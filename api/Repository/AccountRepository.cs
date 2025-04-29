@@ -1,5 +1,5 @@
 using api.Data;
-using api.Dtos.Account;
+using api.Dtos.AccountDtos;
 using api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using VCT.API.Models.Accounts;
@@ -12,6 +12,11 @@ namespace api.Repository
         public AccountRepository(ApplicationDBContext context)
         {
             _context = context;
+        }
+
+        public Task<bool> AccountExists(int id)
+        {
+            return _context.Accounts.AnyAsync(a => a.Id == id);
         }
 
         public async Task<Account> CreateAsync(Account accountModel)

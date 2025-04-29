@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using api.Dtos.Account;
+using api.Dtos.AccountDtos;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using VCT.API.Models.Accounts;
 

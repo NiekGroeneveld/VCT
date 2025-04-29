@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Account;
+using api.Dtos.AccountDtos;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;

@@ -11,5 +11,7 @@ namespace api.Interfaces
         Task<List<Product>> GetAllAsync();
 
         Task<Product?> GetByIdAsync(int id);
+
+        Task<Product> CreateAsync(Product productModel);
     }
 }

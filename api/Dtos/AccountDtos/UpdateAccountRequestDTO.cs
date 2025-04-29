@@ -6,7 +6,7 @@ using VCT.API.Models.Accounts;
 using VCT.API.Models.Clients;
 using VCT.API.Models.Products;
 
-namespace api.Dtos.Account
+namespace api.Dtos.AccountDtos
 {
     public class UpdateAccountRequestDTO
     {

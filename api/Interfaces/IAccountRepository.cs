@@ -1,5 +1,5 @@
 
-using api.Dtos.Account;
+using api.Dtos.AccountDtos;
 using VCT.API.Models.Accounts;
 
 namespace api.Interfaces
@@ -14,5 +14,8 @@ namespace api.Interfaces
         Task<Account?> UpdateAsync(int id, UpdateAccountRequestDTO accountDto);
 
         Task<Account?> DeleteAsync(int id);
+
+        Task<bool> AccountExists(int id);
+
     }
 }

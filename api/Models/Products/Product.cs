@@ -10,6 +10,7 @@ namespace VCT.API.Models.Products
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
+        public int AccountId { get; set; }
         
 
         public Product() { }

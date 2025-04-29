@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using api.Dtos.Products;
+using api.Dtos.ProductDtos;
+
 using VCT.API.Models.Accounts;
 using VCT.API.Models.Clients;
 using VCT.API.Models.Products;
 
 
 
-namespace api.Dtos.Account
+namespace api.Dtos.AccountDtos
 {
     public class AccountDTO
     {

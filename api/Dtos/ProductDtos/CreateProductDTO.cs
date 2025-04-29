@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace api.Dtos.Products
+namespace api.Dtos.ProductDtos
 {
-    public class ProductDTO
+    public class CreateProductDTO
     {
-        public int Id { get; set; }
+        
         public string Name { get; set; }
         public float Height { get; set; }
         public float Width { get; set; }

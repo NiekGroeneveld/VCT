@@ -139,3 +139,4 @@ C:\Users\ncgre\OneDrive\Documenten\GroeneveldSoftware\Code\VendolutionCT\api\bin
 C:\Users\ncgre\OneDrive\Documenten\GroeneveldSoftware\Code\VendolutionCT\api\bin\Debug\net8.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Users\ncgre\OneDrive\Documenten\GroeneveldSoftware\Code\VendolutionCT\api\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\ncgre\OneDrive\Documenten\GroeneveldSoftware\Code\VendolutionCT\api\bin\Debug\net8.0\Newtonsoft.Json.Bson.dll
+C:\Users\ncgre\OneDrive\Documenten\GroeneveldSoftware\Code\VendolutionCT\api\obj\Debug\net8.0\api.sourcelink.json
