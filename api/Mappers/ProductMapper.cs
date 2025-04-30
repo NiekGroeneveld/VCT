@@ -34,5 +34,19 @@ namespace api.Mappers
                 AccountId = accountId
             };
         }
+
+        public static Product ToProductFromUpdateDTO(this UpdateProductRequestDTO updateDTO)
+        {
+            return new Product
+            {
+                Name = updateDTO.Name,
+                Height = updateDTO.Height,
+                Width = updateDTO.Width,
+                Depth = updateDTO.Depth,
+                Stable = updateDTO.Stable,
+            };
+        }
+
+        
     }
 }

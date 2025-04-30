@@ -55,8 +55,34 @@ namespace api.Controllers
             }
             var productModel = productDTO.ToProductFromCreateDTO(accountId);
             await _productRepo.CreateAsync(productModel);
-            return CreatedAtAction(nameof(GetById), new {id = productModel}, productModel.ToProductDTO());
+            return CreatedAtAction(nameof(GetById), new {id = productModel.Id}, productModel.ToProductDTO());
         }
+
+        [HttpPut]
+        [Route("{id}")] 
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateProductRequestDTO updateDTO)
+        {
+            var product = await _productRepo.UpdateAsync(id, updateDTO.ToProductFromUpdateDTO());
+
+            if(product == null)    {return NotFound();}
+
+            return Ok(product.ToProductDTO());
+        }
+
+        [HttpDelete]
+        [Route("{id}")] 
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            var productModel = await _productRepo.DeleteAsync(id);
+
+            if(productModel == null)    
+            {
+                return NotFound("Product does not exist");
+            }
+
+            return Ok(productModel);
+        }
+
 
     }
 }
