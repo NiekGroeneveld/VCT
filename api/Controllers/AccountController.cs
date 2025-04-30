@@ -8,6 +8,7 @@ using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Identity.Client;
 
 namespace api.Controllers
@@ -28,12 +29,16 @@ namespace api.Controllers
             [HttpGet]
             public async Task<IActionResult> GetAll()
             {
+                if(!ModelState.IsValid) 
+                    {
+                        return BadRequest();
+                    }
                 var account = await _accountRepository.GetAllAsync();
                 var accountDto = account.Select(s => s.ToAccountDTO());
                 return Ok(account);
             }
 
-            [HttpGet("{id}")]
+            [HttpGet("{id:int}")]
             public async Task<IActionResult> GetById([FromRoute] int id)
             {
                 var account = await _accountRepository.GetByIdAsync(id);
@@ -52,7 +57,7 @@ namespace api.Controllers
             }
 
             [HttpPut]
-            [Route("{id}")]
+            [Route("{id:int}")]
             public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateAccountRequestDTO updateDTO)
             {
                 var accountModel = await _accountRepository.UpdateAsync(id, updateDTO);
@@ -63,7 +68,7 @@ namespace api.Controllers
             }
 
             [HttpDelete]
-            [Route("{id}")]
+            [Route("{id:int}")]
             public async Task<IActionResult> Delete([FromRoute] int id)
             {
                 var accountModel = await _accountRepository.DeleteAsync(id);

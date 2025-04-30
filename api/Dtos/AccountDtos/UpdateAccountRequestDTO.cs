@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using VCT.API.Models.Accounts;
@@ -10,8 +11,12 @@ namespace api.Dtos.AccountDtos
 {
     public class UpdateAccountRequestDTO
     {
+        [Required]
+        [MinLength(8)]
+        [MaxLength(40)]
         public string? Name { get; set; }
 
+        [Required]
         public string? Password { get; set; }
 
         public List<Client> Clients { get; set; } = new();
