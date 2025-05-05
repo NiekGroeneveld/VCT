@@ -1,6 +1,7 @@
 ﻿using VCT.API.Models.Products;
 using VCT.API.Models.Machines;
 using System.ComponentModel.Design.Serialization;
+using Microsoft.Identity.Client;
 
 
 namespace VCT.API.Models.Clients
@@ -12,15 +13,16 @@ namespace VCT.API.Models.Clients
         public List<Product> Products = new List<Product>();
         public List<MasterMachine> Machines = new List<MasterMachine>();
 
+        //Addition
+        public int AccountId { get; set; } 
+
+        public Client() { }
+        
         internal Client(int id, string name) 
         {
             Id = id;
             Name = name;
         }
-
-        void addMachine() { throw new NotImplementedException(); }
-        void addProduct() { throw new NotImplementedException(); }
-
 
     }
 

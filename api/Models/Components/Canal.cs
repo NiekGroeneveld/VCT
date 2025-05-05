@@ -14,8 +14,7 @@ namespace VCT.API.Models.Components
         
         public int ExtractorId { get; set; }	
         public Extractor Extractor { get; set; } 
-        
-        
+    
         
         public float CanalWidth { get; set ; }
         public float CanalHeight { get; set; }

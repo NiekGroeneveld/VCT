@@ -1,12 +1,13 @@
 
 using api.Dtos.AccountDtos;
+using api.QueryObjects;
 using VCT.API.Models.Accounts;
 
 namespace api.Interfaces
 {
     public interface IAccountRepository
     {
-        Task<List<Account>> GetAllAsync();
+        Task<List<Account>> GetAllAsync(AccountQueryObject query);
 
         Task<Account?> GetByIdAsync(int id);    //FirstOrDefault CAN BE NULL
         Task<Account> CreateAsync(Account accountModel);

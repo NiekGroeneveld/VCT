@@ -5,7 +5,7 @@ namespace VCT.API.Models.Products
     public class Product
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public float Height { get; set; }
         public float Width { get; set; }
         public float Depth { get; set; }

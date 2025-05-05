@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlSer
 //Dependency injection
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
 
 var app = builder.Build();
 

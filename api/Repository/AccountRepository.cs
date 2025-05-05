@@ -1,6 +1,7 @@
 using api.Data;
 using api.Dtos.AccountDtos;
 using api.Interfaces;
+using api.QueryObjects;
 using Microsoft.EntityFrameworkCore;
 using VCT.API.Models.Accounts;
 
@@ -37,9 +38,28 @@ namespace api.Repository
             return stockModel;
         }
 
-        public async Task<List<Account>> GetAllAsync()
+        public async Task<List<Account>> GetAllAsync(AccountQueryObject query)
         {
-            return await _context.Accounts.Include(p => p.Products).ToListAsync();
+            var accounts = _context.Accounts.Include(p => p.Products).Include(c => c.Clients).AsQueryable();
+            
+            if(!string.IsNullOrWhiteSpace(query.AccountName))
+            {
+                accounts = accounts.Where(a => a.Name.Contains(query.AccountName));
+            }
+
+            
+            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if(query.SortBy.Equals("AccountName" , StringComparison.OrdinalIgnoreCase))
+                {
+                    accounts = query.IsDescending ? accounts.OrderByDescending(a => a.Name) : accounts.OrderBy(a => a.Name);
+                }
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            
+            return await accounts.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+
         }
 
         public async Task<Account?> GetByIdAsync(int id)

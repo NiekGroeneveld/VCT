@@ -12,8 +12,8 @@ namespace api.Dtos.AccountDtos
     public class UpdateAccountRequestDTO
     {
         [Required]
-        [MinLength(8)]
-        [MaxLength(40)]
+        [MinLength(8, ErrorMessage ="Username must be at least 8 characters long")]
+        [MaxLength(40, ErrorMessage ="Username must be at most 40 characters long")]
         public string? Name { get; set; }
 
         [Required]
