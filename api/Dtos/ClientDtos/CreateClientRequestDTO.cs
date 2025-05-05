@@ -7,6 +7,6 @@ namespace api.Dtos.ClientDtos
 {
     public class CreateClientRequestDTO
     {
-        public string? Name { get; set; }
+        public required string Name { get; set; }
     }
 }

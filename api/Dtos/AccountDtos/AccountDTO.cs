@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.Dtos.ClientDtos;
 using api.Dtos.ProductDtos;
 
 using VCT.API.Models.Accounts;
@@ -19,7 +20,7 @@ namespace api.Dtos.AccountDtos
 
         //Password was here, is deleted
 
-        public List<Client> Clients { get; set; } = new();
+        public List<ClientDTO> Clients { get; set; } = new();
         public List<ProductDTO> Products { get; set; } = new();
     }
 }

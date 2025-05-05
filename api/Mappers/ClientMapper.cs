@@ -9,13 +9,13 @@ namespace api.Mappers
 {
     public static class ClientMapper
     {
-        public static ClientDto ToClientDTO(this Client clientModel)
+        public static ClientDTO ToClientDTO(this Client clientModel)
         {
-            return new ClientDto
+            return new ClientDTO
             {
                 Id = clientModel.Id,
                 Name = clientModel.Name,
-                Products = clientModel.Products,
+                Products = clientModel.Products.Select(p => p.ToProductDTO()).ToList(),
                 Machines = clientModel.Machines
             };
         }
@@ -29,5 +29,14 @@ namespace api.Mappers
             };
         }
         
+        public static Client ToClientFromUpdateDTO(this UpdateClientRequestDTO updateClientRequestDTO)
+        {
+            return new Client
+            {
+                Name = updateClientRequestDTO.Name,
+                Products = updateClientRequestDTO.Products,
+                Machines = updateClientRequestDTO.Machines
+            };
+        }
     }
 }

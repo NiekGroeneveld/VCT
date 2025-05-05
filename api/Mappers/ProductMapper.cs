@@ -37,6 +37,7 @@ namespace api.Mappers
 
         public static Product ToProductFromUpdateDTO(this UpdateProductRequestDTO updateDTO)
         {
+               
             return new Product
             {
                 Name = updateDTO.Name,
@@ -46,6 +47,7 @@ namespace api.Mappers
                 Stable = updateDTO.Stable,
             };
         }
+
 
         
     }

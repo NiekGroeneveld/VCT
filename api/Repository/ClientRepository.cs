@@ -7,6 +7,8 @@ using api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using VCT.API.Models.Clients;
 using api.Mappers;
+using api.Dtos.ClientDtos;
+using api.QueryObjects;
 
 namespace api.Repository
 {
@@ -26,14 +28,57 @@ namespace api.Repository
             return clientModel;
         }
 
-        public async Task<List<Client>> GetAllAsync()
+        public async  Task<Client?> DeleteAsync(int id)
         {
-            return await _context.Clients.ToListAsync();
+            var clientModel = await _context.Clients.FirstOrDefaultAsync(c => c.Id == id);
+
+            if(clientModel == null)    {return null;}
+
+            _context.Clients.Remove(clientModel); ///Not async!
+            await _context.SaveChangesAsync();
+            return clientModel;
+        }
+
+        public async Task<List<Client>> GetAllAsync(ClientQueryObject query)
+        {
+            var clients =  _context.Clients.Include(p => p.Products).Include(m => m.Machines).AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(query.ClientName))
+            {
+                clients = clients.Where(c => c.Name.Contains(query.ClientName));
+            }
+
+            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if(query.SortBy.Equals("ClientName" , StringComparison.OrdinalIgnoreCase))
+                {
+                    clients = query.IsDescending ? clients.OrderByDescending(c => c.Name) : clients.OrderBy(c => c.Name);
+                }
+            }
+
+             var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+            return await clients.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+
         }
 
         public async Task<Client?> GetByIdAsync(int id)
         {
-            return await _context.Clients.FindAsync(id);
+            return await _context.Clients.Include(p=> p.Products).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Client?> UpdateAsync(int id, UpdateClientRequestDTO updateDTO)
+        {
+            var existingClient = await _context.Clients.Include(p => p.Products).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
+
+            if(existingClient == null)    {return null;}
+
+            existingClient.Name = updateDTO.Name;
+            existingClient.Products = updateDTO.Products;
+            existingClient.Machines = updateDTO.Machines;
+
+            await _context.SaveChangesAsync();
+            return existingClient;
         }
     }
 }

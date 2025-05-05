@@ -16,7 +16,7 @@ namespace api.Mappers
             {
                 Id = accountModel.Id,
                 Name = accountModel.Name,
-                Clients = accountModel.Clients,
+                Clients = accountModel.Clients.Select(c => c.ToClientDTO()).ToList(),
                 Products = accountModel.Products.Select(p => p.ToProductDTO()).ToList()
             };
         }

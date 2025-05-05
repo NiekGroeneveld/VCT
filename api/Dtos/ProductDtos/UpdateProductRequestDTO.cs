@@ -11,7 +11,7 @@ namespace api.Dtos.ProductDtos
         [Required]
         [MinLength(4, ErrorMessage = "Name must be at least 4 characters long")]
         [MaxLength(50, ErrorMessage = "Name must be at most 50 characters long")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         
         [Required]
         [Range(0, float.MaxValue, ErrorMessage = "Height must be a positive number")]
