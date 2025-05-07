@@ -63,7 +63,7 @@ namespace api.Controllers
             {
                 return BadRequest("Account does not exits");
             }
-            var productModel = productDTO.ToProductFromCreateDTO(accountId);
+            var productModel = productDTO.ToProductFromCreateDTO();
             await _productRepo.CreateAsync(productModel);
             return CreatedAtAction(nameof(GetById), new {id = productModel.Id}, productModel.ToProductDTO());
         }

@@ -35,7 +35,7 @@ namespace api.Controllers
                 
                 var clients = await _clientRepo.GetAllAsync(query);
                 var clientDTO = clients.Select(c => c.ToClientDTO());
-                return Ok(clients);
+                return Ok(clientDTO);
             }
 
             [HttpGet("{id:int}")]

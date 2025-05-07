@@ -7,6 +7,7 @@ namespace api.Interfaces
 {
     public interface IAccountRepository
     {
+        //Native
         Task<List<Account>> GetAllAsync(AccountQueryObject query);
 
         Task<Account?> GetByIdAsync(int id);    //FirstOrDefault CAN BE NULL
@@ -16,6 +17,9 @@ namespace api.Interfaces
 
         Task<Account?> DeleteAsync(int id);
 
+        
+        
+        //Additional
         Task<bool> AccountExists(int id);
 
     }

@@ -34,8 +34,8 @@ namespace api.Controllers
                 return BadRequest(ModelState);
             
             var account = await _accountRepository.GetAllAsync(query);
-            var accountDto = account.Select(s => s.ToAccountDTO());
-            return Ok(account);
+            var accountDTO = account.Select(s => s.ToAccountDTO());
+            return Ok(accountDTO);
         }
 
         [HttpGet("{id:int}")]

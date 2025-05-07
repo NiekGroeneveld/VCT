@@ -2,6 +2,8 @@
 using VCT.API.Models.Machines;
 using System.ComponentModel.Design.Serialization;
 using Microsoft.Identity.Client;
+using api.Models.ManyToMany;
+using VCT.API.Models.Accounts;
 
 
 namespace VCT.API.Models.Clients
@@ -10,20 +12,13 @@ namespace VCT.API.Models.Clients
     {
         public int Id {get; set;}
         public string Name { get; set; }
-        public List<Product> Products {get; set;}= new List<Product>();
         public List<MasterMachine> Machines {get; set;}= new List<MasterMachine>();
-
-        //Addition
-        public int AccountId { get; set; } 
+        
+        
+        public List<AccountClient> AccountClients {get; set;}= new List<AccountClient>();
+        public List<ClientProduct> ClientProducts {get; set;}= new List<ClientProduct>();
 
         public Client() { }
-        
-        internal Client(int id, string name) 
-        {
-            Id = id;
-            Name = name;
-        }
-
     }
 
 }

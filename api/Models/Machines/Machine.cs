@@ -7,6 +7,8 @@ namespace VCT.API.Models.Machines
     {
         public int id { get; set; }
         public int MachineNumber { get; set; }
+        public int ClientId { get; set; }
+
         public MachineType Type { get; set; }
         public Configuration? Config { get; set; }
         public void InitializeConfig()

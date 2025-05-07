@@ -41,7 +41,7 @@ namespace api.Repository
 
         public async Task<List<Client>> GetAllAsync(ClientQueryObject query)
         {
-            var clients =  _context.Clients.Include(p => p.Products).Include(m => m.Machines).AsQueryable();
+            var clients =  _context.Clients.Include(c => c.ClientProducts).ThenInclude(cp => cp.Product).Include(m => m.Machines).AsQueryable();
 
             if(!string.IsNullOrWhiteSpace(query.ClientName))
             {
@@ -56,7 +56,7 @@ namespace api.Repository
                 }
             }
 
-             var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
 
             return await clients.Skip(skipNumber).Take(query.PageSize).ToListAsync();
 
@@ -64,18 +64,16 @@ namespace api.Repository
 
         public async Task<Client?> GetByIdAsync(int id)
         {
-            return await _context.Clients.Include(p=> p.Products).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Clients.Include(cp=> cp.ClientProducts).ThenInclude(p => p.Product).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Client?> UpdateAsync(int id, UpdateClientRequestDTO updateDTO)
         {
-            var existingClient = await _context.Clients.Include(p => p.Products).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
+            var existingClient = await _context.Clients.Include(cp => cp.ClientProducts).ThenInclude(p => p.Product).Include(m => m.Machines).FirstOrDefaultAsync(c => c.Id == id);
 
             if(existingClient == null)    {return null;}
 
             existingClient.Name = updateDTO.Name;
-            existingClient.Products = updateDTO.Products;
-            existingClient.Machines = updateDTO.Machines;
 
             await _context.SaveChangesAsync();
             return existingClient;

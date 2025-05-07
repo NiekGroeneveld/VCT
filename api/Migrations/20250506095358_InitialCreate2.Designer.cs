@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api.Data;
 
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250506095358_InitialCreate2")]
+    partial class InitialCreate2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,51 @@ namespace api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AccountClient", b =>
+                {
+                    b.Property<int>("AccountsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccountsId", "ClientsId");
+
+                    b.HasIndex("ClientsId");
+
+                    b.ToTable("AccountClient");
+                });
+
+            modelBuilder.Entity("AccountProduct", b =>
+                {
+                    b.Property<int>("AccountsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccountsId", "ProductsId");
+
+                    b.HasIndex("ProductsId");
+
+                    b.ToTable("AccountProduct");
+                });
+
+            modelBuilder.Entity("ClientProduct", b =>
+                {
+                    b.Property<int>("ProductsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("clientsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductsId", "clientsId");
+
+                    b.HasIndex("clientsId");
+
+                    b.ToTable("ClientProduct");
+                });
 
             modelBuilder.Entity("VCT.API.Models.Accounts.Account", b =>
                 {
@@ -308,6 +356,51 @@ namespace api.Migrations
                     b.HasBaseType("VCT.API.Models.Components.Extractor");
 
                     b.HasDiscriminator().HasValue("Low");
+                });
+
+            modelBuilder.Entity("AccountClient", b =>
+                {
+                    b.HasOne("VCT.API.Models.Accounts.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VCT.API.Models.Clients.Client", null)
+                        .WithMany()
+                        .HasForeignKey("ClientsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AccountProduct", b =>
+                {
+                    b.HasOne("VCT.API.Models.Accounts.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VCT.API.Models.Products.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ClientProduct", b =>
+                {
+                    b.HasOne("VCT.API.Models.Products.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VCT.API.Models.Clients.Client", null)
+                        .WithMany()
+                        .HasForeignKey("clientsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("VCT.API.Models.Components.Canal", b =>

@@ -15,17 +15,18 @@ namespace api.Mappers
             {
                 Id = clientModel.Id,
                 Name = clientModel.Name,
-                Products = clientModel.Products.Select(p => p.ToProductDTO()).ToList(),
+                Products = clientModel.ClientProducts.Select(cp => cp.Product).Where(p => p != null).Select(p => p.ToProductDTO()).ToList(),
                 Machines = clientModel.Machines
             };
         }
 
+        
+        //Non-complete this thing will get added to to an account or accounts later on.
         public static Client ToClientFromCreateDTO(this CreateClientRequestDTO createClientRequestDTO, int accountId)
         {
             return new Client
             {
                 Name = createClientRequestDTO.Name,
-                AccountId = accountId
             };
         }
         
@@ -33,9 +34,7 @@ namespace api.Mappers
         {
             return new Client
             {
-                Name = updateClientRequestDTO.Name,
-                Products = updateClientRequestDTO.Products,
-                Machines = updateClientRequestDTO.Machines
+                Name = updateClientRequestDTO.Name
             };
         }
     }

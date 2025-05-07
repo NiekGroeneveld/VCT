@@ -40,7 +40,7 @@ namespace api.Repository
 
         public async Task<List<Account>> GetAllAsync(AccountQueryObject query)
         {
-            var accounts = _context.Accounts.Include(p => p.Products).Include(c => c.Clients).AsQueryable();
+            var accounts = _context.Accounts.Include(a => a.AccountProducts).ThenInclude(ap => ap.Product).Include(c => c.AccountClients).ThenInclude(ac => ac.Client).AsQueryable();
             
             if(!string.IsNullOrWhiteSpace(query.AccountName))
             {
@@ -52,7 +52,9 @@ namespace api.Repository
             {
                 if(query.SortBy.Equals("AccountName" , StringComparison.OrdinalIgnoreCase))
                 {
-                    accounts = query.IsDescending ? accounts.OrderByDescending(a => a.Name) : accounts.OrderBy(a => a.Name);
+                    accounts = query.IsDescending 
+                        ? accounts.OrderByDescending(a => a.Name) 
+                        : accounts.OrderBy(a => a.Name);
                 }
             }
 
@@ -64,19 +66,20 @@ namespace api.Repository
 
         public async Task<Account?> GetByIdAsync(int id)
         {
-            return await _context.Accounts.Include(p => p.Products).FirstOrDefaultAsync(i => i.Id == id);
+            return await _context.Accounts.Include(a => a.AccountProducts).ThenInclude(ap => ap.Product).Include(c => c.AccountClients).ThenInclude(ac => ac.Client).FirstOrDefaultAsync(i => i.Id == id);
         }
 
         public async Task<Account?> UpdateAsync(int id, UpdateAccountRequestDTO accountDto)
         {
-            var existingAccount = await _context.Accounts.FindAsync(id);
+            var existingAccount = await _context.Accounts
+                                        .Include(a=> a.AccountProducts)
+                                        .Include(c => c.AccountClients)
+                                        .FirstOrDefaultAsync(a => a.Id == id); //await _context.Accounts.FindAsync(id);
 
             if(existingAccount == null)    {return null;}
 
             existingAccount.Name = accountDto.Name;
             existingAccount.Password = accountDto.Password;
-            existingAccount.Clients = accountDto.Clients;
-            existingAccount.Products = accountDto.Products;
 
             await _context.SaveChangesAsync();
             return existingAccount;

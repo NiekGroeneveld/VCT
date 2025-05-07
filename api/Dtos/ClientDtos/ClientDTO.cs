@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.Dtos.AccountDtos;
 using api.Dtos.ProductDtos;
+using api.Models.ManyToMany;
+using VCT.API.Models.Accounts;
 using VCT.API.Models.Machines;
 using VCT.API.Models.Products;
 

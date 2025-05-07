@@ -22,8 +22,9 @@ namespace api.Mappers
             };
         }
 
-        public static Product ToProductFromCreateDTO(this CreateProductDTO productDTO, int accountId)
+        public static Product ToProductFromCreateDTO(this CreateProductDTO productDTO)
         {
+            //AccountID, assigning to Account Later on
             return new Product
             {
                 Name = productDTO.Name,
@@ -31,7 +32,6 @@ namespace api.Mappers
                 Width = productDTO.Width,
                 Depth = productDTO.Depth,
                 Stable = productDTO.Stable,
-                AccountId = accountId
             };
         }
 
