@@ -110,8 +110,14 @@ namespace api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("MachineTypeId")
+                    b.Property<int>("ConfigurationType")
                         .HasColumnType("int");
+
+                    b.Property<int>("MachineId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -160,11 +166,11 @@ namespace api.Migrations
 
             modelBuilder.Entity("VCT.API.Models.Machines.MasterMachine", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
@@ -175,10 +181,13 @@ namespace api.Migrations
                     b.Property<int>("MachineNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("MachineType")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
@@ -189,14 +198,11 @@ namespace api.Migrations
 
             modelBuilder.Entity("VCT.API.Models.Machines.SatelliteMachine", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("ConfigId")
                         .HasColumnType("int");
@@ -204,17 +210,17 @@ namespace api.Migrations
                     b.Property<int>("MachineNumber")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MasterMachineid")
+                    b.Property<int>("MachineType")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("MasterMachineId")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("ConfigId");
 
-                    b.HasIndex("MasterMachineid");
+                    b.HasIndex("MasterMachineId");
 
                     b.ToTable("SatelliteMachine");
                 });
@@ -319,7 +325,7 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.HasOne("VCT.API.Models.Products.Product", "Product")
-                        .WithMany()
+                        .WithMany("Canals")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -363,7 +369,9 @@ namespace api.Migrations
 
                     b.HasOne("VCT.API.Models.Machines.MasterMachine", null)
                         .WithMany("SatelliteMachines")
-                        .HasForeignKey("MasterMachineid");
+                        .HasForeignKey("MasterMachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Config");
                 });
@@ -459,6 +467,8 @@ namespace api.Migrations
             modelBuilder.Entity("VCT.API.Models.Products.Product", b =>
                 {
                     b.Navigation("AccountProducts");
+
+                    b.Navigation("Canals");
 
                     b.Navigation("ClientProducts");
                 });

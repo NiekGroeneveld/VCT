@@ -21,6 +21,11 @@ namespace api.Repository
             _context = context;
         }
 
+        public async Task<bool> ClientExists(int id)
+        {
+            return await _context.Clients.AnyAsync(c => c.Id == id);
+        }
+
         public async Task<Client> CreateAsync(Client clientModel)
         {
             await _context.Clients.AddAsync(clientModel);

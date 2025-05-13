@@ -22,7 +22,7 @@ namespace api.Mappers
 
         
         //Non-complete this thing will get added to to an account or accounts later on.
-        public static Client ToClientFromCreateDTO(this CreateClientRequestDTO createClientRequestDTO, int accountId)
+        public static Client ToClientFromCreateDTO(this CreateClientRequestDTO createClientRequestDTO)
         {
             return new Client
             {

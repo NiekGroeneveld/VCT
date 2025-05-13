@@ -18,5 +18,9 @@ namespace api.Interfaces
         Task<Client?> UpdateAsync(int id, UpdateClientRequestDTO updateDTO);
 
         Task<Client?> DeleteAsync(int id);
+
+
+        //Additional
+        Task<bool> ClientExists(int id);
     }
 }

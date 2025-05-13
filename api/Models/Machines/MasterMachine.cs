@@ -1,29 +1,20 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VCT.API.Models.Enums;
 
 namespace VCT.API.Models.Machines
 {
     public class MasterMachine : Machine
     {
+        [Key]
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        [ForeignKey("Client")]
+        public int ClientId { get; set; }
         public List<SatelliteMachine> SatelliteMachines { get; } = new List<SatelliteMachine>();
 
-        public MasterMachine(int machineNumber, MachineType type)
-        {
-            MachineNumber = machineNumber;
-            Type = type;
-            InitializeConfig();
-        }
+        public MasterMachine(){}
 
-
-
-        public void AddSatellite(MachineType type)
-        {
-            SatelliteMachines.Add(new SatelliteMachine(SatelliteMachines.Count, type));
-        }
-
-        public void RemoveSatellite(int machineNumber)
-        {
-            //ToDo, take care of machinenumbers.
-        }
     }
 }

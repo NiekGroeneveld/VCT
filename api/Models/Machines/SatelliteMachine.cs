@@ -4,9 +4,14 @@ namespace VCT.API.Models.Machines
 {
     public class SatelliteMachine : Machine
     {
+        public int Id { get; set; }
+        public int MasterMachineId { get; set; }
+        
+        public SatelliteMachine() { }
+       
         internal SatelliteMachine(int machineNumber, MachineType type) {
             MachineNumber = machineNumber;
-            Type = type;
+            MachineType = type;
             InitializeConfig();
         }
     }

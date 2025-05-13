@@ -1,19 +1,26 @@
-﻿using VCT.API.Models.Components;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using VCT.API.Models.Components;
 using VCT.API.Models.Enums;
 
 namespace VCT.API.Models.Machines
 {
     public abstract class Machine
     {
-        public int id { get; set; }
+        
         public int MachineNumber { get; set; }
-        public int ClientId { get; set; }
+        public MachineType MachineType { get; set; }
+        
+        
+        public int? ConfigId { get; set; }
+        
+        [ForeignKey("ConfigId")]
+        public Configuration Config { get; set; } = new Configuration();
 
-        public MachineType Type { get; set; }
-        public Configuration? Config { get; set; }
+
         public void InitializeConfig()
         {
-            Config = new Configuration(Type);
+            Config = new Configuration();
+            Config.InitializeFromMachineType(MachineType);
         }
 
     }

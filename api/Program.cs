@@ -23,6 +23,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlSer
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IMachineRepository, MachineRepository>();
+builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 
 var app = builder.Build();
 

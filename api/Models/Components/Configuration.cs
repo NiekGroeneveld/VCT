@@ -1,36 +1,22 @@
 using VCT.API.Models.Machines;
 using VCT.API.Models.Enums;
+using api.Models.Enums;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace VCT.API.Models.Components
 {
     public class Configuration
     {
         public int Id { get; set; }
         public List<Tray> Trays { get; set; } = new List<Tray>();
-        
-        public int MachineTypeId { get; set; }
-        private MachineType Type { get; set; }
-        private int? Dots;
-        private int? TrayWidth;
+        public string? Name { get; set; }
         
         
-        public Configuration() { }
-        public Configuration(MachineType type, int id = -1)
-        {
-            Id = id;
-            Type = type;
-        }
+        //NavigationType
+        public int MachineId { get; set; }
+        public ConfigurationType ConfigurationType { get; set; }
+        
+        public Configuration() {}
 
-        public void AddTray()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveTray() { throw new NotImplementedException(); }
-
-        public void MoveTray(int Position, Tray Tray)
-            { throw new NotImplementedException(); }
-
-        public void SwapTrays(Tray tray1, Tray tray2)
-            { throw new NotImplementedException(); }
+        public void InitializeFromMachineType(MachineType machineType) => ConfigurationType = machineType.ToConfigurationType();
     }
 }

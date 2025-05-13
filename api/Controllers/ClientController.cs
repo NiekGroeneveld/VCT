@@ -47,7 +47,7 @@ namespace api.Controllers
                 
                 var clientModel = await _clientRepo.GetByIdAsync(id);
                 
-                 if (clientModel == null) { return NotFound(); }
+                if (clientModel == null) { return NotFound(); }
 
                 var clientDTO = clientModel.ToClientDTO();
                 return Ok(clientDTO);
@@ -59,7 +59,7 @@ namespace api.Controllers
                 if(!ModelState.IsValid)
                     return BadRequest(ModelState);
                 
-                var clientModel = clientDTO.ToClientFromCreateDTO(accountId);
+                var clientModel = clientDTO.ToClientFromCreateDTO();
                 
                 if(!await _accountRepo.AccountExists(accountId)) 
                 {
@@ -96,12 +96,5 @@ namespace api.Controllers
 
                 return Ok(clientModel.ToClientDTO());
             }
-
-
-    
-
-
-
-
         }
 }
