@@ -21,7 +21,20 @@ namespace api.Repository
         {
             _context = context;
         }
-        
+
+        public Task<Tray?> AddTrayAsync(int Id)
+        {
+            var configuration = _context.Configurations.FindAsync(id);
+            
+            //Logic from the Configuration Class
+            int newTrayPos = GetNewTrayPosition(conifugration);
+        }
+
+        public Task<bool> ConfigurationExists(int id)
+        {
+            return _context.Configurations.AnyAsync(c => c.Id == id);
+        }
+
         public async Task<Configuration> CreateAsync(Configuration configModel)
         {
             await _context.Configurations.AddAsync(configModel);
@@ -61,6 +74,11 @@ namespace api.Repository
         {
             ConfigurationType configType = machineType.ToConfigurationType();
             return await _context.Configurations.Include(c => c.Trays).Where(c => c.ConfigurationType == configType).ToListAsync();
+        }
+
+        public Task<Tray?> RemoveTrayAsync(int id, int trayId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Configuration?> UpdateAsync(int id, UpdateConfigurationRequestDTO configModel)

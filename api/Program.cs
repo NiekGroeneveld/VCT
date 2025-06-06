@@ -25,6 +25,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IMachineRepository, MachineRepository>();
 builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+builder.Services.AddScoped<ITrayRepository, TrayRepository>();
 
 var app = builder.Build();
 

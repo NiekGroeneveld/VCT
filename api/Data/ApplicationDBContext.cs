@@ -6,7 +6,6 @@ using VCT.API.Models.Machines;
 using VCT.API.Models.Enums;
 using VCT.API.Models.Components;
 using VCT.API.Models.Clients;
-using VCT.API.Models.SpecificationData;
 using VCT.API.Models.Accounts;
 using api.Models.ManyToMany;
 
@@ -31,6 +30,7 @@ namespace api.Data
         public DbSet<Configuration> Configurations { get; set; }
         public DbSet<Canal> Canals { get; set; }
         public DbSet<Tray> Trays { get; set; }
+        public DbSet<MachineTypeSpecs> MachineTypeSpecs { get; set; }
         
 
 

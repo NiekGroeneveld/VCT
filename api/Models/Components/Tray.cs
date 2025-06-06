@@ -1,43 +1,43 @@
-﻿using VCT.API.Models.Products;
+﻿using api.Models.Components;
+using api.Models.Enums;
+using VCT.API.Models.Products;
 
 namespace VCT.API.Models.Components
 {
-    public class Tray
+    public class Tray : IComparable<Tray>
     {
         public int Id { get; set; }
-        private const int MINIMUMHEIGHT = 8; //CM
-        public int TrayNumber { get;}
-        public int TrayPosition { get; }
-        public List<Canal> Canals { get; } = new List<Canal>();
-        public List<int> Dividers { get; } = new List<int>();
-        private int TrayWidth;
-        private int TrayHeigth = MINIMUMHEIGHT;
+        public int ConfigurationId { get; set; }
+        public int TrayNumber { get;set;}
+        public int TrayPosition { get; set;}
+        public List<Canal> Canals { get; set;} = new List<Canal>();
+        public List<int> Dividers { get; set;} = new List<int>();
+        public  int TrayWidth;
+        
+        private const int MINIMUMHEIGHT = 8; //CM  
+        public int TrayHeigth = MINIMUMHEIGHT;
 
         
         public Tray() { }
-        public Tray(int id, int trayNumber, int trayPosition, int trayWidth)
+        private Tray(int configurationId, int trayNumber, int trayPosition, int trayWidth)
         {
-            Id = id;
+            ConfigurationId = configurationId;
             TrayNumber = trayNumber;
             TrayPosition = trayPosition;
             TrayWidth = trayWidth;
         }
 
-        void AddCanal(Product product)
+        public Tray CreateTrayInConfigurationByType(int id, ConfigurationType configurationType, int trayNumber, int trayPosition)
         {
-            throw new NotImplementedException();
+           ConfigurationCharacteristics configurationCharacteristics = configurationType.GetConfigurationCharacteristicsByConfigurationType();
+           return new Tray(id, trayNumber, trayPosition, configurationCharacteristics.WidthTray);
+           
         }
 
-        void RemoveCanal(Product product)
+        public int CompareTo(Tray other)
         {
-            throw new NotImplementedException();
+            return this.TrayPosition.CompareTo(other.TrayPosition);
         }
-
-        public void ConfigureTray()
-        { throw new NotImplementedException(); }
-
-        public void UpdateTrayHeight()
-            { throw new NotImplementedException(); }
     
     }
 }

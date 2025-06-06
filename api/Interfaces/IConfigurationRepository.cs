@@ -16,9 +16,16 @@ namespace api.Interfaces
        Task<Configuration?> UpdateAsync(int id, UpdateConfigurationRequestDTO configModel);
        Task<Configuration?> DeleteAsync(int id);
 
+        //Controlling the Trays
+       Task<Tray?> AddTrayAsync(int id);
+       
+       Task<Tray?> RemoveTrayAsync(int id, int trayId);
+
+
        //Additional
        Task<Configuration?> GetByMachineIdAsync(int machineId);
        Task<List<Configuration>> GetByMachineTypeAsync(MachineType machineType);
+       Task<bool> ConfigurationExists(int id);
 
     }
 }

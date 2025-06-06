@@ -23,8 +23,6 @@ namespace api.Mappers
                 Type = machineModel.MachineType.ToString(),
                 MachineNumber = machineModel.MachineNumber,
                 ClientId = machineModel.ClientId 
-
-
             };
         }
 

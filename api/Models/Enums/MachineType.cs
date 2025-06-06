@@ -1,4 +1,8 @@
-﻿using api.Models.Enums;
+﻿using api.Models.Components;
+using api.Models.Enums;
+using api.Models.Machines.MachineTypeData;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using VCT.API.Models.Machines;
 
 namespace VCT.API.Models.Enums
 {
@@ -25,6 +29,12 @@ namespace VCT.API.Models.Enums
             MachineType.ComboPlus => ConfigurationType.ComboPlusConfig,
             _ => throw new ArgumentOutOfRangeException(nameof(machineType), machineType, null)
         };
+
+        public static ConfigurationCharacteristics GetConfigurationCharacteristicsByMachineType(this MachineType machineType)
+        {
+            MachineTypeSpecs machineTypeSpecs = MachineTypeData.MachineTypeSpecs[machineType];
+            return new ConfigurationCharacteristics(machineTypeSpecs.MachineType.ToConfigurationType(), machineTypeSpecs.Dots, machineTypeSpecs.WidthTray, machineTypeSpecs.Height);
+        }
     }
 
 }
