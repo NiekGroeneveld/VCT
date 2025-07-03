@@ -1,0 +1,34 @@
+import {extractorType, extractorConstants} from "./extractor.types";
+
+export interface Product {
+    id: number;         // Unique identifier for the product
+    name: string;       // Product name
+    width: number;      // Width in mm      
+    height: number;     // Height in mm
+    depth: number;      // Depth in mm
+    stable: boolean;    // Indicates if the product is stable
+    source: 'client' | 'account'; //Origin of the product data
+    color: string;      // Visual representation color of the product
+}
+
+export interface PlacedProductBase extends Product {
+    x: number;        // X coordinate wihtin tray
+    y: number;        // Y coordinate qwithin tray
+    placedAt: number; // Timestamp when the product was placed
+    trayId: number; // ID of the tray where the product is placed
+}
+
+//Low extractor interface
+export interface LowExtractorProduct extends PlacedProductBase {
+    extractorType: 'low';        // Type of extractor product
+    extractorHeight: typeof extractorConstants.LOW_EXTRACTOR_HEIGHT; // Height of the low extractor product
+}
+
+//High extractor interface
+export interface HighExtractorProduct extends PlacedProductBase {
+    extractorType: 'high';                                               // Type of extractor product
+    extractorHeight: typeof extractorConstants.HIGH_EXTRACTOR_HEIGHT; // Height of the low extractor product
+    clipDistance: number;                                               // Distance between clips in deltas
+}
+
+export type PlacedProduct = LowExtractorProduct | HighExtractorProduct;

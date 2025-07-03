@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rQqnKg0hb2I=",
+  "dgSpecHash": "Pr1sCE46wXE=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ncgre\\OneDrive\\Documenten\\GroeneveldSoftware\\Code\\VendolutionCT\\api\\api.csproj",
+  "projectFilePath": "E:\\Repositories\\Groeneveld Software\\VCT\\api\\api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ncgre\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\ncgre\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
