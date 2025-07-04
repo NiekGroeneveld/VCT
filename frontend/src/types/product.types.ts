@@ -32,3 +32,12 @@ export interface HighExtractorProduct extends PlacedProductBase {
 }
 
 export type PlacedProduct = LowExtractorProduct | HighExtractorProduct;
+
+export const ProductBoundaries = {
+    MIN_WIDTH: 50,   // Minimum width in mm
+    MAX_WIDTH: 320,  // Maximum width in mm
+    MIN_HEIGHT: 10,  // Minimum height in mm
+    MAX_HEIGHT: 340, // Maximum height in mm
+    MIN_DEPTH: 1,   // Minimum depth in mm
+    MAX_DEPTH: 560   // Maximum depth in mm
+}

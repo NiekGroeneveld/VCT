@@ -3,7 +3,6 @@ import {Product, PlacedProduct} from '../types/product.types';
 import { extractorConstants } from '../types/extractor.types';      
 
 export const getCanalHeight = (product: PlacedProduct): number => {
-    // Assuming PlacedProduct has a property 'motorHeight' for the height of the canal
     return product.extractorHeight + product.height;
 };
 
