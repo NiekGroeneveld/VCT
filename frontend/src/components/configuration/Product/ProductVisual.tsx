@@ -1,86 +1,122 @@
 // src/components/common/ProductVisual.tsx
-import React from 'react';
-import { Product, PlacedProduct } from '../../../types/product.types';
+import React from "react";
+import { useDrag } from "react-dnd";
+import { DragItem } from '../../../types/configuration.types'; // Adjust the import path as needed
+import { Product, PlacedProduct } from "../../../types/product.types";
+
 
 interface ProductVisualProps {
-    product: Product | PlacedProduct;
-    scale?: number; // Optional scale override (default is 1:1 real size)
-    className?: string;
-    style?: React.CSSProperties;
-    onClick?: () => void;
-    showLabel?: boolean;
-    showStabilityIndicator?: boolean;
-    draggable?: boolean;
+  product: Product | PlacedProduct;
+  scale?: number; // Optional scale override (default is 1:1 real size)
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  showLabel?: boolean;
+  showStabilityIndicator?: boolean;
+  draggable?: boolean;
 }
 
 export const ProductVisual: React.FC<ProductVisualProps> = ({
-    product,
-    scale = 1, // ✅ DEFAULT: 1mm = 1px (real size)
-    className = '',
-    style = {},
-    onClick,
-    showLabel = true,
-    showStabilityIndicator = true,
-    draggable = false
+  product,
+  scale = 1, // ✅ DEFAULT: 1mm = 1px (real size)
+  className = "",
+  style = {},
+  onClick,
+  showLabel = true,
+  showStabilityIndicator = true,
+  draggable = false,
 }) => {
-    // ✅ REAL SIZE: Direct conversion mm to px
-    const width = product.width * scale;
-    const height = product.height * scale;
+  // ✅ REAL SIZE: Direct conversion mm to px
+  const [{ isDragging }, drag] = useDrag<
+    DragItem,
+    any,
+    { isDragging: boolean }
+  >({
+    //Type identifier - mast match accept type in drop target
+    type: "PRODUCT",
 
-    // Determine label content
-    const labelContent = showLabel ? (
-        width > 30 && height > 20 ? (
-            <span className="text-xs text-center leading-tight px-1">
-                {product.name.length > product.width ? 
-                    product.name.substring(0, 6) + '..' : 
-                    product.name
-                }
-            </span>
-        ) : (
-            <span className="text-xs font-bold">
-                {product.name.charAt(0)}
-            </span>
-        )
-    ) : null;
+    item: () => {
+      console.log("Dragging product:", product);
+      return {
+        type: "PRODUCT" as const,
+        product: product as Product, // Cast to Product type
+        fromTray: "trayId" in product ? product.trayId : undefined,
+      };
+    },
 
-    return (
-        <div 
-            className={`relative ${draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} group ${className}`}
-            onClick={onClick}
-            title={`${product.name} (${product.width}×${product.height}×${product.depth}mm)`}
-        >
-            {/* Main product rectangle */}
-            <div
-                className="border-2 rounded-md flex items-center justify-center font-medium text-white shadow-sm hover:shadow-md transition-all"
-                style={{
-                    width: `${width}px`,
-                    height: `${height}px`,
-                    backgroundColor: product.color,
-                    borderColor: product.color,
-                    ...style
-                }}
-            >
-                {labelContent}
-            </div>
-            
-            {/* Stability indicator for unstable products */}
-            {showStabilityIndicator && !product.stable && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border border-white">
-                    <span className="text-white text-xs leading-none flex items-center justify-center h-full">!</span>
-                </div>
-            )}
-            
-            {/* Optional: Extractor height indicator for placed products */}
-            {'extractorHeight' in product && (
-                <div 
-                    className="absolute -left-1 border-l-2 border-dashed border-gray-400 opacity-60"
-                    style={{
-                        bottom: `${height}px`,
-                        height: `${(product.extractorHeight || 0) * scale}px`
-                    }}
-                    title={`Extractor: ${product.extractorHeight}mm`}
-                />
-            )}
-        </div>
-    );
+    canDrag: () => draggable, // Only allow dragging if draggable is true
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult();
+      if (item.product && dropResult ) {
+        console.log(
+          `Dropped product ${item.product.name} into tray ${dropResult.trayId}`
+        );
+      } else if (item.product) {
+        console.log(
+          `Product ${item.product.name} was dragged but not dropped into a tray`
+        );
+      }
+      else {
+        console.log("Drag operation ended without a valid item or drop result");
+      }
+    },
+  });
+
+  const width = product.width * scale;
+  const height = product.height * scale;
+
+  // Determine label content
+  const labelContent = showLabel ? (
+    width > 30 && height > 20 ? (
+      <span className="text-xs text-center leading-tight px-1">
+        {product.name.length > product.width
+          ? product.name.substring(0, 6) + ".."
+          : product.name}
+      </span>
+    ) : (
+      <span className="text-xs font-bold">{product.name.charAt(0)}</span>
+    )
+  ) : null;
+
+  const baseClasses = `relative ${
+    draggable ? "cursor-move" : "cursor-pointer"
+  } border border-gray-400 bg-blue-100 flex items-center justify-center ${className}`;
+
+  const dragStyles = isDragging
+    ? {
+        opacity: 0.5,
+        transform: "scale(1.05)",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      }
+    : {};
+
+  const combinedStyles = {
+    width: `${width}px`,
+    height: `${height}px`,
+    backgroundColor: product.color || "#dbeafe",
+    ...style,
+    ...dragStyles,
+  };
+
+  const productElement = (
+    <div className={baseClasses} style={combinedStyles} onClick={onClick}>
+      {labelContent}
+
+      {/* Stability indicator */}
+      {showStabilityIndicator && !product.stable && (
+        <div
+          className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"
+          title="Unstable product"
+        />
+      )}
+    </div>
+  );
+
+  return draggable ? drag(productElement) : productElement;
 };
+
+  

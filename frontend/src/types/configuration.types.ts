@@ -39,3 +39,8 @@ export interface ValidationResult{
     errors: string[];   //Critical issues
     warnings: string[]; // Non-critical issues
 }
+
+export const ConfigurationConstants = {
+    DOTS : 72,
+    DOT_DELTA : 13, // mm
+}
