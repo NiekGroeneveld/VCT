@@ -1,17 +1,21 @@
 import React from "react";
 import { useDrop } from "react-dnd";
 import { Trash2 } from "lucide-react";
-import { Tray } from "../../../types/tray.types";
+import { Tray, TrayConstants } from "../../../types/tray.types";
 import { DragItem, DropResult } from "../../../types/configuration.types";
 import { Product, PlacedProduct } from "../../../types/product.types";
 import { ProductVisual } from "../Product/ProductVisual";
 
 import {
   findBestXPosition,
-  canPlaceAt,
   calculateYPosition,
 } from "../../../utils/trayUtils";
 import { extractorConstants } from "../../../types/extractor.types";
+
+import {
+  getCanalHeight,
+  getCanalHeightProduct,
+} from "../../../utils/productUtils";
 
 interface TrayComponentProps {
   tray: Tray;
@@ -76,8 +80,11 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
             };
 
         //===============Update Tray with new product================
+        const newTrayHeight = Math.max(tray.height, getCanalHeight(newProduct));
+
         const updatedTray: Tray = {
           ...tray,
+          height: newTrayHeight,
           products: [...tray.products, newProduct],
         };
 
@@ -114,9 +121,19 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
 
   //=====PRODUCT MANAGEMENT FUNCTIONS=====
   const removeProduct = (productId: number) => {
+    let newproducts = tray.products.filter(
+      (product) => product.id !== productId
+    );
+    let highestProduct = newproducts
+      .map((p) => getCanalHeight(p))
+      .reduce((a, b) => Math.max(a, b), 0);
     const updatedTray: Tray = {
       ...tray,
-      products: tray.products.filter((product) => product.id !== productId),
+      height:
+        highestProduct > TrayConstants.MINIMAL_TRAY_HEIGHT
+          ? highestProduct
+          : TrayConstants.MINIMAL_TRAY_HEIGHT,
+      products: newproducts,
     };
     onUpdate(updatedTray);
   };
@@ -230,14 +247,14 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
                   <ProductVisual
                     product={product}
                     scale={1} // 1:1 scale (1mm = 1px)
-                    draggable={false} // Products in trays aren't draggable yet
+                    draggable={true} // Products in trays aren't draggable yet
                     showLabel={true}
                     showStabilityIndicator={true}
                   />
                   {/* ========== REMOVE BUTTON ========== */}
                   {/* Only visible on hover - allows removing products */}
                   <button
-                    onClick={() => removeProduct(index)}
+                    onClick={() => removeProduct(product.id)}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove product"
                     style={{ zIndex: 3 }} // Above everything

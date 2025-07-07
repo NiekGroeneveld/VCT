@@ -45,13 +45,25 @@ export const fitsInTrayHeight = (product: Product, tray: Tray): boolean => {
     return getCanalHeightProduct(product) <= tray.height;
 };
 
+export const upSizeTray = (tray: Tray, product: Product): Tray => {
+    // Calculate the new height based on the tallest product in the tray
+    const newHeight = Math.max(tray.height, getCanalHeightProduct(product));
+    
+    // Return a new tray object with the updated height
+    return {
+        ...tray,
+        height: newHeight
+    };
+}
+
 /**
  * finds best X position for a product in a tray
  */
 
 export const findBestXPosition = (product: Product, tray: Tray): number | null => {
-    if (!fitsInTrayHeight(product, tray)) {
-        return null; // Product does not fit in tray height
+    if (product.height > 340) {
+        Error("Product height exceeds maximum tray height");
+        return null; 
     }
 
     //Try positions from left to right
