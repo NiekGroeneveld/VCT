@@ -42,5 +42,5 @@ export interface ValidationResult{
 
 export const ConfigurationConstants = {
     DOTS : 72,
-    DOT_DELTA : 13, // mm
+    DOT_DELTA : 135, // mm
 }

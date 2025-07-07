@@ -133,7 +133,7 @@ class ProductService {
                 width: 120, 
                 height: 50, 
                 depth: 50, 
-                stable: false, 
+                stable: true, 
                 source: 'account', 
                 color: '#654321' 
             },
