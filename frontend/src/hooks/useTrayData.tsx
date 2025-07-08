@@ -10,6 +10,7 @@ import {
 } from "../utils/trayUtils";
 import { extractorConstants } from "../types/extractor.types";
 import { getCanalHeight } from "../utils/productUtils";
+import { TrayProductReorderService } from "../services/TrayProductReorderService";
 
 export const useTrayData = () => {
   const [trays, setTrays] = useState<Tray[]>([]);
@@ -241,25 +242,11 @@ export const useTrayData = () => {
     setTrays(prev => prev.map((tray: Tray) => {
       if (tray.id !== trayId) return tray;
       
-      const products = [...tray.products];
-      const [movedProduct] = products.splice(fromIndex, 1);
-      products.splice(toIndex, 0, movedProduct);
+      // Use TrayProductReorderService for advanced spacing
+      const updatedTray = TrayProductReorderService.reorderProducts(tray, fromIndex, toIndex, true);
       
-      // Recalculate X positions based on new order
-      const updatedProducts = products.map((product, index) => ({
-        ...product,
-        x: index * (product.width + 10), // Simple spacing logic - can be improved
-      }));
-      
-      let updatedTray: Tray = {
-        ...tray,
-        products: updatedProducts
-      };
-
       // Assign correct onTrayIndex based on X positions
-      updatedTray = assignOnTrayIndex(updatedTray);
-      
-      return updatedTray;
+      return assignOnTrayIndex(updatedTray);
     }));
   }, [assignOnTrayIndex]);
 
@@ -289,10 +276,17 @@ export const useTrayData = () => {
         if (tray.id === fromTrayId) {
           // Remove from source tray
           const updatedProducts = tray.products.filter((_, index) => index !== fromIndex);
+          
+          // Use advanced spacing for source tray
+          const repositionedProducts = TrayProductReorderService.calculateAdvancedSpacing(
+            tray, 
+            updatedProducts
+          );
+          
           let updatedSourceTray: Tray = {
             ...tray,
-            products: updatedProducts,
-            height: calculateTrayHeight(updatedProducts)
+            products: repositionedProducts,
+            height: calculateTrayHeight(repositionedProducts)
           };
 
           // Assign correct onTrayIndex based on X positions
@@ -316,11 +310,11 @@ export const useTrayData = () => {
           
           updatedProducts.splice(insertIndex, 0, updatedProduct);
           
-          // Recalculate positions
-          const repositionedProducts = updatedProducts.map((product, index) => ({
-            ...product,
-            x: index * (product.width + 10) // Simple spacing - can be improved with better algorithm
-          }));
+          // Recalculate positions using advanced spacing
+          const repositionedProducts = TrayProductReorderService.calculateAdvancedSpacing(
+            tray, 
+            updatedProducts
+          );
           
           const newHeight = Math.max(tray.height, ...repositionedProducts.map(p => getCanalHeight(p)));
           
