@@ -1,149 +1,71 @@
+// src/components/configuration/Tray/TrayComponent.tsx
+
 import React from "react";
 import { useDrop } from "react-dnd";
 import { Trash2 } from "lucide-react";
-import { Tray, TrayConstants } from "../../../types/tray.types";
+import { Tray } from "../../../types/tray.types";
 import { DragItem, DropResult } from "../../../types/configuration.types";
-import { Product, PlacedProduct } from "../../../types/product.types";
-import { ProductVisual } from "../Product/ProductVisual";
-
-import {
-  findBestXPosition,
-  calculateYPosition,
-} from "../../../utils/trayUtils";
-import { extractorConstants } from "../../../types/extractor.types";
-
-import {
-  getCanalHeight,
-  getCanalHeightProduct,
-} from "../../../utils/productUtils";
+import { PlacedProduct } from "../../../types/product.types";
+import { TrayDropHandler } from "../../../services/TrayDropHandler";
+import { TrayProductManager } from "../../../services/TrayProductManager";
+import { TrayProductReorderService } from "../../../services/TrayProductReorderService";
+import { DraggableTrayProduct } from "./DraggableTrayProduct";
 
 interface TrayComponentProps {
   tray: Tray;
   onUpdate: (tray: Tray) => void;
   onRemove: () => void;
+  onProductMoveBetweenTrays?: (product: PlacedProduct, fromIndex: number, fromTrayId: number, toTrayId: number) => void;
+  variant?: 'standalone' | 'managed'; // New prop to control behavior
 }
 
 export const TrayComponent: React.FC<TrayComponentProps> = ({
   tray,
   onUpdate,
   onRemove,
+  onProductMoveBetweenTrays,
+  variant = 'standalone'
 }) => {
+  
+  // Configure drop behavior using the drop handler service
   const [{ isOver, canDrop }, drop] = useDrop<
     DragItem,
     DropResult,
     { isOver: boolean; canDrop: boolean }
-  >({
-    accept: "PRODUCT",
-    drop: (item, monitor) => {
-      if (!item.product) {
-        console.error("Dropped item missing product data");
-        return {
-          trayId: tray.id,
-          position: { x: 0, y: 0 },
-          isValid: false,
-        };
-      }
+  >(TrayDropHandler.createDropConfig(tray, onUpdate));
 
-      const clientOffset = monitor.getClientOffset();
-      const targetRect = (monitor.getDropResult() as any)?.targetRect;
-
-      console.log(
-        "Product dropped in tray:",
-        item.product.name,
-        " Tray ID:",
-        tray.id
-      );
-
-      const bestX = findBestXPosition(item.product, tray);
-
-      if (bestX !== null) {
-        const y = calculateYPosition(item.product);
-        const newProduct: PlacedProduct = item.product.stable
-          ? {
-              ...item.product,
-              x: bestX,
-              y,
-              placedAt: Date.now(),
-              trayId: tray.id,
-              extractorType: "low",
-              extractorHeight: extractorConstants.LOW_EXTRACTOR_HEIGHT,
-            }
-          : {
-              ...item.product,
-              x: bestX,
-              y,
-              placedAt: Date.now(),
-              trayId: tray.id,
-              extractorType: "high",
-              extractorHeight: extractorConstants.HIGH_EXTRACTOR_HEIGHT,
-              clipDistance: extractorConstants.CLIP_DELTA, // Default clip distance, calculation will be added later
-            };
-
-        //===============Update Tray with new product================
-        const newTrayHeight = Math.max(tray.height, getCanalHeight(newProduct));
-
-        const updatedTray: Tray = {
-          ...tray,
-          height: newTrayHeight,
-          products: [...tray.products, newProduct],
-        };
-
-        onUpdate(updatedTray);
-
-        return {
-          trayId: updatedTray.id,
-          position: { x: bestX, y: y },
-          isValid: true,
-        };
-      }
-
-      return {
-        trayId: tray.id,
-        position: { x: 0, y: 0 },
-        isValid: false,
-      };
-    },
-
-    canDrop: (item) => {
-      if (!item.product) {
-        return false;
-      }
-
-      const bestX = findBestXPosition(item.product, tray);
-      return bestX !== null;
-    },
-
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
-  });
-
-  //=====PRODUCT MANAGEMENT FUNCTIONS=====
-  const removeProduct = (productId: number) => {
-    let newproducts = tray.products.filter(
-      (product) => product.id !== productId
-    );
-    let highestProduct = newproducts
-      .map((p) => getCanalHeight(p))
-      .reduce((a, b) => Math.max(a, b), 0);
-    const updatedTray: Tray = {
-      ...tray,
-      height:
-        highestProduct > TrayConstants.MINIMAL_TRAY_HEIGHT
-          ? highestProduct
-          : TrayConstants.MINIMAL_TRAY_HEIGHT,
-      products: newproducts,
-    };
+  /**
+   * Handles product removal by index
+   */
+  const handleRemoveProduct = (productIndex: number) => {
+    const updatedTray = TrayProductManager.removeProductByIndex(tray, productIndex);
     onUpdate(updatedTray);
   };
 
+  /**
+   * Handles reordering products within the tray
+   */
+  const handleReorderProducts = (fromIndex: number, toIndex: number) => {
+    const updatedTray = TrayProductReorderService.reorderProducts(tray, fromIndex, toIndex);
+    onUpdate(updatedTray);
+  };
+
+  /**
+   * Handles moving product between trays
+   */
+  const handleMoveBetweenTrays = (product: PlacedProduct, fromIndex: number, targetTrayId: number) => {
+    if (onProductMoveBetweenTrays && targetTrayId !== tray.id) {
+      onProductMoveBetweenTrays(product, fromIndex, tray.id, targetTrayId);
+    }
+  };
+
+  // Dynamic styling based on drop state
   const trayClasses = `
-        relative border-2 transition-colors duration-200
-        ${isOver && canDrop ? "border-green-400 bg-green-50" : " "}
-        ${isOver && !canDrop ? "border-red-400 bg-red-50" : " "}
-        ${!isOver ? "border-gray-300 bg-gray-100" : " "}
-    `;
+    relative border-2 transition-colors duration-200
+    ${isOver && canDrop ? "border-green-400 bg-green-50" : ""}
+    ${isOver && !canDrop ? "border-red-400 bg-red-50" : ""}
+    ${!isOver ? "border-gray-300 bg-gray-100" : ""}
+  `.trim();
 
   const trayStyle = {
     width: `${tray.width}px`,
@@ -152,140 +74,141 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
 
   return (
     <div className="bg-gray-50 rounded-lg p-4">
-      {/* ========== TRAY HEADER ========== */}
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <h3 className="font-medium text-gray-800">
-            Tray {tray.id} ({tray.width}mm × {tray.height}mm)
-          </h3>
-          <p className="text-sm text-gray-600">
-            {tray.products.length} product
-            {tray.products.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <button
-          onClick={onRemove}
-          className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-100"
-          title="Remove tray"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-      {/* ================================= */}
+      
+      {/* Tray Header */}
+      <TrayHeader 
+        tray={tray} 
+        onRemove={onRemove}
+      />
 
-      {/* ========== TRAY DROP AREA ========== */}
+      {/* Tray Drop Area */}
       <div ref={drop as any} className={trayClasses} style={trayStyle}>
-        {/* EMPTY STATE: Show when no products in tray */}
         {tray.products.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-gray-500">
-            <div className="text-center">
-              <div className="text-sm">Drop products here</div>
-              <div className="text-xs">(Drag from product list)</div>
-            </div>
-            <div
-              className="absolute bg-gray-200 border border-gray-400"
-              style={{
-                left: `0px`, // Start at left edge of tray
-                bottom: `${0 * tray.height}px`, // Position at the bottom of the tray
-                width: `636px`, // Full width of the tray
-                height: `28px`, // Full height of the tray
-                zIndex: 0, // Behind all products
-              }}
-            />
-          </div>
+          <TrayEmptyState tray={tray} />
         ) : (
-          // ========== PRODUCTS DISPLAY ==========
-          // Show all products positioned within the tray
-          <div
-            className="relative"
-            style={{
-              padding: 0,
-              margin: 0,
-              height: "100%",
-            }}
-          >
-            <div
-              className="absolute bg-gray-200 border border-gray-400"
-              style={{
-                left: `0px`, // Start at left edge of tray
-                bottom: `${-tray.height}px`, // Position at the bottom of the tray
-                width: `${tray.width - 4}px`, // Full width of the tray
-                height: `28px`, // Full height of the tray
-                zIndex: 1, // Behind all products
-              }}
-            />
-            {tray.products.map((product, index) => (
-              <div key={index}>
-                {/* ========== EXTRACTOR VISUAL ========== */}
-                {/* Render the extractor beneath the product */}
-                <div
-                  className="absolute bg-gray-500 border border-gray-800"
-                  style={{
-                    left: `${product.x}px`,
-                    bottom: `${-tray.height}px`, // Extractor sits at tray bottom
-                    width: `${product.width}px`, // Same width as product
-                    height: `${product.extractorHeight}px`, // Extractor height
-                    zIndex: 0, // Behind the product
-                  }}
-                  title={`${product.extractorType} extractor (${product.extractorHeight}mm)`}
-                />
-                {/* ===================================== */}
-
-                {/* ========== PRODUCT VISUAL ========== */}
-                {/* Render the product on top of extractor */}
-                <div
-                  className="absolute group" // Group for hover effects
-                  style={{
-                    left: `${product.x}px`, // X position from product data
-                    bottom: `${product.y - tray.height}px`, // Y position - product sits on extractor
-                    zIndex: 2, // Above the extractor
-                    // This positions the product ON TOP of the extractor
-                    // Extractor is at tray bottom, product is lifted by extractor height
-                  }}
-                >
-                  {/* Render the actual product visual */}
-                  <ProductVisual
-                    product={product}
-                    scale={1} // 1:1 scale (1mm = 1px)
-                    draggable={true} // Products in trays aren't draggable yet
-                    showLabel={true}
-                    showStabilityIndicator={true}
-                  />
-                  {/* ========== REMOVE BUTTON ========== */}
-                  {/* Only visible on hover - allows removing products */}
-                  <button
-                    onClick={() => removeProduct(product.id)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove product"
-                    style={{ zIndex: 3 }} // Above everything
-                  >
-                    ×
-                  </button>
-                  {/* =================================== */}
-                </div>
-                {/* ==================================== */}
-              </div>
-            ))}
-          </div>
-          // =====================================
+          <TrayProductsDisplay 
+            tray={tray}
+            onRemoveProduct={handleRemoveProduct}
+            onReorderProducts={handleReorderProducts}
+            onMoveBetweenTrays={handleMoveBetweenTrays}
+          />
         )}
 
-        {/* ========== DROP FEEDBACK ========== */}
-        {/* Show feedback message during drag hover */}
-        {isOver && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div
-              className={`text-lg font-semibold ${
-                canDrop ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {canDrop ? "Drop here" : "Cannot fit here"}
-            </div>
-          </div>
-        )}
-        {/* ================================== */}
+        {/* Drop Feedback */}
+        <TrayDropFeedback isOver={isOver} canDrop={canDrop} />
       </div>
-      {/* =================================== */}
+    </div>
+  );
+};
+
+/**
+ * Tray header component with title and remove button
+ */
+const TrayHeader: React.FC<{
+  tray: Tray;
+  onRemove: () => void;
+}> = ({ tray, onRemove }) => (
+  <div className="flex justify-between items-center mb-3">
+    <div>
+      <h3 className="font-medium text-gray-800">
+        Tray {tray.id} ({tray.width}mm × {tray.height}mm)
+      </h3>
+      <p className="text-sm text-gray-600">
+        {tray.products.length} product{tray.products.length !== 1 ? "s" : ""}
+      </p>
+    </div>
+    <button
+      onClick={onRemove}
+      className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-100"
+      title="Remove tray"
+    >
+      <Trash2 size={16} />
+    </button>
+  </div>
+);
+
+/**
+ * Empty state when tray has no products
+ */
+const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => (
+  <div className="flex items-center justify-center h-32 text-gray-500">
+    <div className="text-center">
+      <div className="text-sm">Drop products here</div>
+      <div className="text-xs">(Drag from product list)</div>
+    </div>
+    {/* Tray Base for Empty State */}
+    <div
+      className="absolute bg-gray-200 border border-gray-400"
+      style={{
+        left: "0px",
+        bottom: "0px", // Position at the bottom of the container, not beneath it
+        width: `${tray.width - 4}px`,
+        height: "28px",
+        zIndex: 0,
+      }}
+    />
+  </div>
+);
+
+/**
+ * Displays all products in the tray with drag and drop functionality
+ */
+const TrayProductsDisplay: React.FC<{
+  tray: Tray;
+  onRemoveProduct: (index: number) => void;
+  onReorderProducts: (fromIndex: number, toIndex: number) => void;
+  onMoveBetweenTrays: (product: PlacedProduct, fromIndex: number, targetTrayId: number) => void;
+}> = ({ tray, onRemoveProduct, onReorderProducts, onMoveBetweenTrays }) => (
+  <div className="relative" style={{ padding: 0, margin: 0, height: "100%" }}>
+    <TrayBase tray={tray} />
+    {tray.products.map((product, index) => (
+      <DraggableTrayProduct
+        key={`${product.id}-${index}-${product.placedAt}`} // Unique key that includes placement time
+        product={product}
+        tray={tray}
+        index={index}
+        onReorder={onReorderProducts}
+        onRemove={() => onRemoveProduct(index)}
+        onMoveBetweenTrays={onMoveBetweenTrays}
+      />
+    ))}
+  </div>
+);
+
+/**
+ * Visual representation of the tray base
+ */
+const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => (
+  <div
+    className="absolute bg-gray-200 border border-gray-400"
+    style={{
+      left: "0px",
+      bottom: `${-tray.height}px`,
+      width: `${tray.width - 4}px`,
+      height: "28px",
+      zIndex: 1,
+    }}
+  />
+);
+
+/**
+ * Feedback shown during drag operations
+ */
+const TrayDropFeedback: React.FC<{
+  isOver: boolean;
+  canDrop: boolean;
+}> = ({ isOver, canDrop }) => {
+  if (!isOver) return null;
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div
+        className={`text-lg font-semibold ${
+          canDrop ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {canDrop ? "Drop here" : "Cannot fit here"}
+      </div>
     </div>
   );
 };
