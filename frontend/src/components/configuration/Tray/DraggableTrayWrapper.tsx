@@ -70,7 +70,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                 opacity: isDragging ? 0.8 : 1,
                 transition: isDragging ? 'none' : 'all 0.2s ease',
                 boxShadow: isDragging ? '0 10px 25px rgba(0,0,0,0.3)' : 'none',
-                zIndex: isDragging ? 1000 : 'auto',
+                zIndex: isDragging ? 40 : 'auto',
                 ...style
             }}
         >

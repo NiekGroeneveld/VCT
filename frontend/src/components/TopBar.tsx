@@ -7,7 +7,7 @@ type Props = {}
 
 const TopBar: React.FC<Props> = (props: Props) => {
   return (
-    <div className="fixed top-0 left-0 w-screen h-32 flex flex-row bg-gray-900 text-white shadow-md">
+    <div className="fixed top-0 left-0 w-screen h-32 flex flex-row bg-gray-900 text-white shadow-md z-[100]">
       {/* Logo */}
       <div className="flex items-center">
         <img src={logo} alt="Vendolution Logo" className="h-32 w-auto" />

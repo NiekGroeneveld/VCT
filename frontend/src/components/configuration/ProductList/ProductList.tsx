@@ -134,7 +134,7 @@ export const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
                 </div>
                 
                 {/* Add from Catalog Button - Always visible at bottom */}
-                <div className="sticky bottom-0 bg-white border-t border-gray-300 pt-2 -mx-4 px-4">
+                <div className="sticky bottom-0 bg-white border-t border-gray-300 pt-2 -mx-4 px-4 z-10">
                     <button
                         onClick={handleAddFromCatalog}
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors"

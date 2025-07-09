@@ -104,7 +104,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute z-10 w-full mt-1 ${backgroundColor} ${borderColor} rounded-lg shadow-lg`}>
+        <div className={`absolute z-[110] w-full mt-1 ${backgroundColor} ${borderColor} rounded-lg shadow-lg`}>
           {/* Search Bar */}
           <div className={`p-2 border-b ${borderColor}`}>
             <div className="relative">

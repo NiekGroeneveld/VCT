@@ -52,7 +52,7 @@ export interface ValidationResult{
 export const ConfigurationConstants = {
     DOTS : 72,                  //Total number of dots in the machine
     DOT_DELTA : 13.5,           // mm - Distance between dots
-    TOP_SPACE: 200,             // mm - Space above the top dot
+    TOP_SPACE: 272,             // mm - Space above the top dot
     get MACHINE_HEIGHT() { return this.DOT_DELTA * this.DOTS + this.TOP_SPACE; }, // mm - Total height: 13.5*72+200 = 1172mm
     TRAY_COLLISION_MARGIN: 10,  // mm - Margin for tray collision detection
 }
