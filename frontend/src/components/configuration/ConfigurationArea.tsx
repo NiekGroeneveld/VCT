@@ -1,47 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tray, TrayConstants } from '../../types/tray.types';
 import { getDotYPosition } from '../../types/configuration.types';
 import { useTrayDragDrop } from '../../hooks/useTrayDragDrop';
+import { useCrossTrayOperations } from '../../hooks/useCrossTrayOperations'; // ADD THIS IMPORT
 import { MachineConfigurationZone } from './MachineConfigurationZone';
 import { DraggableTrayWrapper } from './Tray/DraggableTrayWrapper';
 
 export const ConfigurationArea: React.FC = () => {
-    // Initialize with sample trays using proper constants:
-    // - DEFAULT_TRAY_WIDTH: 640mm (fixed width, not adjustable)
-    // - MINIMAL_TRAY_HEIGHT: 124mm (minimum height, can grow with products)
-    const [trays, setTrays] = useState<Tray[]>([
-        {
-            id: 1,
-            name: "Tray 1",
-            dotPosition: 5,
-            height: TrayConstants.MINIMAL_TRAY_HEIGHT,
-            width: TrayConstants.DEFAULT_TRAY_WIDTH,
-            products: []
-        },
-        {
-            id: 2,
-            name: "Tray 2", 
-            dotPosition: 20,
-            height: TrayConstants.MINIMAL_TRAY_HEIGHT,
-            width: TrayConstants.DEFAULT_TRAY_WIDTH,
-            products: []
-        },
-        {
-            id: 3,
-            name: "Tray 3",
-            dotPosition: 35,
-            height: TrayConstants.MINIMAL_TRAY_HEIGHT,
-            width: TrayConstants.DEFAULT_TRAY_WIDTH,
-            products: []
-        }
-    ]);
+    // Initialize with sample trays
+    const [trays, setTrays] = useState<Tray[]>([]);
     
+    // Hook for tray positioning (existing)
     const {
         startTrayDrag,
         updateTrayPosition,
         endTrayDrag,
         getDragFeedback
     } = useTrayDragDrop(trays, setTrays);
+
+    // ADD THIS: Hook for cross-tray product operations
+    const { handleProductMoveBetweenTrays, moveProductBetweenTrays } = useCrossTrayOperations(trays, setTrays);
+
+    // ADD THIS: Event listener for cross-tray moves
+    useEffect(() => {
+        const handleCrossTrayRequest = (event: any) => {
+            const { sourceTrayId, targetTrayId, sourceIndex, targetIndex } = event.detail;
+            moveProductBetweenTrays(sourceTrayId, targetTrayId, sourceIndex, targetIndex);
+        };
+        
+        window.addEventListener('requestCrossTrayMove', handleCrossTrayRequest);
+        return () => window.removeEventListener('requestCrossTrayMove', handleCrossTrayRequest);
+    }, [moveProductBetweenTrays]);
 
     return (
         <div className="flex space-x-6">
@@ -67,12 +56,13 @@ export const ConfigurationArea: React.FC = () => {
                             onDragStart={startTrayDrag}
                             onDragEnd={endTrayDrag}
                             onDragUpdate={updateTrayPosition}
+                            onProductMoveBetweenTrays={handleProductMoveBetweenTrays} // ADD THIS LINE
                             style={{
                                 position: 'absolute',
-                                bottom: `${getDotYPosition(tray.dotPosition || 1)}px`, // Direct mm positioning
+                                bottom: `${getDotYPosition(tray.dotPosition || 1)}px`,
                                 left: '20px',
-                                width: `${tray.width}px`, // Direct mm width
-                                height: `${tray.height}px`, // Direct mm height
+                                width: `${tray.width}px`,
+                                height: `${tray.height}px`,
                                 zIndex: tray.isDragging ? 1000 : 1
                             }}
                         />
@@ -107,17 +97,19 @@ export const ConfigurationArea: React.FC = () => {
                             const newTray: Tray = {
                                 id: Date.now(),
                                 name: `Tray ${trays.length + 1}`,
-                                dotPosition: trays.length > 0 ? Math.max(...trays.map(t => t.dotPosition || 1)) + 10 : 1,
+                                dotPosition: trays.length > 0 ? 
+                                    Math.max(...trays.map(t => t.dotPosition || 1)) + 10 : 1,
                                 height: TrayConstants.MINIMAL_TRAY_HEIGHT,
                                 width: TrayConstants.DEFAULT_TRAY_WIDTH,
                                 products: []
                             };
                             setTrays(prev => [...prev, newTray]);
                         }}
-                        className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        className="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
                         Add New Tray
                     </button>
+
                 </div>
             </div>
         </div>

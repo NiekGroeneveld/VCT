@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { GripVertical } from 'lucide-react';
 import { Tray } from '../../../types/tray.types';
+import { PlacedProduct } from '../../../types/product.types';
 import { TrayComponent } from './TrayComponent';
 
 interface DraggableTrayWrapperProps {
@@ -11,6 +12,8 @@ interface DraggableTrayWrapperProps {
     onDragStart: (tray: Tray) => void;
     onDragEnd: (trayId: number, finalYPosition: number) => boolean;
     onDragUpdate: (trayId: number, currentYPosition: number) => void;
+    // ADD THIS: Props for cross-tray operations
+    onProductMoveBetweenTrays?: (product: PlacedProduct, fromIndex: number, fromTrayId: number, toTrayId: number) => void;
     style?: React.CSSProperties;
     className?: string;
 }
@@ -22,6 +25,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
     onDragStart,
     onDragEnd,
     onDragUpdate,
+    onProductMoveBetweenTrays, // ADD THIS
     style,
     className = ""
 }) => {
@@ -102,10 +106,10 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     tray={tray}
                     onUpdate={onUpdate}
                     onRemove={onRemove}
-                    variant="managed"
+                    onProductMoveBetweenTrays={onProductMoveBetweenTrays} // ADD THIS LINE
+                    variant="managed" // ADD THIS LINE
                 />
             </div>
-
 
             {/* Dragging indicator */}
             {isDragging && (
