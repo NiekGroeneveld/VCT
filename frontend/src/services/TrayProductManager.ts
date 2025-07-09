@@ -286,4 +286,99 @@ export class TrayProductManager {
       }
     };
   }
+
+  /**
+   * Moves a product from one tray to another
+   * Returns both updated trays or null if the operation fails
+   */
+  static moveProductBetweenTrays(
+    sourceTray: Tray,
+    targetTray: Tray,
+    productIndex: number,
+    targetIndex?: number
+  ): { sourceTray: Tray; targetTray: Tray } | null {
+    // Validate source index
+    if (productIndex < 0 || productIndex >= sourceTray.products.length) {
+      console.warn(`Invalid product index: ${productIndex} for source tray with ${sourceTray.products.length} products`);
+      return null;
+    }
+
+    const productToMove = sourceTray.products[productIndex];
+    
+    // Check if product can fit in target tray
+    if (!this.canPlaceProduct(targetTray, productToMove)) {
+      console.warn(`Product ${productToMove.name} cannot fit in target tray`);
+      return null;
+    }
+
+    // Remove from source tray
+    const updatedSourceProducts = sourceTray.products.filter((_, index) => index !== productIndex);
+    const repositionedSourceProducts = this.calculateAdvancedSpacing(sourceTray, updatedSourceProducts);
+    const sourceHeight = this.calculateOptimalHeight(repositionedSourceProducts);
+
+    let updatedSourceTray: Tray = {
+      ...sourceTray,
+      products: repositionedSourceProducts,
+      height: sourceHeight
+    };
+    updatedSourceTray = this.assignOnTrayIndex(updatedSourceTray);
+
+    // Add to target tray
+    const updatedProduct: PlacedProduct = {
+      ...productToMove,
+      trayId: targetTray.id,
+      placedAt: Date.now(),
+      onTrayIndex: 0 // Will be recalculated
+    };
+
+    const targetProducts = [...targetTray.products];
+    const insertIndex = targetIndex !== undefined 
+      ? Math.min(targetIndex, targetProducts.length) 
+      : targetProducts.length;
+    
+    targetProducts.splice(insertIndex, 0, updatedProduct);
+    
+    const repositionedTargetProducts = this.calculateAdvancedSpacing(targetTray, targetProducts);
+    const targetHeight = Math.max(targetTray.height, this.calculateOptimalHeight(repositionedTargetProducts));
+
+    let updatedTargetTray: Tray = {
+      ...targetTray,
+      products: repositionedTargetProducts,
+      height: targetHeight
+    };
+    updatedTargetTray = this.assignOnTrayIndex(updatedTargetTray);
+
+    return {
+      sourceTray: updatedSourceTray,
+      targetTray: updatedTargetTray
+    };
+  }
+
+  /**
+   * Validates if a product can be moved from one tray to another
+   */
+  static canMoveProductBetweenTrays(
+    sourceTray: Tray,
+    targetTray: Tray,
+    productIndex: number
+  ): { canMove: boolean; reason?: string } {
+    // Check source index validity
+    if (productIndex < 0 || productIndex >= sourceTray.products.length) {
+      return { canMove: false, reason: 'Invalid product index' };
+    }
+
+    // Can't move to same tray
+    if (sourceTray.id === targetTray.id) {
+      return { canMove: false, reason: 'Cannot move product to the same tray' };
+    }
+
+    const productToMove = sourceTray.products[productIndex];
+    
+    // Check if product fits in target tray
+    if (!this.canPlaceProduct(targetTray, productToMove)) {
+      return { canMove: false, reason: 'Product does not fit in target tray' };
+    }
+
+    return { canMove: true };
+  }
 }

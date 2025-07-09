@@ -2,15 +2,9 @@ import React, { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Tray } from "../../../types/tray.types";
 import { PlacedProduct } from "../../../types/product.types";
+import { DragItem } from "../../../types/configuration.types";
 import { ProductVisual } from "../Product/ProductVisual";
-import { on } from "events";
-
-interface DragItem {
-    type: string;
-    index: number;
-    trayId: number;
-    product: PlacedProduct;
-}
+import { CrossTrayDragDropService } from "../../../services/CrossTrayDragDropService";
 
 interface DraggableTrayProductProps{
     product: PlacedProduct;
@@ -35,9 +29,13 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
         type: "TRAY_PRODUCT",
         item: (): DragItem => ({
             type: "TRAY_PRODUCT",
+            product,
+            fromTray: tray.id,
+            sourceIndex: index,
+            sourceTrayId: tray.id,
+            // Legacy properties for backwards compatibility
             index,
-            trayId: tray.id,
-            product
+            trayId: tray.id
         }),
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
@@ -59,7 +57,8 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
             return;
         }
 
-        if(draggedItem.trayId === tray.id) {
+        // Only handle reordering within the same tray
+        if(draggedItem.trayId === tray.id && dragIndex !== undefined) {
             const hoverBoundingRect = ref.current.getBoundingClientRect();
             const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
             const clientOffset = monitor.getClientOffset();
@@ -81,8 +80,9 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
     },
     drop: (draggedItem: DragItem) => {
       // Handle cross-tray moves
-      if (draggedItem.trayId !== tray.id && onMoveBetweenTrays) {
-        onMoveBetweenTrays(draggedItem.product, draggedItem.index, tray.id);
+      if (draggedItem.trayId !== tray.id && onMoveBetweenTrays && draggedItem.product && draggedItem.index !== undefined) {
+        // Cast to PlacedProduct since we know it comes from a tray
+        onMoveBetweenTrays(draggedItem.product as PlacedProduct, draggedItem.index, tray.id);
       }
     },
         collect: (monitor) => ({
@@ -105,7 +105,7 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
         className="absolute bg-gray-500 border border-gray-800"
         style={{
           left: `${product.x}px`,
-          bottom: `${-tray.height}px`,
+          bottom: `0px`, // Position at bottom of tray container
           width: `${product.width}px`,
           height: `${product.extractorHeight}px`,
           zIndex: 0,
@@ -122,7 +122,7 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
         }`}
         style={{
           left: `${product.x}px`,
-          bottom: `${product.y - tray.height}px`,
+          bottom: `${product.y}px`, // Position from bottom of tray container
           zIndex: 2,
           opacity,
           transform,
@@ -166,7 +166,7 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
           className="absolute bg-blue-400 opacity-50"
           style={{
             left: `${product.x - 2}px`,
-            bottom: `${-tray.height}px`,
+            bottom: `0px`, // Position at bottom of tray container
             width: "4px",
             height: `${product.extractorHeight + product.height}px`,
             zIndex: 5,

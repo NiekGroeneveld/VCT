@@ -81,15 +81,15 @@ export const useTrayData = () => {
   }, []);
 
   /**
-   * Adds a new tray
+   * Adds a new tray with specified dimensions or defaults
    */
-  const addTray = useCallback((width: number = 300, height: number = 200) => {
+  const addTray = useCallback((width: number = TrayConstants.DEFAULT_TRAY_WIDTH, height: number = TrayConstants.MINIMAL_TRAY_HEIGHT) => {
     const newTray: Tray = {
       id: Date.now(),
       width,
       height,
       products: [],
-      position: trays.length,
+      dotPosition: trays.length + 1,
       name: `Tray ${trays.length + 1}`
     };
     setTrays(prev => [...prev, newTray]);

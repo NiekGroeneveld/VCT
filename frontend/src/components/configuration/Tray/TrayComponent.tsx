@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useDrop } from "react-dnd";
-import { Trash2 } from "lucide-react";
 import { Tray } from "../../../types/tray.types";
 import { DragItem, DropResult } from "../../../types/configuration.types";
 import { PlacedProduct } from "../../../types/product.types";
@@ -27,12 +26,33 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   variant = 'standalone'
 }) => {
   
-  // Configure drop behavior using the drop handler service
+  /**
+   * Handles cross-tray product movement coordination
+   */
+  const handleCrossTrayMove = (sourceTrayId: number, targetTrayId: number, sourceIndex: number, targetIndex?: number) => {
+    // This gets called when a TRAY_PRODUCT is dropped on this tray from another tray
+    // We need to find the source product to pass to the parent handler
+    console.log(`Cross-tray move: from tray ${sourceTrayId} index ${sourceIndex} to tray ${targetTrayId}`);
+    
+    // Since we don't have direct access to other trays here, we'll need to use a different approach
+    // Let's emit a custom event that the parent (ConfigurationArea) can listen for
+    const moveEvent = new CustomEvent('requestCrossTrayMove', {
+      detail: { sourceTrayId, targetTrayId, sourceIndex, targetIndex },
+      bubbles: true
+    });
+    
+    // Dispatch the event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(moveEvent);
+    }
+  };
+
+  // Configure drop behavior using the enhanced drop handler service
   const [{ isOver, canDrop }, drop] = useDrop<
     DragItem,
     DropResult,
     { isOver: boolean; canDrop: boolean }
-  >(TrayDropHandler.createDropConfig(tray, onUpdate));
+  >(TrayDropHandler.createDropConfig(tray, onUpdate, handleCrossTrayMove));
 
   /**
    * Handles product removal by index
@@ -68,64 +88,28 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   `.trim();
 
   const trayStyle = {
-    width: `${tray.width}px`,
-    minHeight: `${tray.height}px`,
+    width: `${tray.width}px`, // Direct mm width
+    height: `${tray.height}px`, // Direct mm height
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      
-      {/* Tray Header */}
-      <TrayHeader 
-        tray={tray} 
-        onRemove={onRemove}
-      />
+    <div ref={drop as any} className={trayClasses} style={trayStyle}>
+      {tray.products.length === 0 ? (
+        <TrayEmptyState tray={tray} />
+      ) : (
+        <TrayProductsDisplay 
+          tray={tray}
+          onRemoveProduct={handleRemoveProduct}
+          onReorderProducts={handleReorderProducts}
+          onMoveBetweenTrays={handleMoveBetweenTrays}
+        />
+      )}
 
-      {/* Tray Drop Area */}
-      <div ref={drop as any} className={trayClasses} style={trayStyle}>
-        {tray.products.length === 0 ? (
-          <TrayEmptyState tray={tray} />
-        ) : (
-          <TrayProductsDisplay 
-            tray={tray}
-            onRemoveProduct={handleRemoveProduct}
-            onReorderProducts={handleReorderProducts}
-            onMoveBetweenTrays={handleMoveBetweenTrays}
-          />
-        )}
-
-        {/* Drop Feedback */}
-        <TrayDropFeedback isOver={isOver} canDrop={canDrop} />
-      </div>
+      {/* Drop Feedback */}
+      <TrayDropFeedback isOver={isOver} canDrop={canDrop} />
     </div>
   );
 };
-
-/**
- * Tray header component with title and remove button
- */
-const TrayHeader: React.FC<{
-  tray: Tray;
-  onRemove: () => void;
-}> = ({ tray, onRemove }) => (
-  <div className="flex justify-between items-center mb-3">
-    <div>
-      <h3 className="font-medium text-gray-800">
-        Tray {tray.id} ({tray.width}mm × {tray.height}mm)
-      </h3>
-      <p className="text-sm text-gray-600">
-        {tray.products.length} product{tray.products.length !== 1 ? "s" : ""}
-      </p>
-    </div>
-    <button
-      onClick={onRemove}
-      className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-100"
-      title="Remove tray"
-    >
-      <Trash2 size={16} />
-    </button>
-  </div>
-);
 
 /**
  * Empty state when tray has no products
@@ -141,8 +125,8 @@ const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => (
       className="absolute bg-gray-200 border border-gray-400"
       style={{
         left: "0px",
-        bottom: "0px", // Position at the bottom of the container, not beneath it
-        width: `${tray.width - 4}px`,
+        bottom: "0px", // Position at the bottom of the container
+        width: `${tray.width}px`, // Account for padding in mm
         height: "28px",
         zIndex: 0,
       }}
@@ -159,7 +143,7 @@ const TrayProductsDisplay: React.FC<{
   onReorderProducts: (fromIndex: number, toIndex: number) => void;
   onMoveBetweenTrays: (product: PlacedProduct, fromIndex: number, targetTrayId: number) => void;
 }> = ({ tray, onRemoveProduct, onReorderProducts, onMoveBetweenTrays }) => (
-  <div className="relative" style={{ padding: 0, margin: 0, height: "100%" }}>
+  <div className="relative" style={{ padding: 0, margin: 0, height: "100%", bottom: "0px" }}>
     <TrayBase tray={tray} />
     {tray.products.map((product, index) => (
       <DraggableTrayProduct
@@ -183,8 +167,8 @@ const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => (
     className="absolute bg-gray-200 border border-gray-400"
     style={{
       left: "0px",
-      bottom: `${-tray.height}px`,
-      width: `${tray.width - 4}px`,
+      bottom: `0px`, // Direct mm positioning
+      width: `${tray.width}px`, // Account for padding in mm
       height: "28px",
       zIndex: 1,
     }}

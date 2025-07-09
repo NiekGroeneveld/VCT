@@ -12,7 +12,11 @@ export interface Tray{
     height: number;     // Height adjustable by products placed on the tray
     products: PlacedProduct[]; // Array of products placed in the tray
     name?: string;      // Optional name for the tray (maybe for standardtrays later on )
-    position: number;   // Order within config, 0-based
+    
+    
+    dotPosition: number;    // Position of the tray in a configuration, used for layout purposes
+    isDragging?: boolean;   // Flag to indicate if the tray is currently being dragged
+    dragStartDot?: number;  // Starting position of the tray when dragging begins
 }
 
 export interface TrayConfiguration {
@@ -23,5 +27,11 @@ export interface TrayConfiguration {
     machinedId?: number; // ID of the machine this configuration is for
     createdAt: string; // Timestamp when the configuration was created
     updatedAt: string; // Timestamp when the configuration was last updated
+}
+
+export interface TrayBounds{
+    minDot: number;             // Minimum allowed dot position for the tray    
+    maxDot: number;             // Maximum allowed dot position for the tray
+    collissionDots: number[];   // Dots that are occupied by other
 }
 
