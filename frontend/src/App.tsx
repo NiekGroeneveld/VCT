@@ -2,9 +2,9 @@
 import React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import  TopBar  from './components/TopBar';
-import { ProductList } from './components/configuration/ProductList/ProductList';
-import { ConfigurationArea } from './components/configuration/ConfigurationArea';
+import  TopBar  from './app/layout/TopBar';
+import { ProductList } from './domains/product-management/components/ProductList';
+import { ConfigurationArea } from './domains/machine-configuration/components/ConfigurationArea';
 //import {ConfigurationArea} from './components/configuration/ConfigurationArea/ConfigurationArea';
 
 function App() {
