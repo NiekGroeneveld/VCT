@@ -24,6 +24,7 @@ export const useTrayDragDrop = (
 
     /**
      * Updates tray position while dragging
+     * Now includes collision detection for visual feedback
      */
     const updateTrayPosition = useCallback((trayId: number, newYposition: number) => {
         // Convert screen Y to dot position using the same logic as getDotYPosition
@@ -31,11 +32,20 @@ export const useTrayDragDrop = (
         const newDot = getYPositionDot(newYposition);
         const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
 
-        setTrays(prev => prev.map(tray =>
-            tray.id === trayId
-            ? {...tray, dotPosition: clampedDot}
-            : tray
-        ));
+        setTrays(prev => prev.map(tray => {
+            if (tray.id !== trayId) return tray;
+            
+            // Check if this position is valid (for visual feedback)
+            const otherTrays = prev.filter(t => t.id !== trayId);
+            const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
+            
+            return {
+                ...tray, 
+                dotPosition: clampedDot,
+                // Add a flag to indicate if current position is valid (for visual feedback)
+                isValidPosition: validation.canPlace
+            };
+        }));
     }, [setTrays]);
          
     /**
@@ -48,39 +58,38 @@ export const useTrayDragDrop = (
         
         const tray = trays.find(t => t.id === trayId);
 
-        if(!tray) return false;
+        if(!tray) {
+            console.warn(`Tray with ID ${trayId} not found`);
+            return false;
+        }
+
+        const originalDot = tray.dragStartDot || tray.dotPosition;
         const otherTrays = trays.filter(t => t.id !== trayId);
         const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
 
+        console.log(`Attempting to place tray ${trayId} at dot ${clampedDot}, validation:`, validation);
+
         if(validation.canPlace) {
+            // Valid position - place the tray there
             setTrays(prev => prev.map(t =>
                 t.id === trayId
-                ? {...t, dotPosition: clampedDot, isDragging: false, dragStartDot: undefined}
+                ? {...t, dotPosition: clampedDot, isDragging: false, dragStartDot: undefined, isValidPosition: true}
+                : t
+            ));
+            setDraggedTray(null);
+            console.log(`Tray ${trayId} successfully placed at dot ${clampedDot}`);
+            return true;
+        } else {
+            // Invalid position - allow placement but collision detection will mark it as colliding
+            console.log(`Allowing placement of tray ${trayId} at dot ${clampedDot} - collision will be detected`);
+            
+            setTrays(prev => prev.map(t =>
+                t.id === trayId
+                ? {...t, dotPosition: clampedDot, isDragging: false, dragStartDot: undefined, isValidPosition: true}
                 : t
             ));
             setDraggedTray(null);
             return true;
-        } else {
-            //Invalid Position, try to find nearest valid position
-            const nearestDot = TrayPositionService.findNearestValidDot(tray, clampedDot, otherTrays);
-            if(nearestDot){
-                setTrays(prev => prev.map(t =>
-                    t.id === trayId
-                    ? {...t, dotPosition: nearestDot, isDragging: false, dragStartDot: undefined}
-                    : t
-                ));
-                setDraggedTray(null);
-                return true;
-            } else {
-                //No valid position found, reset tray position
-                setTrays(prev => prev.map(t =>
-                    t.id === trayId
-                    ? {...t, dotPosition: t.dragStartDot || 1, isDragging: false, dragStartDot: undefined}
-                    : t
-                ));
-                setDraggedTray(null);
-                return false;
-            }
         }
     }, [setTrays, trays]);
 

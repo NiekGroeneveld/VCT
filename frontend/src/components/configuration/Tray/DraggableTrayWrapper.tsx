@@ -74,6 +74,24 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                 ...style
             }}
         >
+            {/* Persistent collision indicator */}
+            {!isDragging && tray.hasCollision && (
+                <div className="absolute -inset-1 border-2 border-red-500 rounded-lg pointer-events-none z-10">
+                    <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
+                        Collision
+                    </div>
+                </div>
+            )}
+            
+            {/* Invalid position indicator during drag */}
+            {isDragging && tray.isValidPosition === false && (
+                <div className="absolute -inset-1 border-2 border-red-500 border-dashed rounded-lg bg-red-100 bg-opacity-20 pointer-events-none z-10">
+                    <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
+                        Invalid Position
+                    </div>
+                </div>
+            )}
+            
             {/* Drag Handle */}
             <div
                 ref={handleRef}
@@ -86,6 +104,8 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     transition-colors duration-200
                     ${isDragging ? 'bg-blue-200 border-blue-300' : ''}
                     ${tray.isDragging ? 'bg-blue-200 border-blue-300' : ''}
+                    ${isDragging && tray.isValidPosition === false ? 'bg-red-200 border-red-300' : ''}
+                    ${!isDragging && tray.hasCollision ? 'bg-red-200 border-red-300' : ''}
                     rounded-l-lg
                 `}
                 title={`Drag ${tray.name || `Tray ${tray.id}`} to reposition`}
@@ -96,6 +116,8 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                         text-gray-500 group-hover:text-gray-700
                         ${isDragging ? 'text-blue-600' : ''}
                         ${tray.isDragging ? 'text-blue-600' : ''}
+                        ${isDragging && tray.isValidPosition === false ? 'text-red-600' : ''}
+                        ${!isDragging && tray.hasCollision ? 'text-red-600' : ''}
                     `} 
                 />
             </div>
@@ -115,6 +137,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
             {isDragging && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap">
                     {tray.name || `Tray ${tray.id}`} → Dot {tray.dotPosition || 1}
+                    {tray.isValidPosition === false && <span className="ml-2 text-red-300">⚠ Invalid</span>}
                 </div>
             )}
         </div>

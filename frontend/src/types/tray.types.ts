@@ -17,6 +17,8 @@ export interface Tray{
     dotPosition: number;    // Position of the tray in a configuration, used for layout purposes
     isDragging?: boolean;   // Flag to indicate if the tray is currently being dragged
     dragStartDot?: number;  // Starting position of the tray when dragging begins
+    isValidPosition?: boolean; // Flag to indicate if current position is valid during drag
+    hasCollision?: boolean; // Flag to indicate if the tray has a persistent collision with other trays
 }
 
 export interface TrayConfiguration {

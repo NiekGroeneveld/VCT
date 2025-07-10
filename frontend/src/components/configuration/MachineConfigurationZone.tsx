@@ -67,6 +67,11 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         });
     };
 
+    // Helper function to check if a dot is the attachment point (bottom) of a tray
+    const isDotAttachmentPoint = (dotNumber: number): boolean => {
+        return trays.some(tray => tray.dotPosition === dotNumber);
+    };
+
     // Helper function to get elevator indicators
     const getElevatorIndicators = (dotNumber: number): number => {
         // Bottom indicators
@@ -125,21 +130,34 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                     const dotNumber = i + 1;
                     const yPosition = getDotYPosition(dotNumber);
                     const isOccupied = isDotOccupied(dotNumber);
+                    const isAttachmentPoint = isDotAttachmentPoint(dotNumber);
                     const elevatorCount = getElevatorIndicators(dotNumber);
                     const isDouble = isDoubleDot(dotNumber);
+                    
+                    // Determine dot color and size based on status
+                    let dotColor = 'bg-black'; // Default
+                    let dotSize = 'w-2 h-2'; // Default size (8px)
+                    let dotOffset = ''; // Default positioning
+                    if (isAttachmentPoint) {
+                        dotColor = 'bg-red-500'; // Red for attachment point (more prominent)
+                        dotSize = 'w-2.5 h-2.5'; // 1.1x size (10px vs 8px)
+                        dotOffset = '-translate-x-0.5'; // Center the larger dot horizontally only
+                    } else if (isOccupied) {
+                        dotColor = 'bg-red-300'; // Light red for occupied range (less stressed)
+                    }
                     
                     return (
                         <div key={dotNumber} className="absolute" style={{ bottom: `${yPosition}px`, left: '10px' }}>
                             {/* Main dot */}
                             <div 
-                                className={`w-2 h-2 rounded-full border ${isOccupied ? 'bg-red-500' : 'bg-black'}`}
-                                title={`Dot ${dotNumber}${isOccupied ? ' (occupied)' : ''}`}
+                                className={`${dotSize} rounded-full border ${dotColor} ${dotOffset}`}
+                                title={`Dot ${dotNumber}${isAttachmentPoint ? ' (attachment point)' : isOccupied ? ' (occupied)' : ''}`}
                             />
                             
                             {/* Double dot indicator */}
                             {isDouble && (
                                 <div 
-                                    className={`w-2 h-2 rounded-full border ${isOccupied ? 'bg-red-500' : 'bg-black'} absolute`}
+                                    className={`${dotSize} rounded-full border ${dotColor} absolute ${dotOffset}`}
                                     style={{ left: '10px', top: '0px' }}
                                 />
                             )}

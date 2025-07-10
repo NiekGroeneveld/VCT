@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Tray, TrayConstants } from '../../types/tray.types';
-import { getDotYPosition } from '../../types/configuration.types';
+import { getDotYPosition, ConfigurationConstants } from '../../types/configuration.types';
 import { useTrayDragDrop } from '../../hooks/useTrayDragDrop';
-import { useCrossTrayOperations } from '../../hooks/useCrossTrayOperations'; // ADD THIS IMPORT
+import { useCrossTrayOperations } from '../../hooks/useCrossTrayOperations';
+import { useCollisionDetection } from '../../hooks/useCollisionDetection';
+import { TrayPositionService } from '../../services/TrayPositionService';
 import { MachineConfigurationZone } from './MachineConfigurationZone';
 import { DraggableTrayWrapper } from './Tray/DraggableTrayWrapper';
 
@@ -18,6 +20,9 @@ export const ConfigurationArea: React.FC = () => {
         endTrayDrag,
         getDragFeedback
     } = useTrayDragDrop(trays, setTrays);
+
+    // Hook for collision detection
+    const { recalculateCollisions } = useCollisionDetection(trays, setTrays);
 
     // ADD THIS: Hook for cross-tray product operations
     const { handleProductMoveBetweenTrays, moveProductBetweenTrays } = useCrossTrayOperations(trays, setTrays);
@@ -34,16 +39,33 @@ export const ConfigurationArea: React.FC = () => {
     }, [moveProductBetweenTrays]);
 
     const handleAddTray = () => {
+        // Find the first available position for the new tray
         const newTray: Tray = {
             id: Date.now(),
             name: `Tray ${trays.length + 1}`,
-            dotPosition: trays.length > 0 ? 
-                Math.max(...trays.map(t => t.dotPosition || 1)) + 10 : 1,
+            dotPosition: 1, // Temporary position
             height: TrayConstants.MINIMAL_TRAY_HEIGHT,
             width: TrayConstants.DEFAULT_TRAY_WIDTH,
             products: []
         };
-        setTrays(prev => [...prev, newTray]);
+
+        // Find a valid position for the new tray
+        let validDot = 1;
+        const existingTrays = trays;
+        
+        // Try to find the first available position starting from dot 1
+        for (let dot = 1; dot <= ConfigurationConstants.DOTS; dot++) {
+            const tempTray = { ...newTray, dotPosition: dot };
+            const validation = TrayPositionService.canPlaceTrayAtDot(tempTray, dot, existingTrays);
+            if (validation.canPlace) {
+                validDot = dot;
+                break;
+            }
+        }
+
+        // Create the tray with the valid position
+        const finalTray = { ...newTray, dotPosition: validDot };
+        setTrays(prev => [...prev, finalTray]);
     };
 
     return (
@@ -77,6 +99,8 @@ export const ConfigurationArea: React.FC = () => {
                                 setTrays(prev => prev.map(t => 
                                     t.id === updatedTray.id ? updatedTray : t
                                 ));
+                                // Trigger collision recalculation after tray update
+                                setTimeout(() => recalculateCollisions(), 0);
                             }}
                             onRemove={() => {
                                 setTrays(prev => prev.filter(t => t.id !== tray.id));

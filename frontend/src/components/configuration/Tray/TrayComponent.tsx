@@ -93,7 +93,19 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   };
 
   return (
-    <div ref={drop as any} className={trayClasses} style={trayStyle}>
+    <div ref={drop as any} className={`${trayClasses} group`} style={trayStyle}>
+      {/* Remove Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity z-20"
+        title="Remove tray"
+      >
+        ×
+      </button>
+      
       {tray.products.length === 0 ? (
         <TrayEmptyState tray={tray} />
       ) : (

@@ -118,5 +118,45 @@ export class TrayPositionService {
         });
     }
 
+    /**
+     * Detects all collisions between trays and returns IDs of colliding trays
+     */
+    static detectCollisions(trays: Tray[]): Set<number> {
+        const collidingTrayIds = new Set<number>();
+        
+        // Check every tray against every other tray
+        for (let i = 0; i < trays.length; i++) {
+            for (let j = i + 1; j < trays.length; j++) {
+                const tray1 = trays[i];
+                const tray2 = trays[j];
+                
+                const tray1BottomDot = tray1.dotPosition;
+                const tray1TopDot = this.calculateTopDotForTray(tray1, tray1BottomDot);
+                const tray2BottomDot = tray2.dotPosition;
+                const tray2TopDot = this.calculateTopDotForTray(tray2, tray2BottomDot);
+                
+                // Check if trays overlap
+                if (this.doTraysOverlap(tray1BottomDot, tray1TopDot, tray2BottomDot, tray2TopDot)) {
+                    collidingTrayIds.add(tray1.id);
+                    collidingTrayIds.add(tray2.id);
+                }
+            }
+        }
+        
+        return collidingTrayIds;
+    }
+
+    /**
+     * Updates collision status for all trays
+     */
+    static updateCollisionStatus(trays: Tray[]): Tray[] {
+        const collidingTrayIds = this.detectCollisions(trays);
+        
+        return trays.map(tray => ({
+            ...tray,
+            hasCollision: collidingTrayIds.has(tray.id)
+        }));
+    }
+
 
 }
