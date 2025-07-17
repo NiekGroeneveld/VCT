@@ -3,6 +3,7 @@
 import { Tray, TrayConstants } from "../types/tray.types";
 import { PlacedProduct } from "../../product-management/types/product.types";
 import { findBestXPosition } from "../utils/trayUtils";
+import  {ProductSpacingService} from "./ProductSpacingService";
 
 /**
  * Service for handling product reordering and positioning within trays
@@ -45,86 +46,8 @@ export class TrayProductReorderService {
     return positionedProducts;
   }
 
-  /**
-   * Simple spacing algorithm for products (alternative to optimal positioning)
-   */
-  static calculateSimpleSpacing(products: PlacedProduct[], spacing: number = 10): PlacedProduct[] {
-    let currentX = 0;
-    
-    return products.map((product, index) => {
-      const positionedProduct = {
-        ...product,
-        x: currentX
-      };
-      
-      currentX += product.width + spacing;
-      return positionedProduct;
-    });
-  }
 
-  /**
-   * Advanced spacing algorithm that distributes products evenly across tray width
-   */
-  static calculateAdvancedSpacing(tray: Tray, products: PlacedProduct[], minSpacing: number = 2): PlacedProduct[] {
-    if (products.length === 0) {
-      return [];
-    }
-    console.log(`Calculating advanced spacing for ${products.length} products in tray ${tray.id}`);
-
-    const trayWidth = tray.width; // Use actual tray width, not constant
-    const totalProductWidth = products.reduce((sum, p) => sum + p.width, 0);
-    const productCount = products.length;
-    
-    // Calculate available space for spacing
-    const availableSpace = trayWidth - totalProductWidth;
-    
-    // If products don't fit, use simple left-aligned spacing
-    if (availableSpace < 0) {
-      console.warn(`Products don't fit in tray width ${trayWidth}mm, using simple spacing`);
-      return this.calculateSimpleSpacing(products, minSpacing);
-    }
-    
-    // Calculate spacing between products
-    let spacing: number;
-    let startX: number;
-    
-    if (productCount === 1) {
-      // Center single product
-      spacing = 0;
-      startX = (trayWidth - totalProductWidth) / 2;
-    } else {
-      // Distribute products evenly with minimum spacing
-      const totalSpacingNeeded = (productCount - 1) * minSpacing;
-      const extraSpace = availableSpace - totalSpacingNeeded;
-      
-      if (extraSpace > 0) {
-        // Distribute extra space evenly
-        spacing = minSpacing + (extraSpace / (productCount - 1));
-        startX = 0;
-      } else {
-        // Use minimum spacing
-        spacing = minSpacing;
-        startX = (availableSpace - totalSpacingNeeded) / 2;
-      }
-    }
-    
-    // Position products
-    const positionedProducts: PlacedProduct[] = [];
-    let currentX = Math.max(0, startX); // Ensure we don't start with negative X
-    
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      const positionedProduct: PlacedProduct = {
-        ...product,
-        x: currentX
-      };
-      
-      positionedProducts.push(positionedProduct);
-      currentX += product.width + spacing;
-    }
-    
-    return positionedProducts;
-  }
+  
 
   /**
    * Calculates product center X position
@@ -150,7 +73,7 @@ export class TrayProductReorderService {
     
     // Validate indices
     if (fromIndex >= products.length || toIndex >= products.length) {
-      console.warn(`Invalid indices: fromIndex=${fromIndex}, toIndex=${toIndex}, array length=${products.length}`);
+      console.log(`Invalid indices: fromIndex=${fromIndex}, toIndex=${toIndex}, array length=${products.length}`);
       return tray;
     }
 
@@ -159,9 +82,7 @@ export class TrayProductReorderService {
     products.splice(toIndex, 0, movedProduct);
 
     // Recalculate positions
-    const repositionedProducts = useAdvanced 
-      ? this.calculateAdvancedSpacing(tray, products)
-      : this.calculateSimpleSpacing(products);
+    const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(tray, products);
 
     return {
       ...tray,
@@ -190,7 +111,7 @@ export class TrayProductReorderService {
     const sourceProducts = sourceTray.products.filter((_, index) => index !== sourceIndex);
     const updatedSourceTray = {
       ...sourceTray,
-      products: this.calculateAdvancedSpacing(sourceTray, sourceProducts)
+      products: ProductSpacingService.calculateAdvancedSpacing(sourceTray, sourceProducts)
     };
 
     // Add to target
@@ -211,7 +132,7 @@ export class TrayProductReorderService {
     
     const updatedTargetTray = {
       ...targetTray,
-      products: this.calculateAdvancedSpacing(targetTray, targetProducts)
+      products: ProductSpacingService.calculateAdvancedSpacing(targetTray, targetProducts)
     };
 
     return {

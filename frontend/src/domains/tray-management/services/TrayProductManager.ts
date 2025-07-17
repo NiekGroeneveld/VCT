@@ -5,6 +5,7 @@ import { PlacedProduct, Product } from "../../product-management/types/product.t
 import { getCanalHeight } from "../../product-management/utils/productUtils";
 import { calculateYPosition, findBestXPosition } from "../utils/trayUtils";
 import { extractorConstants } from "../../product-management/types/extractor.types";
+import { ProductSpacingService } from "./ProductSpacingService";
 
 /**
  * Service class for managing tray products with pure functions
@@ -30,76 +31,10 @@ export class TrayProductManager {
     };
   }
 
-  /**
-   * Advanced spacing algorithm that distributes products evenly across tray width
-   */
-  static calculateAdvancedSpacing(tray: Tray, products: PlacedProduct[], minSpacing: number = 2): PlacedProduct[] {
-    if (products.length === 0) {
-      return [];
-    }
+  
+  
 
-    const trayWidth = tray.width;
-    const totalProductWidth = products.reduce((sum, p) => sum + p.width, 0);
-    const productCount = products.length;
-    
-    // Calculate available space for spacing
-    const availableSpace = trayWidth - totalProductWidth;
-    
-    // If products don't fit, use simple left-aligned spacing
-    if (availableSpace < 0) {
-      console.warn(`Products don't fit in tray width ${trayWidth}mm, using simple spacing`);
-      return this.calculateSimpleSpacing(products, minSpacing);
-    }
-    
-    // Calculate spacing between products
-    let spacing: number;
-    let startX: number;
-    
-    if (productCount === 1) {
-      // Center single product
-      spacing = 0;
-      startX = (trayWidth - totalProductWidth) / 2;
-    } else {
-      // Calculate total spacing needed (including half spacing at start and end)
-      const totalSpacingSlots = productCount + 1; // Between products + start + end
-      const spacingPerSlot = availableSpace / totalSpacingSlots;
-      
-      spacing = spacingPerSlot;
-      startX = spacingPerSlot; // Start with half spacing
-    }
-    
-    // Position products
-    const positionedProducts: PlacedProduct[] = [];
-    let currentX = startX;
-    
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      const positionedProduct: PlacedProduct = {
-        ...product,
-        x: Math.round(currentX)
-      };
-      
-      positionedProducts.push(positionedProduct);
-      currentX += product.width + spacing;
-    }
-    
-    return positionedProducts;
-  }
 
-  /**
-   * Simple spacing algorithm for products (fallback)
-   */
-  static calculateSimpleSpacing(products: PlacedProduct[], spacing: number = 10): PlacedProduct[] {
-    let currentX = 0;
-    return products.map((product) => {
-      const positionedProduct: PlacedProduct = {
-        ...product,
-        x: currentX
-      };
-      currentX += product.width + spacing;
-      return positionedProduct;
-    });
-  }
 
   /**
    * Creates a PlacedProduct from a Product with proper extractor configuration
@@ -152,7 +87,7 @@ export class TrayProductManager {
     const updatedProducts = [...tray.products, placedProduct];
     
     // Use advanced spacing to position all products including the new one
-    const repositionedProducts = this.calculateAdvancedSpacing(tray, updatedProducts);
+    const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(tray, updatedProducts);
     const newHeight = Math.max(tray.height, ...repositionedProducts.map(p => getCanalHeight(p)));
 
     let updatedTray: Tray = {
@@ -174,7 +109,7 @@ export class TrayProductManager {
     const updatedProducts = tray.products.filter((p: PlacedProduct) => p.id !== productId);
     
     // Use advanced spacing to reposition remaining products
-    const repositionedProducts = this.calculateAdvancedSpacing(tray, updatedProducts);
+    const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(tray, updatedProducts);
     const newHeight = this.calculateOptimalHeight(repositionedProducts);
 
     let updatedTray: Tray = {
@@ -201,7 +136,7 @@ export class TrayProductManager {
     const updatedProducts = tray.products.filter((_: PlacedProduct, index: number) => index !== productIndex);
     
     // Use advanced spacing to reposition remaining products
-    const repositionedProducts = this.calculateAdvancedSpacing(tray, updatedProducts);
+    const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(tray, updatedProducts);
     const newHeight = this.calculateOptimalHeight(repositionedProducts);
 
     let updatedTray: Tray = {
@@ -240,7 +175,7 @@ export class TrayProductManager {
     
     // If width changed, reposition products with new spacing
     if (updates.width !== undefined && updates.width !== tray.width) {
-      const repositionedProducts = this.calculateAdvancedSpacing(updatedTray, updatedTray.products);
+      const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(updatedTray, updatedTray.products);
       updatedTray.products = repositionedProducts;
     }
     
@@ -313,7 +248,7 @@ export class TrayProductManager {
 
     // Remove from source tray
     const updatedSourceProducts = sourceTray.products.filter((_: PlacedProduct, index: number) => index !== productIndex);
-    const repositionedSourceProducts = this.calculateAdvancedSpacing(sourceTray, updatedSourceProducts);
+    const repositionedSourceProducts = ProductSpacingService.calculateAdvancedSpacing(sourceTray, updatedSourceProducts);
     const sourceHeight = this.calculateOptimalHeight(repositionedSourceProducts);
 
     let updatedSourceTray: Tray = {
@@ -338,7 +273,7 @@ export class TrayProductManager {
     
     targetProducts.splice(insertIndex, 0, updatedProduct);
     
-    const repositionedTargetProducts = this.calculateAdvancedSpacing(targetTray, targetProducts);
+    const repositionedTargetProducts = ProductSpacingService.calculateAdvancedSpacing(targetTray, targetProducts);
     const targetHeight = Math.max(targetTray.height, this.calculateOptimalHeight(repositionedTargetProducts));
 
     let updatedTargetTray: Tray = {

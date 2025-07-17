@@ -2,6 +2,7 @@ import { DragItem, DropResult, ValidationResult } from '../../machine-configurat
 import { Tray } from '../types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
 import { TrayProductManager } from './TrayProductManager';
+import { ProductSpacingService } from './ProductSpacingService';
 
 /**
  * Comprehensive service for handling cross-tray drag and drop operations

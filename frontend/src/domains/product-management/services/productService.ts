@@ -4,13 +4,6 @@ import { Product } from '../types/product.types';
 class ProductService {
     private baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-    private mockLibraryProducts: Product[] = []; // Store created products locally
-
-    constructor() {
-        // Initialize with default mock products
-        this.mockLibraryProducts = this.getMockLibraryProducts();
-    }
-
     async getClientProducts(): Promise<Product[]> {
         try {
             const response = await fetch(`${this.baseUrl}/products/client`);
@@ -47,8 +40,7 @@ class ProductService {
             return await response.json();
         } catch (error) {
             console.error('Failed to fetch library products:', error);
-            // Return the current mock library products (including any created ones)
-            return [...this.mockLibraryProducts];
+            return this.getMockLibraryProducts();
         }
     }
 
@@ -211,12 +203,7 @@ class ProductService {
                 id: Math.floor(Math.random() * 10000) + 1000,
                 ...productData
             };
-            
-            // Add the new product to our mock library
-            this.mockLibraryProducts.push(mockProduct);
             console.log('Created mock product:', mockProduct);
-            console.log('Total products in library:', this.mockLibraryProducts.length);
-            
             return mockProduct;
         }
     }
