@@ -2,7 +2,6 @@
 
 import { Tray, TrayConstants } from "../types/tray.types";
 import { PlacedProduct } from "../../product-management/types/product.types";
-import { findBestXPosition } from "../utils/trayUtils";
 import  {ProductSpacingService} from "./ProductSpacingService";
 
 /**
@@ -10,52 +9,6 @@ import  {ProductSpacingService} from "./ProductSpacingService";
  */
 export class TrayProductReorderService {
   
-  /**
-   * Calculates optimal X positions for all products in a tray based on their order
-   */
-  static calculateOptimalXPositions(tray: Tray, products: PlacedProduct[]): PlacedProduct[] {
-    const sortedProducts = [...products];
-    const positionedProducts: PlacedProduct[] = [];
-    
-    // Create a temporary tray state for collision detection
-    let tempTray: Tray = { ...tray, products: [] };
-    
-    for (let i = 0; i < sortedProducts.length; i++) {
-      const product = sortedProducts[i];
-      
-      // Find best position considering already placed products
-      const bestX = findBestXPosition(product, tempTray);
-      
-      if (bestX !== null) {
-        const positionedProduct = {
-          ...product,
-          x: bestX
-        };
-        
-        positionedProducts.push(positionedProduct);
-        // Update temp tray for next iteration
-        tempTray = { ...tempTray, products: [...tempTray.products, positionedProduct] };
-      } else {
-        // If can't find position, keep original position or use fallback
-        console.warn(`Could not find optimal position for product ${product.name} at index ${i}`);
-        positionedProducts.push(product);
-        tempTray = { ...tempTray, products: [...tempTray.products, product] };
-      }
-    }
-    
-    return positionedProducts;
-  }
-
-
-  
-
-  /**
-   * Calculates product center X position
-   */
-  private static calculateProductCenterX(product: PlacedProduct): number {
-    return product.x + (product.width / 2);
-  }
-
   /**
    * Reorders products within a tray and recalculates positions
    */
