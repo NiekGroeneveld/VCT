@@ -79,7 +79,7 @@ export const ConfigurationArea: React.FC = () => {
                         className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md flex items-center gap-2 transition-colors text-sm"
                     >
                         <Plus size={16} />
-                        <span>Add Tray</span>
+                        <span>Lade Toevoegen</span>
                     </button>
                 </div>
             </div>

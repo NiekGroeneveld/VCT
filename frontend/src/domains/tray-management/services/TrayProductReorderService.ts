@@ -69,6 +69,7 @@ export class TrayProductReorderService {
     if (products.length === 0) {
       return [];
     }
+    console.log(`Calculating advanced spacing for ${products.length} products in tray ${tray.id}`);
 
     const trayWidth = tray.width; // Use actual tray width, not constant
     const totalProductWidth = products.reduce((sum, p) => sum + p.width, 0);
@@ -256,7 +257,7 @@ export class TrayProductReorderService {
     isValidDrop: boolean;
   } {
     const isValid = this.isValidReorder(tray, draggedIndex, hoverIndex);
-    
+    console.log(`DragDrop indicators for tray ${tray.id}: ${isValid}, draggedIndex: ${draggedIndex}, hoverIndex: ${hoverIndex}`);
     return {
       showDropBefore: isValid && hoverIndex < draggedIndex,
       showDropAfter: isValid && hoverIndex > draggedIndex,

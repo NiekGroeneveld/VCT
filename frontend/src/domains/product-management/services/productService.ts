@@ -4,6 +4,13 @@ import { Product } from '../types/product.types';
 class ProductService {
     private baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
+    private mockLibraryProducts: Product[] = []; // Store created products locally
+
+    constructor() {
+        // Initialize with default mock products
+        this.mockLibraryProducts = this.getMockLibraryProducts();
+    }
+
     async getClientProducts(): Promise<Product[]> {
         try {
             const response = await fetch(`${this.baseUrl}/products/client`);
@@ -40,7 +47,8 @@ class ProductService {
             return await response.json();
         } catch (error) {
             console.error('Failed to fetch library products:', error);
-            return this.getMockLibraryProducts();
+            // Return the current mock library products (including any created ones)
+            return [...this.mockLibraryProducts];
         }
     }
 
@@ -178,6 +186,39 @@ class ProductService {
                 color: '#8B0000' 
             }
         ];
+    }
+
+    // Create a new product
+    async createProduct(productData: Omit<Product, 'id'>): Promise<Product> {
+        try {
+            const response = await fetch(`${this.baseUrl}/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error creating product: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to create product:', error);
+            // For development, create a mock product with a random ID
+            const mockProduct: Product = {
+                id: Math.floor(Math.random() * 10000) + 1000,
+                ...productData
+            };
+            
+            // Add the new product to our mock library
+            this.mockLibraryProducts.push(mockProduct);
+            console.log('Created mock product:', mockProduct);
+            console.log('Total products in library:', this.mockLibraryProducts.length);
+            
+            return mockProduct;
+        }
     }
 }
 
