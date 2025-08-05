@@ -28,21 +28,3 @@ export const hasXAxisCollision = (x: number, productWidth: number, tray: Tray): 
         return !(productRight <= existingLeft || productLeft >= existingRight);
     });
 };
-
-/**
- * finds best X position for a product in a tray
- */
-export const findBestXPosition = (product: Product, tray: Tray): number | null => {
-    if (product.height > 340) {
-        Error("Product height exceeds maximum tray height");
-        return null; 
-    }
-
-    //Try positions from left to right
-    for (let x = 0; x <= tray.width - product.width; x++){
-        if( !hasXAxisCollision(x, product.width, tray)){
-            return x;
-        }
-    }
-    return null; // No valid position found
-}

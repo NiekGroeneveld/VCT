@@ -1,6 +1,7 @@
 import { Tray } from '../types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
 
+
 export class ProductSpacingService {
     /**
        * Advanced spacing algorithm that distributes products evenly across tray width

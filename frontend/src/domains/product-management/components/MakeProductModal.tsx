@@ -26,9 +26,9 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
-    width: 0,
-    height: 0,
-    depth: 0,
+    width: 50,
+    height: 120,
+    depth: 100,
     stable: true,
     color: "#003B7D", // Default color
   });
@@ -93,11 +93,11 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       // Reset form
       setFormData({
         name: "",
-        width: 0,
-        height: 0,
-        depth: 0,
+        width: 50,
+        height: 120,
+        depth: 100,
         stable: true,
-        color: "#3B82F6",
+        color: "#003B7D",
       });
 
       // Notify parent component
@@ -118,10 +118,10 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     setFormData({
       name: "",
       width: 50,
-      height: 340,
-      depth: 540,
+      height: 120,
+      depth: 10,
       stable: true,
-      color: "#3B82F6",
+      color: "#003B7D",
     });
     setError(null);
     onClose();

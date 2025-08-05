@@ -3,7 +3,7 @@
 import { Tray, TrayConstants } from "../types/tray.types";
 import { PlacedProduct, Product } from "../../product-management/types/product.types";
 import { getCanalHeight } from "../../product-management/utils/productUtils";
-import { calculateYPosition, findBestXPosition } from "../utils/trayUtils";
+import { calculateYPosition} from "../utils/trayUtils";
 import { extractorConstants } from "../../product-management/types/extractor.types";
 import { ProductSpacingService } from "./ProductSpacingService";
 

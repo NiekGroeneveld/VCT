@@ -3,6 +3,7 @@ import { Product } from '../types/product.types';
 
 class ProductService {
     private baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+    private createdProducts: Product[] = []; // Store created products in memory
 
     async getClientProducts(): Promise<Product[]> {
         try {
@@ -40,7 +41,8 @@ class ProductService {
             return await response.json();
         } catch (error) {
             console.error('Failed to fetch library products:', error);
-            return this.getMockLibraryProducts();
+            // Return both mock library products and created products
+            return [...this.getMockLibraryProducts(), ...this.createdProducts];
         }
     }
 
@@ -198,12 +200,17 @@ class ProductService {
             return await response.json();
         } catch (error) {
             console.error('Failed to create product:', error);
-            // For development, create a mock product with a random ID
+            // For development, create a mock product with a random ID and store it
             const mockProduct: Product = {
                 id: Math.floor(Math.random() * 10000) + 1000,
                 ...productData
             };
+            
+            // Add to our created products list so it appears in getLibraryProducts
+            this.createdProducts.push(mockProduct);
+            
             console.log('Created mock product:', mockProduct);
+            console.log('Total created products:', this.createdProducts.length);
             return mockProduct;
         }
     }
