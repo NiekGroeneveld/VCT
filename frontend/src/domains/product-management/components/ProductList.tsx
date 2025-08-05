@@ -92,10 +92,10 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   return (
     <div
-      className={`bg-gray-100 rounded-lg border-2 border-gray-300 ${className}`}
+      className={`bg-gray-100 rounded-lg border-2 border-gray-300 h-full flex flex-col ${className}`}
     >
       {/* Header */}
-      <div className="bg-white rounded-t-lg border-b border-gray-300">
+      <div className="bg-white rounded-t-lg border-b border-gray-300 flex-shrink-0">
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Producten</h3>
           <button
@@ -130,9 +130,9 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       </div>
 
       {/* Product Grid */}
-      <div ref={setContainerRef} className="p-4 max-h-[70vh] overflow-auto">
+      <div ref={setContainerRef} className="p-4 flex-1 overflow-auto relative">
         <div
-          className="grid gap-3 mb-4"
+          className="grid gap-3"
           style={{
             gridTemplateColumns: `repeat(${gridDimensions.cols}, max-content)`, // ✅ FIXED: Each column sizes to its content
             justifyContent: "start", // ✅ FIXED: Align grid to start instead of stretch
@@ -150,16 +150,12 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             />
           ))}
         </div>
+      </div>
 
-        {/* Add from Catalog Button - Always visible at bottom */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-300 pt-2 -mx-4 px-4 z-10">
-          <button
-            onClick={handleAddFromCatalog}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors"
-          >
-            <Plus size={16} />
-            <span className="text-sm font-medium">Toevoegen uit Catalogus</span>
-          </button>
+      {/* Bottom Bar */}
+      <div className="bg-white rounded-b-lg border-t border-gray-300 flex-shrink-0">
+        <div className="p-3 flex items-center">
+          <h3 className="font-semibold text-gray-800"></h3>
         </div>
       </div>
 
