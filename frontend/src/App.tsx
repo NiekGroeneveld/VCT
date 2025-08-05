@@ -16,21 +16,21 @@ function App() {
         <TopBar />
         
         {/* Main content area with top margin to account for fixed TopBar */}
-        <main className="pt-32 p-4">
-          <div className="flex gap-6 max-w-full mx-auto">
-            {/* Left sidebar - ProductList (flexible) */}
+        <main className="pt-32 p-4 min-h-screen">
+          <div className="flex gap-6 min-h-full items-stretch">
+            {/* Left sidebar - ProductList (flexible to fill remaining space) */}
             <div className="flex-1 min-w-0">
               <ProductList />
             </div>
             
-            {/* Configuration Area - Fixed width to accommodate default tray width + padding */}
+            {/* Configuration Area - Fixed width, centered */}
             <div className="w-[800px] flex-shrink-0">
                 <ConfigurationArea />
             </div>
             
-            {/* Right sidebar - Stats/Controls (flexible) */}
-            <div className="flex-1 min-w-0 max-w-sm">
-              <div className="bg-white rounded-lg border-2 border-gray-300 p-4">
+            {/* Right sidebar - Stats/Controls (flexible to fill remaining space) */}
+            <div className="flex-1 min-w-0">
+              <div className="bg-white rounded-lg border-2 border-gray-300 p-4 min-h-full">
                 <h3 className="font-semibold text-gray-800 mb-3">Tray Management</h3>
                 <div className="text-gray-500 text-sm mb-4">
                   Manage your trays and view configuration details here.
@@ -47,7 +47,7 @@ function App() {
                 </div>
                 
                 <div className="text-xs text-gray-400">
-                  Configuration area is now optimized for {640}px wide trays with proper padding.
+                  Configuration area is fixed at 800px width. Side panels scale to available space.
                 </div>
               </div>
             </div>
