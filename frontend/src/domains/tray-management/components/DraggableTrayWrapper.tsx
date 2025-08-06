@@ -76,7 +76,13 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
         >
             {/* Persistent collision indicator */}
             {!isDragging && tray.hasCollision && (
-                <div className="absolute -inset-1 border-2 border-red-500 rounded-lg pointer-events-none z-10">
+                <div className="absolute border-2 border-red-500 rounded-lg pointer-events-none z-10" 
+                     style={{ 
+                         top: '-4px', 
+                         bottom: '-4px', 
+                         left: '-4px', 
+                         right: '-28px' 
+                     }}>
                     <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
                         Collision
                     </div>
@@ -85,7 +91,13 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
             
             {/* Invalid position indicator during drag */}
             {isDragging && tray.isValidPosition === false && (
-                <div className="absolute -inset-1 border-2 border-red-500 border-dashed rounded-lg bg-red-100 bg-opacity-20 pointer-events-none z-10">
+                <div className="absolute border-2 border-red-500 border-dashed rounded-lg bg-red-100 bg-opacity-20 pointer-events-none z-10"
+                     style={{ 
+                         top: '-4px', 
+                         bottom: '-4px', 
+                         left: '-4px', 
+                         right: '-28px' 
+                     }}>
                     <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
                         Invalid Position
                     </div>

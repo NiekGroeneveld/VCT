@@ -27,6 +27,17 @@ export class TrayDropHandler {
             };
         }
         
+        // Handle same-tray operations (reordering) - don't add new product
+        if (item.type === 'TRAY_PRODUCT' && item.fromTray === tray.id) {
+            console.log("Same-tray reordering detected - handled by DraggableTrayProduct component");
+            return {
+                trayId: tray.id,
+                position: { x: 0, y: 0 },
+                isValid: true,
+                operation: 'reorder'
+            };
+        }
+        
         // Handle cross-tray moves
         if (item.type === 'TRAY_PRODUCT' && item.fromTray && item.fromTray !== tray.id) {
             console.log("Cross-tray move detected:", item.product.name, "from tray", item.fromTray, "to tray", tray.id);
@@ -82,11 +93,12 @@ export class TrayDropHandler {
             return false;
         }
 
-        // For cross-tray moves, check if it's not the same tray
+        // For same-tray TRAY_PRODUCT moves, allow them (these are reordering operations)
         if (item.type === 'TRAY_PRODUCT' && item.fromTray === tray.id) {
-            return false; // Can't drop on the same tray
+            return true; // Allow same-tray reordering
         }
 
+        // For cross-tray moves and new product placement, use normal validation
         return TrayProductManager.canPlaceProduct(tray, item.product);
     }
 
