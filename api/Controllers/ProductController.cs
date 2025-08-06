@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.AccountDtos;
+using api.Dtos.UserDtos;
 using api.Dtos.ProductDtos;
 using api.Interfaces;
 using api.Mappers;
@@ -18,13 +18,13 @@ namespace api.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepo;
-        private readonly IAccountRepository _accountRepo;
+        private readonly IUserRepository _UserRepo;
 
         
-        public ProductController(IProductRepository productRepo, IAccountRepository accountRepo)
+        public ProductController(IProductRepository productRepo, IUserRepository UserRepo)
         {
             _productRepo = productRepo;
-            _accountRepo = accountRepo;
+            _UserRepo = UserRepo;
         }
 
         [HttpGet]
@@ -52,16 +52,16 @@ namespace api.Controllers
             return Ok(product.ToProductDTO());
         }
 
-        [HttpPost("{accountId:int}")]
-        public async Task<IActionResult> Create([FromRoute] int accountId, [FromBody] CreateProductDTO productDTO)
+        [HttpPost("{UserId:int}")]
+        public async Task<IActionResult> Create([FromRoute] int UserId, [FromBody] CreateProductDTO productDTO)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
 
-            if(!await _accountRepo.AccountExists(accountId)) 
+            if(!await _UserRepo.UserExists(UserId)) 
             {
-                return BadRequest("Account does not exits");
+                return BadRequest("User does not exits");
             }
             var productModel = productDTO.ToProductFromCreateDTO();
             await _productRepo.CreateAsync(productModel);

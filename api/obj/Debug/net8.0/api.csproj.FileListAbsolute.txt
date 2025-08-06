@@ -284,3 +284,15 @@ E:\Repositories\Groeneveld Software\VCT\api\obj\Debug\net8.0\staticwebassets.bui
 E:\Repositories\Groeneveld Software\VCT\api\obj\Debug\net8.0\api.csproj.Up2Date
 E:\Repositories\Groeneveld Software\VCT\api\obj\Debug\net8.0\api.genruntimeconfig.cache
 E:\Repositories\Groeneveld Software\VCT\api\obj\Debug\net8.0\ref\api.dll
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.csproj.AssemblyReference.cache
+E:\Repositories\VCT\api\obj\Debug\net8.0\rpswa.dswa.cache.json
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.GeneratedMSBuildEditorConfig.editorconfig
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.AssemblyInfoInputs.cache
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.AssemblyInfo.cs
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.csproj.CoreCompileInputs.cache
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.MvcApplicationPartsAssemblyInfo.cs
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.MvcApplicationPartsAssemblyInfo.cache
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.sourcelink.json
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.dll
+E:\Repositories\VCT\api\obj\Debug\net8.0\refint\api.dll
+E:\Repositories\VCT\api\obj\Debug\net8.0\api.pdb

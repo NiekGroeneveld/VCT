@@ -18,11 +18,11 @@ namespace api.Controllers
         {
             private readonly ApplicationDBContext _context;
             private readonly IClientRepository _clientRepo;
-            private readonly IAccountRepository _accountRepo;
+            private readonly IUserRepository _UserRepo;
 
-            public ClientController(ApplicationDBContext context, IAccountRepository accountRepository, IClientRepository clientRepository)
+            public ClientController(ApplicationDBContext context, IUserRepository UserRepository, IClientRepository clientRepository)
             {
-                _accountRepo = accountRepository;
+                _UserRepo = UserRepository;
                 _clientRepo = clientRepository;
                 _context = context;
             }
@@ -53,17 +53,17 @@ namespace api.Controllers
                 return Ok(clientDTO);
             }
 
-            [HttpPost("{accountId:int}")]
-            public async Task<IActionResult> Create([FromRoute] int accountId, [FromBody] CreateClientRequestDTO clientDTO)
+            [HttpPost("{UserId:int}")]
+            public async Task<IActionResult> Create([FromRoute] int UserId, [FromBody] CreateClientRequestDTO clientDTO)
             {
                 if(!ModelState.IsValid)
                     return BadRequest(ModelState);
                 
                 var clientModel = clientDTO.ToClientFromCreateDTO();
                 
-                if(!await _accountRepo.AccountExists(accountId)) 
+                if(!await _UserRepo.UserExists(UserId)) 
                 {
-                    return BadRequest("Account does not exits");
+                    return BadRequest("User does not exits");
                 }
                 
                 await _clientRepo.CreateAsync(clientModel);

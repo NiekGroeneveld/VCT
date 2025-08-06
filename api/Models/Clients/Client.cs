@@ -3,7 +3,6 @@ using VCT.API.Models.Machines;
 using System.ComponentModel.Design.Serialization;
 using Microsoft.Identity.Client;
 using api.Models.ManyToMany;
-using VCT.API.Models.Accounts;
 
 
 namespace VCT.API.Models.Clients
@@ -15,7 +14,7 @@ namespace VCT.API.Models.Clients
         public List<MasterMachine> Machines {get; set;}= new List<MasterMachine>();
         
         
-        public List<AccountClient> AccountClients {get; set;}= new List<AccountClient>();
+        public List<UserClient> UserClients {get; set;}= new List<UserClient>();
         public List<ClientProduct> ClientProducts {get; set;}= new List<ClientProduct>();
 
         public Client() { }

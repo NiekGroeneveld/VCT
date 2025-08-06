@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using api.Models.ManyToMany;
-using VCT.API.Models.Accounts;
+using VCT.API.Models.Users;
 using VCT.API.Models.Clients;
 using VCT.API.Models.Components;
 
@@ -20,7 +20,7 @@ namespace VCT.API.Models.Products
         
         
         //Many-To-Many Relationships
-        public List<AccountProduct> AccountProducts { get; set;} = new List<AccountProduct>();
+        public List<UserProduct> UserProducts { get; set;} = new List<UserProduct>();
         public List<ClientProduct> ClientProducts { get; set;} = new List<ClientProduct>();
 
 
