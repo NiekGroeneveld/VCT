@@ -3,6 +3,7 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 import { Tray } from '../../tray-management/types/tray.types';
 import { ConfigurationConstants, getDotYPosition } from '../types/configuration.types';
+import { useScaling } from '../../../hooks/useScaling';
 
 interface MachineConfigurationZoneProps {
     trays: Tray[];
@@ -17,6 +18,8 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     children,
     className = ""
 }) => {
+    const { scaledValue, scale } = useScaling();
+    
     const [{ isOver, canDrop, draggedItem }, drop] = useDrop({
         accept: 'TRAY_POSITION',
         drop: (item: any, monitor) => {
@@ -26,7 +29,9 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 // Convert from top-based client coordinates to bottom-based container coordinates
                 const relativeY = clientOffset.y - containerRect.top;
                 const containerBottomY = containerRect.height - relativeY;
-                onTrayPositionChange(item.trayId, containerBottomY);
+                // Convert back to unscaled coordinates for data storage
+                const unscaledY = containerBottomY / scale;
+                onTrayPositionChange(item.trayId, unscaledY);
             }
             return { dropped: true };
         },
@@ -42,13 +47,20 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 // Convert from top-based client coordinates to bottom-based container coordinates
                 const relativeY = clientOffset.y - containerRect.top;
                 const containerBottomY = containerRect.height - relativeY;
-                onTrayPositionChange(item.trayId, containerBottomY);
+                // Convert back to unscaled coordinates for data storage
+                const unscaledY = containerBottomY / scale;
+                onTrayPositionChange(item.trayId, unscaledY);
             }
         }
     });
 
-    // Calculate machine dimensions
-    const machineHeight = ConfigurationConstants.MACHINE_HEIGHT;
+    // Calculate scaled machine dimensions
+    const machineHeight = scaledValue(ConfigurationConstants.MACHINE_HEIGHT);
+    
+    // Scaled dot position function
+    const getScaledDotYPosition = (dotNumber: number): number => {
+        return scaledValue(getDotYPosition(dotNumber));
+    };
 
     // Use a callback ref to attach the drop target
     const divRef = React.useRef<HTMLDivElement>(null);
@@ -124,11 +136,11 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             {/* Left side: Dot indicators */}
             <div 
                 className="flex-shrink-0 relative bg-gray-100 border-r-2 border-black"
-                style={{ width: '60px', height: `${machineHeight}px` }}
+                style={{ width: `${scaledValue(60)}px`, height: `${machineHeight}px` }}
             >
                 {Array.from({ length: ConfigurationConstants.DOTS }, (_, i) => {
                     const dotNumber = i + 1;
-                    const yPosition = getDotYPosition(dotNumber);
+                    const yPosition = getScaledDotYPosition(dotNumber);
                     const isOccupied = isDotOccupied(dotNumber);
                     const isAttachmentPoint = isDotAttachmentPoint(dotNumber);
                     const elevatorCount = getElevatorIndicators(dotNumber);
@@ -147,7 +159,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                     }
                     
                     return (
-                        <div key={dotNumber} className="absolute" style={{ bottom: `${yPosition}px`, left: '10px' }}>
+                        <div key={dotNumber} className="absolute" style={{ bottom: `${yPosition}px`, left: `${scaledValue(10)}px` }}>
                             {/* Main dot */}
                             <div 
                                 className={`${dotSize} rounded-full border ${dotColor} ${dotOffset}`}
@@ -158,18 +170,18 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                             {isDouble && (
                                 <div 
                                     className={`${dotSize} rounded-full border ${dotColor} absolute ${dotOffset}`}
-                                    style={{ left: '10px', top: '0px' }}
+                                    style={{ left: `${scaledValue(10)}px`, top: '0px' }}
                                 />
                             )}
                             
                             {/* Elevator indicators (yellow dots) */}
                             {elevatorCount > 0 && (
-                                <div className="absolute" style={{ left: '20px', top: '0px' }}>
+                                <div className="absolute" style={{ left: `${scaledValue(20)}px`, top: '0px' }}>
                                     {Array.from({ length: elevatorCount }, (_, idx) => (
                                         <div
                                             key={idx}
                                             className="w-2 h-2 rounded-full bg-yellow-400 border border-yellow-600 absolute"
-                                            style={{ left: `${idx * 6}px`, top: '0px' }}
+                                            style={{ left: `${scaledValue(idx * 6)}px`, top: '0px' }}
                                         />
                                     ))}
                                 </div>
@@ -184,8 +196,8 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                         key={index}
                         className="absolute text-red-600 font-bold text-xs"
                         style={{ 
-                            bottom: `${getDotYPosition(dotNumber)}px`, 
-                            left: '35px',
+                            bottom: `${getScaledDotYPosition(dotNumber)}px`, 
+                            left: `${scaledValue(35)}px`,
                             transform: 'translateY(50%)'
                         }}
                     >
@@ -198,15 +210,15 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             <div 
                 ref={divRef}
                 className={`
-                    relative border-2 border-black bg-gray-50 flex-1
+                    relative border-2 border-black bg-gray-50
                     ${isOver ? (canDrop ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50') : ''}
                     ${className}
                 `}
                 style={{
+                    width: `${scaledValue(700)}px`, // Scaled machine area width
                     height: `${machineHeight}px`,
-                    minHeight: '800px',
-                    paddingLeft: '20px',
-                    paddingRight: '20px'
+                    paddingLeft: `${scaledValue(60)}px`, // Increased padding for centering
+                    paddingRight: `${scaledValue(60)}px` // Increased padding for centering
                 }}
             >
                 {/* Working area */}

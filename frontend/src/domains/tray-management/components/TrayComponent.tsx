@@ -9,6 +9,7 @@ import { TrayDropHandler } from "../services/TrayDropHandler";
 import { TrayProductManager } from "../services/TrayProductManager";
 import { TrayProductReorderService } from "../services/TrayProductReorderService";
 import { DraggableTrayProduct } from "./DraggableTrayProduct";
+import { useScaling } from "../../../hooks/useScaling";
 
 interface TrayComponentProps {
   tray: Tray;
@@ -25,6 +26,7 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   onProductMoveBetweenTrays,
   variant = 'standalone'
 }) => {
+  const { scaledValue } = useScaling();
   
   /**
    * Handles cross-tray product movement coordination
@@ -88,8 +90,8 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   `.trim();
 
   const trayStyle = {
-    width: `${tray.width}px`, // Direct mm width
-    height: `${tray.height}px`, // Direct mm height
+    width: `${scaledValue(tray.width)}px`, // Scaled width
+    height: `${scaledValue(tray.height)}px`, // Scaled height
   };
 
   return (
@@ -126,25 +128,45 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
 /**
  * Empty state when tray has no products
  */
-const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => (
-  <div className="flex items-center justify-center h-32 text-gray-500">
-    <div className="text-center">
-      <div className="text-sm">Drop products here</div>
-      <div className="text-xs">(Drag from product list)</div>
+const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => {
+  const { scaledValue } = useScaling();
+  
+  const trayBaseHeight = 28; // Height of the tray base in mm
+  const availableTextHeight = tray.height - trayBaseHeight; // Space above the tray base
+  
+  return (
+    <div 
+      className="relative text-gray-500"
+      style={{ height: `${scaledValue(tray.height)}px` }}
+    >
+      {/* Text positioned in the upper portion, above the tray base */}
+      <div 
+        className="absolute inset-x-0 flex items-center justify-center"
+        style={{ 
+          top: '0px',
+          height: `${scaledValue(availableTextHeight)}px` // Only use space above tray base
+        }}
+      >
+        <div className="text-center">
+          <div className="text-sm">Drop products here</div>
+          <div className="text-xs">(Drag from product list)</div>
+        </div>
+      </div>
+      
+      {/* Tray Base for Empty State - slightly narrower to fit within drop area */}
+      <div
+        className="absolute bg-gray-200 border border-gray-400"
+        style={{
+          left: `${scaledValue(0)}px`, // Small margin from edges
+          bottom: `${scaledValue(3)}px`,
+          width: `${scaledValue(tray.width - 3)}px`, // Slightly narrower (4px margin on each side)
+          height: `${scaledValue(trayBaseHeight)}px`,
+          zIndex: 0,
+        }}
+      />
     </div>
-    {/* Tray Base for Empty State */}
-    <div
-      className="absolute bg-gray-200 border border-gray-400"
-      style={{
-        left: "0px",
-        bottom: "0px", // Position at the bottom of the container
-        width: `${tray.width}px`, // Account for padding in mm
-        height: "28px",
-        zIndex: 0,
-      }}
-    />
-  </div>
-);
+  );
+};
 
 /**
  * Displays all products in the tray with drag and drop functionality
@@ -174,18 +196,22 @@ const TrayProductsDisplay: React.FC<{
 /**
  * Visual representation of the tray base
  */
-const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => (
-  <div
-    className="absolute bg-gray-200 border border-gray-400"
-    style={{
-      left: "0px",
-      bottom: `0px`, // Direct mm positioning
-      width: `${tray.width}px`, // Account for padding in mm
-      height: "28px",
-      zIndex: 1,
-    }}
-  />
-);
+const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => {
+  const { scaledValue } = useScaling();
+  
+  return (
+    <div
+      className="absolute bg-gray-200 border border-gray-400"
+      style={{
+        left: `${scaledValue(0)}px`, // Small margin from edges
+        bottom: `${scaledValue(0)}px`,
+        width: `${scaledValue(tray.width - 3)}px`, // Slightly narrower (4px margin on each side)
+        height: `${scaledValue(28)}px`,
+        zIndex: 1,
+      }}
+    />
+  );
+};
 
 /**
  * Feedback shown during drag operations

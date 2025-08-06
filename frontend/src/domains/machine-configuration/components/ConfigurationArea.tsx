@@ -8,17 +8,19 @@ import { useCollisionDetection } from '../hooks/useCollisionDetection';
 import { TrayPositionService } from '../services/TrayPositionService';
 import { MachineConfigurationZone } from './MachineConfigurationZone';
 import { DraggableTrayWrapper } from '../../tray-management/components/DraggableTrayWrapper';
+import { useScaling } from '../../../hooks/useScaling';
 
 export const ConfigurationArea: React.FC = () => {
     // Initialize with sample trays
     const [trays, setTrays] = useState<Tray[]>([]);
+    const { scaledValue } = useScaling();
     
     // Hook for tray positioning (existing)
     const {
         startTrayDrag,
         updateTrayPosition,
         endTrayDrag,
-        getDragFeedback
+        getDragFeedback,
     } = useTrayDragDrop(trays, setTrays);
 
     // Hook for collision detection
@@ -108,14 +110,15 @@ export const ConfigurationArea: React.FC = () => {
                             onDragStart={startTrayDrag}
                             onDragEnd={endTrayDrag}
                             onDragUpdate={updateTrayPosition}
-                            onProductMoveBetweenTrays={handleProductMoveBetweenTrays}                        style={{
-                            position: 'absolute',
-                            bottom: `${getDotYPosition(tray.dotPosition || 1)}px`,
-                            left: '20px',
-                            width: `${tray.width}px`,
-                            height: `${tray.height}px`,
-                            zIndex: tray.isDragging ? 40 : 1
-                        }}
+                            onProductMoveBetweenTrays={handleProductMoveBetweenTrays}
+                            style={{
+                                position: 'absolute',
+                                bottom: `${scaledValue(getDotYPosition(tray.dotPosition || 1))}px`,
+                                left: `${scaledValue(10)}px`, // Match the new machine area padding
+                                width: `${scaledValue(tray.width)}px`,
+                                height: `${scaledValue(tray.height)}px`,
+                                zIndex: tray.isDragging ? 40 : 1
+                            }}
                         />
                     ))}
                 </MachineConfigurationZone>

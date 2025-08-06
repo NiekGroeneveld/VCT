@@ -6,6 +6,7 @@ import { productService } from "../services/productService";
 import { ProductVisual } from "./ProductVisual";
 import useGridDimensions from "../hooks/useGridDimensions";
 import MakeProductModal from "./MakeProductModal";
+import { useScaling } from "../../../hooks/useScaling";
 
 interface ProductListProps {
   className?: string;
@@ -18,6 +19,7 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [addProductModalOpen, setAddProductModalOpen] =
     useState<boolean>(false);
+  const { scale } = useScaling();
 
   useEffect(() => {
     loadProducts();
@@ -143,6 +145,7 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <ProductVisual
               key={product.id}
               product={product}
+              scale={scale} // Pass the current scale factor
               onClick={() => handleProductClick(product)}
               draggable={true}
               showLabel={true}

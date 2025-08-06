@@ -5,6 +5,7 @@ import { PlacedProduct } from "../../product-management/types/product.types";
 import { DragItem } from "../../machine-configuration/types/configuration.types";
 import { ProductVisual } from "../../product-management/components/ProductVisual";
 import { CrossTrayDragDropService } from "../services/CrossTrayDragDropService";
+import { useScaling } from "../../../hooks/useScaling";
 
 interface DraggableTrayProductProps{
     product: PlacedProduct;
@@ -24,6 +25,8 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
     onMoveBetweenTrays
 }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const { scaledValue, scale } = useScaling();
+    
     //Drag functionality
     const [{isDragging}, drag] = useDrag({
         type: "TRAY_PRODUCT",
@@ -104,10 +107,10 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
       <div
         className="absolute bg-gray-500 border border-gray-800"
         style={{
-          left: `${product.x}px`,
+          left: `${scaledValue(product.x)}px`,
           bottom: `0px`, // Position at bottom of tray container
-          width: `${product.width}px`,
-          height: `${product.extractorHeight}px`,
+          width: `${scaledValue(product.width)}px`,
+          height: `${scaledValue(product.extractorHeight)}px`,
           zIndex: 0,
           opacity,
         }}
@@ -121,8 +124,8 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
           isOver && canDrop ? "ring-2 ring-blue-400" : ""
         }`}
         style={{
-          left: `${product.x}px`,
-          bottom: `${product.y}px`, // Position from bottom of tray container
+          left: `${scaledValue(product.x)}px`,
+          bottom: `${scaledValue(product.y)}px`, // Position from bottom of tray container
           zIndex: 2,
           opacity,
           transform,
@@ -131,7 +134,7 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
       >
         <ProductVisual
           product={product}
-          scale={1}
+          scale={scale} // Pass the current scale factor
           draggable={false} // Handled by react-dnd
           showLabel={true}
           showStabilityIndicator={true}
@@ -165,10 +168,10 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
         <div
           className="absolute bg-blue-400 opacity-50"
           style={{
-            left: `${product.x - 2}px`,
+            left: `${scaledValue(product.x - 2)}px`,
             bottom: `0px`, // Position at bottom of tray container
-            width: "4px",
-            height: `${product.extractorHeight + product.height}px`,
+            width: `${scaledValue(4)}px`,
+            height: `${scaledValue(product.extractorHeight + product.height)}px`,
             zIndex: 5,
           }}
         />
