@@ -415,3 +415,5 @@ E:\Repositories\VCT\api\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
 E:\Repositories\VCT\api\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 E:\Repositories\VCT\api\bin\Debug\net8.0\MySqlConnector.dll
 E:\Repositories\VCT\api\bin\Debug\net8.0\Pomelo.EntityFrameworkCore.MySql.dll
+E:\Repositories\VCT\api\bin\Debug\net8.0\TestData\clients.json
+E:\Repositories\VCT\api\bin\Debug\net8.0\TestData\products.json

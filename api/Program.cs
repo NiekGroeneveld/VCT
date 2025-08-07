@@ -61,6 +61,22 @@ builder.Services.AddScoped<ITrayRepository, TrayRepository>();
 
 var app = builder.Build();
 
+// Seed data in development
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        
+        // Ensure database is created
+        context.Database.EnsureCreated();
+        
+        // Seed test data
+        await DataSeeder.SeedDataAsync(context, userManager);
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
