@@ -1,7 +1,6 @@
 ﻿using VCT.API.Models.Products;
 using VCT.API.Models.Machines;
 using System.ComponentModel.Design.Serialization;
-using Microsoft.Identity.Client;
 using api.Models.ManyToMany;
 
 

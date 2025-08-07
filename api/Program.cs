@@ -3,8 +3,8 @@ using api.Interfaces;
 using api.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql;
 using Microsoft.IdentityModel.Tokens;
 using VCT.API.Models.Users;
 
@@ -22,7 +22,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options => {
 });
 
 //New database stuff
-builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 21))));
 
 
 //Dependency injection
