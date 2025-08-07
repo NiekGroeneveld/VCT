@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.UserDtos;
+
 using api.Dtos.ProductDtos;
 using api.Interfaces;
 using api.Mappers;
@@ -18,13 +18,11 @@ namespace api.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepo;
-        private readonly IUserRepository _UserRepo;
 
         
-        public ProductController(IProductRepository productRepo, IUserRepository UserRepo)
+        public ProductController(IProductRepository productRepo)
         {
             _productRepo = productRepo;
-            _UserRepo = UserRepo;
         }
 
         [HttpGet]
@@ -58,11 +56,13 @@ namespace api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-
+            /*
             if(!await _UserRepo.UserExists(UserId)) 
             {
                 return BadRequest("User does not exits");
             }
+            */
+
             var productModel = productDTO.ToProductFromCreateDTO();
             await _productRepo.CreateAsync(productModel);
             return CreatedAtAction(nameof(GetById), new {id = productModel.Id}, productModel.ToProductDTO());

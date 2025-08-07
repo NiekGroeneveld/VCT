@@ -18,11 +18,9 @@ namespace api.Controllers
         {
             private readonly ApplicationDBContext _context;
             private readonly IClientRepository _clientRepo;
-            private readonly IUserRepository _UserRepo;
 
-            public ClientController(ApplicationDBContext context, IUserRepository UserRepository, IClientRepository clientRepository)
+            public ClientController(ApplicationDBContext context, IClientRepository clientRepository)
             {
-                _UserRepo = UserRepository;
                 _clientRepo = clientRepository;
                 _context = context;
             }
@@ -61,10 +59,12 @@ namespace api.Controllers
                 
                 var clientModel = clientDTO.ToClientFromCreateDTO();
                 
-                if(!await _UserRepo.UserExists(UserId)) 
-                {
-                    return BadRequest("User does not exits");
-                }
+            /*    
+            if (!await _UserRepo.UserExists(UserId))
+            {
+                return BadRequest("User does not exits");
+            }
+            */
                 
                 await _clientRepo.CreateAsync(clientModel);
                 return CreatedAtAction(nameof(GetById), new { id = clientModel.Id }, clientModel.ToClientDTO());

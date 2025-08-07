@@ -1,24 +1,23 @@
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using VCT.API.Models.Products;
 using VCT.API.Models.Machines;
-using VCT.API.Models.Enums;
 using VCT.API.Models.Components;
 using VCT.API.Models.Clients;
 using VCT.API.Models.Users;
 using api.Models.ManyToMany;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace api.Data
 {
-    public class ApplicationDBContext : DbContext
+    public class ApplicationDBContext : IdentityDbContext<User>
     {
-        public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> dbContextOptions) 
+            : base(dbContextOptions)
         {
 
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Product> Products { get; set; }
 
@@ -36,35 +35,10 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             
             //One Single Many-To-Many Relationship (User-Product)
-            modelBuilder.Entity<UserProduct>()
-                .HasKey(ap => new {ap.UserId, ap.ProductId });
-
-            modelBuilder.Entity<UserProduct>()
-                .HasOne(ap => ap.User)
-                .WithMany(a => a.UserProducts)
-                .HasForeignKey(ap => ap.UserId);
-
-            modelBuilder.Entity<UserProduct>()
-                .HasOne(ap => ap.Product)
-                .WithMany(p => p.UserProducts)
-                .HasForeignKey(ap => ap.ProductId);
-
             //(User-Client)
-            modelBuilder.Entity<UserClient>()
-                .HasKey(ac => new { ac.UserId, ac.ClientId });
-
-            modelBuilder.Entity<UserClient>()
-                .HasOne(ac => ac.User)
-                .WithMany(a => a.UserClients)
-                .HasForeignKey(ac => ac.UserId);
-
-            modelBuilder.Entity<UserClient>()
-                .HasOne(ac => ac.Client)
-                .WithMany(c => c.UserClients)
-                .HasForeignKey(ac => ac.ClientId);
-
             //(Client-Product)
             modelBuilder.Entity<ClientProduct>()
                 .HasKey(cp => new { cp.ClientId, cp.ProductId });
@@ -79,9 +53,39 @@ namespace api.Data
                 .WithMany(p => p.ClientProducts)
                 .HasForeignKey(cp => cp.ProductId);
 
-            modelBuilder.Entity<UserProduct>().ToTable("UserProducts");
-            modelBuilder.Entity<UserClient>().ToTable("UserClients");
             modelBuilder.Entity<ClientProduct>().ToTable("ClientProducts");
+
+            // UserProduct many-to-many relationship
+            modelBuilder.Entity<UserProduct>()
+                .HasKey(up => new { up.UserId, up.ProductId });
+
+            modelBuilder.Entity<UserProduct>()
+                .HasOne(up => up.User)
+                .WithMany(u => u.UserProducts)
+                .HasForeignKey(up => up.UserId);
+
+            modelBuilder.Entity<UserProduct>()
+                .HasOne(up => up.Product)
+                .WithMany(p => p.UserProducts)
+                .HasForeignKey(up => up.ProductId);
+
+            modelBuilder.Entity<UserProduct>().ToTable("UserProducts");
+
+            // UserClient many-to-many relationship
+            modelBuilder.Entity<UserClient>()
+                .HasKey(uc => new { uc.UserId, uc.ClientId });
+
+            modelBuilder.Entity<UserClient>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserClients)
+                .HasForeignKey(uc => uc.UserId);
+
+            modelBuilder.Entity<UserClient>()
+                .HasOne(uc => uc.Client)
+                .WithMany(c => c.UserClients)
+                .HasForeignKey(uc => uc.ClientId);
+
+            modelBuilder.Entity<UserClient>().ToTable("UserClients");
             
             //Takes care of enum ExtractorType
             modelBuilder.Entity<Extractor>()
