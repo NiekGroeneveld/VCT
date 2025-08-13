@@ -14,6 +14,5 @@ namespace api.Models
 
         public DateTime CreatedAt { get; set; }
         public Configuration Configuration { get; set; } = new Configuration();
-
     }
 }
