@@ -1,5 +1,6 @@
 
 using System.Drawing;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace api.Models
 {
@@ -15,7 +16,18 @@ namespace api.Models
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
-        public Color color { get; set; } = Color.White;
+        
+        // Store color as hex string (e.g., "#FFFFFF", "#FF0000")
+        public string ColorHex { get; set; } = "#FFFFFF";
+        
+        // Helper property to get/set Color object (not mapped to database)
+        [NotMapped]
+        public Color Color 
+        { 
+            get => ColorTranslator.FromHtml(ColorHex);
+            set => ColorHex = ColorTranslator.ToHtml(value);
+        }
+        
         public bool IsActive { get; set; } = true;
 
         //One-To-Many

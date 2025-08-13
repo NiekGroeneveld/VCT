@@ -7,31 +7,26 @@ namespace api.Models
 {
     public class ConfigurationTypeData
     {
-        public int Id { get;}
-        public string ConfigurationType { get;} = string.Empty;
+        public int Id { get; set; }
+        public string ConfigurationType { get; set; } = string.Empty;
 
         //Data
         //TraySpecs
-        public float MinTrayHeight { get; }
-        public float TrayWidth { get; }
+        public float MinTrayHeight { get; set; }
+        public float TrayWidth { get; set; }
         //MachineDimensions
-        public float ConfigHeight { get; }
-        public int AmountDots { get; }
-        public float DotsDelta { get; }
+        public float ConfigHeight { get; set; }
+        public int AmountDots { get; set; }
+        public float DotsDelta { get; set; }
 
         //ExtractorSpecs
-        public float LowExtractorHeight { get; }
-        public float LowExtractorDepth { get; }
-        public float HighExtractorHeight { get; }
-        public float HighExtractorDepth { get; }
-        public float PalletDelta { get; }
-
-
-
+        public float LowExtractorHeight { get; set; }
+        public float LowExtractorDepth { get; set; }
+        public float HighExtractorHeight { get; set; }
+        public float HighExtractorDepth { get; set; }
+        public float PalletDelta { get; set; }
 
         //For many to one
         public ICollection<Configuration> Configurations { get; set; } = new List<Configuration>();
-
-
     }
 }
