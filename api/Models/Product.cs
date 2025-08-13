@@ -16,22 +16,15 @@ namespace api.Models
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
-        
+    
+
         // Store color as hex string (e.g., "#FFFFFF", "#FF0000")
         public string ColorHex { get; set; } = "#FFFFFF";
-        
-        // Helper property to get/set Color object (not mapped to database)
-        [NotMapped]
-        public Color Color 
-        { 
-            get => ColorTranslator.FromHtml(ColorHex);
-            set => ColorHex = ColorTranslator.ToHtml(value);
-        }
-        
+
         public bool IsActive { get; set; } = true;
 
         //One-To-Many
-        public Company? company { get; set; }
+        public Company? company { get; set; } = null;
 
         //Many-To-Many
         public ICollection<Tray> Trays { get; set; } = new List<Tray>();

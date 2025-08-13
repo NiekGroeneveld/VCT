@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using api.DTOs.Product;
+using api.Models;
+
+namespace api.Mappers
+{
+    public static class ProductMapper
+    {
+        public static ProductDTO toDTO(this Product product)
+        {
+            return new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Height = product.Height,
+                Width = product.Width,
+                Depth = product.Depth,
+                Stable = product.Stable,
+                CompanyName = product.company?.Name ?? "No Company", // Handle null company
+                ColorHex = product.ColorHex
+            };
+        }
+
+        public static Product toProductFromCreateDTO(this CreateProductDTO productDto)
+        {
+            return new Product
+            {
+                Name = productDto.Name,
+                Height = productDto.Height,
+                Width = productDto.Width,
+                Depth = productDto.Depth,
+                Stable = productDto.Stable,
+                ColorHex = productDto.ColorHex,
+                CreatedAt = DateTime.UtcNow,
+                company = null // This should be set later, possibly in the controller or service layer
+            };
+        }
+
+        public static Product toProductFromUpdateDTO(this UpdateProductDTO productDto, Product existingProduct)
+        {
+            existingProduct.Name = productDto.Name;
+            existingProduct.Height = productDto.Height;
+            existingProduct.Width = productDto.Width;
+            existingProduct.Depth = productDto.Depth;
+            existingProduct.Stable = productDto.Stable;
+            existingProduct.ColorHex = productDto.ColorHex;
+            return existingProduct;
+        }
+    }
+}
