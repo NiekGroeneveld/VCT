@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.DTOs.Tray;
 using api.Models;
 using api.DTOs.Product;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace api.Mappers
 {
@@ -15,18 +16,18 @@ namespace api.Mappers
             return new TrayDTO
             {
                 Id = tray.Id,
-                Products = tray.Products?.Select(p => p.toDTO()).ToList() ?? new List<ProductDTO>(),
+                Products = tray.Products?.Select(p => p.toMinimalDTO()).ToList() ?? new List<MinimalProductDTO>(),
                 TrayPosition = tray.TrayPosition,
                 ConfigId = tray.Configuration.Id
             };
         }
 
-        public static Tray toTrayFromCreateDTO(this CreateTrayDTO trayDto)
+        public static Tray toTrayFromCreateDTO(this CreateTrayDTO trayDto, ICollection<Product> products)
         {
             return new Tray
             {
                 TrayPosition = trayDto.TrayPosition,
-                Products = trayDto.Products.Select(p => p.toProduct()).ToList(),
+                Products = products,
                 TrayConfig = string.Empty, //Algorithm service placed here later on.
                 Configuration = null, //add functionality later on when the Configuration repository is ready
                 UpdatedAt = DateTime.UtcNow
@@ -34,9 +35,9 @@ namespace api.Mappers
             };
         }
 
-        public static Tray toTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray)
+        public static Tray toTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray, ICollection<Product> products)
         {
-            existingTray.Products = trayDto.Products.Select(p => p.toProduct()).ToList();
+            existingTray.Products = products;
             existingTray.TrayPosition = trayDto.TrayPosition;
             existingTray.UpdatedAt = DateTime.UtcNow;
             return existingTray;

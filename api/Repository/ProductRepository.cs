@@ -49,6 +49,14 @@ namespace api.Repository
             return await _context.Products.FindAsync(id);
         }
 
+        public async Task<List<Product>> GetProductsByIdsAsync(List<int> productIds)
+        {
+            return await _context.Products
+                .Include(p => p.company)
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+        }
+
         public async Task<Product?> UpdateAsync(int id, UpdateProductDTO productDTO)
         {
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);

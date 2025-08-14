@@ -5,18 +5,21 @@ using System.Threading.Tasks;
 using api.DTOs.Tray;
 using api.Interfaces;
 using api.Mappers;
+using api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
 
-    [Route("api/controllers/companies/{companyId}/configurations/{configurationId}/trays")]
+    [Route("api/controllers/companies/{companyId}/configurations/{configId}/trays")]
     public class TrayController : ControllerBase
     {
         private readonly ITrayInterface _trayRepo;
-        public TrayController(ITrayInterface trayRepository)
+        private readonly IProductRepository _productRepo;
+        public TrayController(ITrayInterface trayRepository, IProductRepository productRepository)
         {
             _trayRepo = trayRepository;
+            _productRepo = productRepository;
         }
 
         [HttpGet]
@@ -38,7 +41,8 @@ namespace api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromRoute] int companyId, [FromRoute] int configurationId, [FromBody] CreateTrayDTO createDTO)
         {
-            var tray = createDTO.toTrayFromCreateDTO();
+            var products = await _productRepo.GetProductsByIdsAsync(createDTO.Products.Select(p => p.Id).ToList());
+            var tray = createDTO.toTrayFromCreateDTO(products);
             await _trayRepo.CreateAsync(tray);
             return CreatedAtAction(nameof(GetById), new { id = tray.Id }, tray.toDTO());
         }
@@ -47,10 +51,11 @@ namespace api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTrayDTO updateDTO)
         {
+            var products = await _productRepo.GetProductsByIdsAsync(updateDTO.Products.Select(p => p.Id).ToList());
             var tray = await _trayRepo.GetByIdAsync(id);
             if (tray == null) return NotFound();
 
-            tray = updateDTO.toTrayFromUpdateDTO(tray);
+            tray = updateDTO.toTrayFromUpdateDTO(tray, products);
             await _trayRepo.UpdateAsync(tray);
             return Ok(tray.toDTO());
         }

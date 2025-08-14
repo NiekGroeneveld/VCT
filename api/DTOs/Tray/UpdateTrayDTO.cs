@@ -8,7 +8,7 @@ namespace api.DTOs.Tray
 {
     public class UpdateTrayDTO
     {
-        public ICollection<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+        public ICollection<MinimalProductDTO> Products { get; set; } = new List<MinimalProductDTO>();
         public int TrayPosition { get; set; }
     }
 }

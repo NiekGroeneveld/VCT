@@ -65,5 +65,13 @@ namespace api.Mappers
             return existingProduct;
         }
 
+        public static MinimalProductDTO toMinimalDTO(this Product product)
+        {
+            return new MinimalProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name
+            };
+        }
     }
 }
