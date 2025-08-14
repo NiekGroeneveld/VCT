@@ -24,6 +24,21 @@ namespace api.Mappers
             };
         }
 
+        public static Product toProduct(this ProductDTO productDto)
+        {
+            return new Product
+            {
+                Id = productDto.Id,
+                Name = productDto.Name,
+                Height = productDto.Height,
+                Width = productDto.Width,
+                Depth = productDto.Depth,
+                Stable = productDto.Stable,
+                ColorHex = productDto.ColorHex,
+                company = null //implement when controller is ready
+            };
+        }
+
         public static Product toProductFromCreateDTO(this CreateProductDTO productDto)
         {
             return new Product
@@ -35,7 +50,7 @@ namespace api.Mappers
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
                 CreatedAt = DateTime.UtcNow,
-                company = null // This should be set later, possibly in the controller or service layer
+                company = null //add functionality later on when the Company repository is ready
             };
         }
 
@@ -49,5 +64,6 @@ namespace api.Mappers
             existingProduct.ColorHex = productDto.ColorHex;
             return existingProduct;
         }
+
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
-    [Route("api/products")]
+    [Route("api/companies/{companyId}/products")]
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepo;
@@ -41,7 +41,7 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProductDTO productDTO)
+        public async Task<IActionResult> Create([FromRoute] int companyId, [FromBody] CreateProductDTO productDTO)
         {
             var productModel = productDTO.toProductFromCreateDTO();
             var product = await _productRepo.CreateAsync(productModel);

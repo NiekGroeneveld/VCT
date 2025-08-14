@@ -22,6 +22,7 @@ namespace api.Repository
 
         public async Task<Product> CreateAsync(Product product)
         {
+            product.CreatedAt = DateTime.UtcNow;
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
             return product;

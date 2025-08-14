@@ -13,6 +13,7 @@ namespace api.Models
         public int TrayPosition { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public Configuration Configuration { get; set; } = new Configuration();
     }
 }
