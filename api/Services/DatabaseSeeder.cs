@@ -75,7 +75,7 @@ namespace api.Services
                 }
             };
 
-            await context.ConfigurationTypeDatas.AddRangeAsync(configTypes);
+            await context.ConfigurationTypeData.AddRangeAsync(configTypes);
             await context.SaveChangesAsync();
 
             // Seed Products

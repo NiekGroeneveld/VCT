@@ -10,10 +10,15 @@ namespace api.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        //Trays
+        public ICollection<Tray> Trays { get; set; } = new List<Tray>();
 
         //One-To-Many
         public string ConfigurationType { get; set; } = string.Empty;
         public ConfigurationTypeData ConfigurationTypeData { get; set; } = new ConfigurationTypeData();
+
 
 
         //Many-To-One

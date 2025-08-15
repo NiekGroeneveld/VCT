@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.DTOs.Tray;
 using api.Interfaces;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
 {
-    public class TrayRepository : ITrayInterface
+    public class TrayRepository : ITrayRepository
     {
         private readonly ApplicationDBContext _context;
 
@@ -56,6 +57,13 @@ namespace api.Repository
             return existingTray;
         }
 
-        
+        public async Task<List<Tray>> UpdateTrayListAsync(List<Tray> trays)
+        {
+            foreach (var tray in trays)
+            {
+                await UpdateAsync(tray);
+            }
+            return trays;
+        }
     }
 }

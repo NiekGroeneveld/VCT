@@ -57,12 +57,12 @@ namespace api.Repository
                 .ToListAsync();
         }
 
-        public async Task<Product?> UpdateAsync(int id, UpdateProductDTO productDTO)
+        public async Task<Product?> UpdateAsync(Product product)
         {
-            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
             if (existingProduct == null) return null;
 
-            existingProduct = productDTO.toProductFromUpdateDTO(existingProduct);
+            existingProduct = product;
             await _context.SaveChangesAsync();
             return existingProduct;
         }

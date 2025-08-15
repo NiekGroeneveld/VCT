@@ -12,10 +12,11 @@ namespace api.Interfaces
         Task<List<Product>> GetAllAsync();
         Task<Product?> GetByIdAsync(int id);
         Task<Product> CreateAsync(Product product);
-        Task<Product?> UpdateAsync(int id, UpdateProductDTO productDTO);
+        Task<Product?> UpdateAsync(Product product);
         Task<Product?> DeleteAsync(int id);
 
         //Additional Methods
         Task<List<Product>> GetProductsByIdsAsync(List<int> productIds);
+
     }
 }

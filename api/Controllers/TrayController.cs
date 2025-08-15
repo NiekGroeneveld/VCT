@@ -14,10 +14,12 @@ namespace api.Controllers
     [Route("api/controllers/companies/{companyId}/configurations/{configId}/trays")]
     public class TrayController : ControllerBase
     {
-        private readonly ITrayInterface _trayRepo;
+        private readonly IConfigurationRepository _configurationRepo;
+        private readonly ITrayRepository _trayRepo;
         private readonly IProductRepository _productRepo;
-        public TrayController(ITrayInterface trayRepository, IProductRepository productRepository)
+        public TrayController(IConfigurationRepository configurationRepository, ITrayRepository trayRepository, IProductRepository productRepository)
         {
+            _configurationRepo = configurationRepository;
             _trayRepo = trayRepository;
             _productRepo = productRepository;
         }
@@ -26,7 +28,7 @@ namespace api.Controllers
         public async Task<IActionResult> GetAll()
         {
             var trays = await _trayRepo.GetAllAsync();
-            return Ok(trays.Select(t => t.toDTO()));
+            return Ok(trays.Select(t => t.ToDTO()));
         }
 
         [HttpGet("{id}")]
@@ -35,16 +37,18 @@ namespace api.Controllers
             var tray = await _trayRepo.GetByIdAsync(id);
             if (tray == null) return NotFound();
 
-            return Ok(tray.toDTO());
+            return Ok(tray.ToDTO());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromRoute] int companyId, [FromRoute] int configurationId, [FromBody] CreateTrayDTO createDTO)
         {
-            var products = await _productRepo.GetProductsByIdsAsync(createDTO.Products.Select(p => p.Id).ToList());
-            var tray = createDTO.toTrayFromCreateDTO(products);
+            var configuration = await _configurationRepo.GetByIdAsync(configurationId);
+            if (configuration == null) return NotFound("Configuration for Creating Tray Not found");
+
+            var tray = createDTO.ToTrayFromCreateDTO(configuration);
             await _trayRepo.CreateAsync(tray);
-            return CreatedAtAction(nameof(GetById), new { id = tray.Id }, tray.toDTO());
+            return CreatedAtAction(nameof(GetById), new { id = tray.Id }, tray.ToDTO());
         }
 
         [HttpPut]
@@ -55,9 +59,9 @@ namespace api.Controllers
             var tray = await _trayRepo.GetByIdAsync(id);
             if (tray == null) return NotFound();
 
-            tray = updateDTO.toTrayFromUpdateDTO(tray, products);
+            tray = updateDTO.ToTrayFromUpdateDTO(tray, products);
             await _trayRepo.UpdateAsync(tray);
-            return Ok(tray.toDTO());
+            return Ok(tray.ToDTO());
         }
 
         [HttpDelete]

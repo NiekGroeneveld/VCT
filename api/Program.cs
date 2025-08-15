@@ -18,7 +18,9 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 });
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ITrayInterface, TrayRepository>();
+builder.Services.AddScoped<ITrayRepository, TrayRepository>();
+builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+builder.Services.AddScoped<IConfigurationTypeDataRepository, ConfigurationTypeDataRepository>();
 
 
 var app = builder.Build();

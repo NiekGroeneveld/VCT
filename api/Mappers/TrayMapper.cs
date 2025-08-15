@@ -11,7 +11,7 @@ namespace api.Mappers
 {
     public static class TrayMapper
     {
-        public static TrayDTO toDTO(this Tray tray)
+        public static TrayDTO ToDTO(this Tray tray)
         {
             return new TrayDTO
             {
@@ -22,20 +22,18 @@ namespace api.Mappers
             };
         }
 
-        public static Tray toTrayFromCreateDTO(this CreateTrayDTO trayDto, ICollection<Product> products)
+        public static Tray ToTrayFromCreateDTO(this CreateTrayDTO trayDto, Configuration configuration)
         {
             return new Tray
             {
                 TrayPosition = trayDto.TrayPosition,
-                Products = products,
                 TrayConfig = string.Empty, //Algorithm service placed here later on.
-                Configuration = null, //add functionality later on when the Configuration repository is ready
+                Configuration = configuration,
                 UpdatedAt = DateTime.UtcNow
-
             };
         }
 
-        public static Tray toTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray, ICollection<Product> products)
+        public static Tray ToTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray, ICollection<Product> products)
         {
             existingTray.Products = products;
             existingTray.TrayPosition = trayDto.TrayPosition;

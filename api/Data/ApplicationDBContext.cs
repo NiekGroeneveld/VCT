@@ -19,7 +19,7 @@ namespace api.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Tray> Trays { get; set; }
         public DbSet<Configuration> Configurations { get; set; }
-        public DbSet<ConfigurationTypeData> ConfigurationTypeDatas { get; set; }
+        public DbSet<ConfigurationTypeData> ConfigurationTypeData { get; set; }
 
     }
 }

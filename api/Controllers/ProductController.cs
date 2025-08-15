@@ -59,7 +59,7 @@ namespace api.Controllers
                 return NotFound();
             }
             product = updateDTO.toProductFromUpdateDTO(product);
-            await _productRepo.UpdateAsync(id, updateDTO);
+            await _productRepo.UpdateAsync(product);
             return Ok(product.toDTO());
         }
 
