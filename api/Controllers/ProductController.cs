@@ -26,7 +26,7 @@ namespace api.Controllers
         public async Task<IActionResult> GetAll()
         {
             var products = await _productRepo.GetAllAsync();
-            return  Ok(products.Select(p => p.toDTO()));
+            return  Ok(products.Select(p => p.ToDTO()));
         }
 
         [HttpGet("{id}")]
@@ -37,7 +37,7 @@ namespace api.Controllers
             {
                 return NotFound();
             }
-            return Ok(product.toDTO());
+            return Ok(product.ToDTO());
         }
 
         [HttpPost]
@@ -45,7 +45,7 @@ namespace api.Controllers
         {
             var productModel = productDTO.toProductFromCreateDTO();
             var product = await _productRepo.CreateAsync(productModel);
-            return CreatedAtAction(nameof(GetById), new { id = productModel.Id }, productModel.toDTO());
+            return CreatedAtAction(nameof(GetById), new { id = productModel.Id }, productModel.ToDTO());
 
         }
 
@@ -60,7 +60,7 @@ namespace api.Controllers
             }
             product = updateDTO.toProductFromUpdateDTO(product);
             await _productRepo.UpdateAsync(product);
-            return Ok(product.toDTO());
+            return Ok(product.ToDTO());
         }
 
         [HttpDelete("{id}")]

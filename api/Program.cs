@@ -21,6 +21,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ITrayRepository, TrayRepository>();
 builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddScoped<IConfigurationTypeDataRepository, ConfigurationTypeDataRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 
 var app = builder.Build();

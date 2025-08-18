@@ -16,7 +16,7 @@ namespace api.Mappers
             return new TrayDTO
             {
                 Id = tray.Id,
-                Products = tray.Products?.Select(p => p.toMinimalDTO()).ToList() ?? new List<MinimalProductDTO>(),
+                Products = tray.Products?.Select(p => p.ToMinimalDTO()).ToList() ?? new List<MinimalProductDTO>(),
                 TrayPosition = tray.TrayPosition,
                 ConfigId = tray.Configuration.Id
             };

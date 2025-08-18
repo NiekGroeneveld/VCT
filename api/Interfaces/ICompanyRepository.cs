@@ -9,9 +9,9 @@ namespace api.Interfaces
     public interface ICompanyRepository
     {
         Task<List<Company>> GetAllAsync();
-        Task<Company> GetByIdAsync(int id);
-        Task CreateAsync(Company company);
-        Task UpdateAsync(Company company);
-        Task DeleteAsync(int id);
+        Task<Company?> GetByIdAsync(int id);
+        Task<Company> CreateAsync(Company company);
+        Task<Company?> UpdateAsync(Company company);
+        Task<Company?> DeleteAsync(int id);
     }
 }

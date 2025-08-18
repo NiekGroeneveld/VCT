@@ -9,7 +9,7 @@ namespace api.Mappers
 {
     public static class ProductMapper
     {
-        public static ProductDTO toDTO(this Product product)
+        public static ProductDTO ToDTO(this Product product)
         {
             return new ProductDTO
             {
@@ -24,7 +24,7 @@ namespace api.Mappers
             };
         }
 
-        public static Product toProduct(this ProductDTO productDto)
+        public static Product ToProduct(this ProductDTO productDto)
         {
             return new Product
             {
@@ -65,7 +65,7 @@ namespace api.Mappers
             return existingProduct;
         }
 
-        public static MinimalProductDTO toMinimalDTO(this Product product)
+        public static MinimalProductDTO ToMinimalDTO(this Product product)
         {
             return new MinimalProductDTO
             {
