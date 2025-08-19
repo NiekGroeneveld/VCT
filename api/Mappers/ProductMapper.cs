@@ -19,7 +19,7 @@ namespace api.Mappers
                 Width = product.Width,
                 Depth = product.Depth,
                 Stable = product.Stable,
-                CompanyName = product.company?.Name ?? "No Company", // Handle null company
+                CompanyName = product.Company?.Name ?? "No Company", // Handle null company
                 ColorHex = product.ColorHex
             };
         }
@@ -35,7 +35,7 @@ namespace api.Mappers
                 Depth = productDto.Depth,
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
-                company = null //implement when controller is ready
+                Company = null //implement when controller is ready
             };
         }
 
@@ -50,7 +50,7 @@ namespace api.Mappers
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
                 CreatedAt = DateTime.UtcNow,
-                company = null //add functionality later on when the Company repository is ready
+                Company = null //add functionality later on when the Company repository is ready
             };
         }
 

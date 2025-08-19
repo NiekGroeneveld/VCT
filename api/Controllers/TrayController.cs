@@ -41,27 +41,26 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromRoute] int companyId, [FromRoute] int configurationId, [FromBody] CreateTrayDTO createDTO)
+        public async Task<IActionResult> Create([FromRoute] int companyId, [FromRoute] int configId, [FromBody] CreateTrayDTO createDTO)
         {
-            var configuration = await _configurationRepo.GetByIdAsync(configurationId);
+            var configuration = await _configurationRepo.GetByIdAsync(configId);
             if (configuration == null) return NotFound("Configuration for Creating Tray Not found");
 
             var tray = createDTO.ToTrayFromCreateDTO(configuration);
             await _trayRepo.CreateAsync(tray);
-            return CreatedAtAction(nameof(GetById), new { id = tray.Id }, tray.ToDTO());
+            return CreatedAtAction(nameof(GetById), new { companyId = companyId, configId = configId, id = tray.Id }, tray.ToDTO());
         }
 
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTrayDTO updateDTO)
         {
-            var products = await _productRepo.GetProductsByIdsAsync(updateDTO.Products.Select(p => p.Id).ToList());
-            var tray = await _trayRepo.GetByIdAsync(id);
-            if (tray == null) return NotFound();
+            var existingTray = await _trayRepo.GetByIdAsync(id);
+            if (existingTray == null) return NotFound();
 
-            tray = updateDTO.ToTrayFromUpdateDTO(tray, products);
-            await _trayRepo.UpdateAsync(tray);
-            return Ok(tray.ToDTO());
+            existingTray = updateDTO.ToTrayFromUpdateDTO(existingTray);
+            await _trayRepo.UpdateAsync(existingTray);
+            return Ok(existingTray.ToDTO());
         }
 
         [HttpDelete]

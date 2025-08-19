@@ -52,7 +52,7 @@ namespace api.Repository
         public async Task<List<Product>> GetProductsByIdsAsync(List<int> productIds)
         {
             return await _context.Products
-                .Include(p => p.company)
+                .Include(p => p.Company)
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync();
         }

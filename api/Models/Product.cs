@@ -16,17 +16,18 @@ namespace api.Models
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
-    
+        public bool IsActive { get; set; } = true;
+        
 
         // Store color as hex string (e.g., "#FFFFFF", "#FF0000")
         public string ColorHex { get; set; } = "#FFFFFF";
 
-        public bool IsActive { get; set; } = true;
 
         //One-To-Many
-        public Company? company { get; set; } = null;
+        public int? CompanyId { get; set; }
+        public Company? Company { get; set; } = null;
 
         //Many-To-Many
-        public ICollection<Tray> Trays { get; set; } = new List<Tray>();
+        public ICollection<TrayProduct> TrayProducts { get; set; } = new List<TrayProduct>();
     }
 }

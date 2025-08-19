@@ -6,6 +6,7 @@ using api.DTOs.Tray;
 using api.Models;
 using api.DTOs.Product;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using api.DTOs.TrayProduct;
 
 namespace api.Mappers
 {
@@ -16,9 +17,13 @@ namespace api.Mappers
             return new TrayDTO
             {
                 Id = tray.Id,
-                Products = tray.Products?.Select(p => p.ToMinimalDTO()).ToList() ?? new List<MinimalProductDTO>(),
                 TrayPosition = tray.TrayPosition,
-                ConfigId = tray.Configuration.Id
+                ConfigId = tray.Configuration?.Id ?? 0,
+                Products = tray.TrayProducts?.Select(tp => new TrayProductDetailDTO
+                {
+                    Product = tp.Product.ToDTO(),
+                    ProductChannelPosition = tp.ProductChannelPosition
+                }).OrderBy(tp => tp.ProductChannelPosition).ToList() ?? new List<TrayProductDetailDTO>()
             };
         }
 
@@ -33,9 +38,8 @@ namespace api.Mappers
             };
         }
 
-        public static Tray ToTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray, ICollection<Product> products)
+        public static Tray ToTrayFromUpdateDTO(this UpdateTrayDTO trayDto, Tray existingTray)
         {
-            existingTray.Products = products;
             existingTray.TrayPosition = trayDto.TrayPosition;
             existingTray.UpdatedAt = DateTime.UtcNow;
             return existingTray;

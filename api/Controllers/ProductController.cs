@@ -45,7 +45,7 @@ namespace api.Controllers
         {
             var productModel = productDTO.toProductFromCreateDTO();
             var product = await _productRepo.CreateAsync(productModel);
-            return CreatedAtAction(nameof(GetById), new { id = productModel.Id }, productModel.ToDTO());
+            return CreatedAtAction(nameof(GetById), new { companyId = companyId, id = productModel.Id }, productModel.ToDTO());
 
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace api.Models
         public DateTime UpdatedAt { get; set; }
 
         //Trays
+        [MaxLength(8)]
         public ICollection<Tray> Trays { get; set; } = new List<Tray>();
 
         //One-To-Many

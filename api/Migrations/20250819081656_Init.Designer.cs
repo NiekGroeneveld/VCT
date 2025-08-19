@@ -12,8 +12,8 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250814180555_TrayAddedToConfiguration")]
-    partial class TrayAddedToConfiguration
+    [Migration("20250819081656_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,21 +24,6 @@ namespace api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("ProductTray", b =>
-                {
-                    b.Property<int>("ProductsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TraysId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductsId", "TraysId");
-
-                    b.HasIndex("TraysId");
-
-                    b.ToTable("ProductTray");
-                });
 
             modelBuilder.Entity("api.Models.Company", b =>
                 {
@@ -84,6 +69,9 @@ namespace api.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -138,7 +126,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConfigurationTypeDatas");
+                    b.ToTable("ConfigurationTypeData");
                 });
 
             modelBuilder.Entity("api.Models.Product", b =>
@@ -152,6 +140,9 @@ namespace api.Migrations
                     b.Property<string>("ColorHex")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -179,12 +170,9 @@ namespace api.Migrations
                     b.Property<float>("Width")
                         .HasColumnType("float");
 
-                    b.Property<int?>("companyId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("companyId");
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Products");
                 });
@@ -220,19 +208,28 @@ namespace api.Migrations
                     b.ToTable("Trays");
                 });
 
-            modelBuilder.Entity("ProductTray", b =>
+            modelBuilder.Entity("api.Models.TrayProduct", b =>
                 {
-                    b.HasOne("api.Models.Product", null)
-                        .WithMany()
-                        .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("TrayId")
+                        .HasColumnType("int");
 
-                    b.HasOne("api.Models.Tray", null)
-                        .WithMany()
-                        .HasForeignKey("TraysId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductChannelPosition")
+                        .HasColumnType("int");
+
+                    b.HasKey("TrayId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("TrayProducts");
                 });
 
             modelBuilder.Entity("api.Models.Configuration", b =>
@@ -256,11 +253,11 @@ namespace api.Migrations
 
             modelBuilder.Entity("api.Models.Product", b =>
                 {
-                    b.HasOne("api.Models.Company", "company")
+                    b.HasOne("api.Models.Company", "Company")
                         .WithMany("Products")
-                        .HasForeignKey("companyId");
+                        .HasForeignKey("CompanyId");
 
-                    b.Navigation("company");
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("api.Models.Tray", b =>
@@ -272,6 +269,25 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.Navigation("Configuration");
+                });
+
+            modelBuilder.Entity("api.Models.TrayProduct", b =>
+                {
+                    b.HasOne("api.Models.Product", "Product")
+                        .WithMany("TrayProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.Tray", "Tray")
+                        .WithMany("TrayProducts")
+                        .HasForeignKey("TrayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Tray");
                 });
 
             modelBuilder.Entity("api.Models.Company", b =>
@@ -289,6 +305,16 @@ namespace api.Migrations
             modelBuilder.Entity("api.Models.ConfigurationTypeData", b =>
                 {
                     b.Navigation("Configurations");
+                });
+
+            modelBuilder.Entity("api.Models.Product", b =>
+                {
+                    b.Navigation("TrayProducts");
+                });
+
+            modelBuilder.Entity("api.Models.Tray", b =>
+                {
+                    b.Navigation("TrayProducts");
                 });
 #pragma warning restore 612, 618
         }

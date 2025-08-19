@@ -72,6 +72,20 @@ namespace api.Services
                     HighExtractorHeight = 40.0f,
                     HighExtractorDepth = 30.0f,
                     PalletDelta = 8.0f
+                },
+                new ConfigurationTypeData
+                {
+                    ConfigurationType = "VisionV8",
+                    MinTrayHeight = 60.0f,
+                    TrayWidth = 220.0f,
+                    ConfigHeight = 1350.0f,
+                    AmountDots = 80,
+                    DotsDelta = 14.0f,
+                    LowExtractorHeight = 28.0f,
+                    LowExtractorDepth = 32.0f,
+                    HighExtractorHeight = 55.0f,
+                    HighExtractorDepth = 38.0f,
+                    PalletDelta = 11.0f
                 }
             };
 
@@ -92,7 +106,8 @@ namespace api.Services
                     Stable = true,
                     ColorHex = "#FF0000", // Red
                     IsActive = true,
-                    company = companies[0] // ACME Corp
+                    CompanyId = companies[0].Id, // ACME Corp
+                    Company = companies[0]
                 },
                 new Product
                 {
@@ -105,7 +120,8 @@ namespace api.Services
                     Stable = false,
                     ColorHex = "#00FF00", // Green
                     IsActive = true,
-                    company = companies[1] // TechVision Ltd
+                    CompanyId = companies[1].Id, // TechVision Ltd
+                    Company = companies[1]
                 },
                 new Product
                 {
@@ -118,7 +134,8 @@ namespace api.Services
                     Stable = true,
                     ColorHex = "#0000FF", // Blue
                     IsActive = true,
-                    company = companies[2] // InnovateTech
+                    CompanyId = companies[2].Id, // InnovateTech
+                    Company = companies[2]
                 },
                 new Product
                 {
@@ -131,7 +148,36 @@ namespace api.Services
                     Stable = true,
                     ColorHex = "#FFFF00", // Yellow
                     IsActive = true,
-                    company = companies[0] // ACME Corp
+                    CompanyId = companies[0].Id, // ACME Corp
+                    Company = companies[0]
+                },
+                new Product
+                {
+                    Name = "Sensor E",
+                    CreatedAt = DateTime.UtcNow,
+                    ProductConfig = "CONFIG_E",
+                    Height = 35.0f,
+                    Width = 18.0f,
+                    Depth = 12.0f,
+                    Stable = true,
+                    ColorHex = "#FF00FF", // Magenta
+                    IsActive = true,
+                    CompanyId = companies[1].Id, // TechVision Ltd
+                    Company = companies[1]
+                },
+                new Product
+                {
+                    Name = "Actuator F",
+                    CreatedAt = DateTime.UtcNow,
+                    ProductConfig = "CONFIG_F",
+                    Height = 50.0f,
+                    Width = 30.0f,
+                    Depth = 25.0f,
+                    Stable = false,
+                    ColorHex = "#00FFFF", // Cyan
+                    IsActive = true,
+                    CompanyId = companies[2].Id, // InnovateTech
+                    Company = companies[2]
                 }
             };
 
@@ -145,17 +191,31 @@ namespace api.Services
                 {
                     Name = "Production Line 1",
                     CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     ConfigurationType = "Standard",
                     ConfigurationTypeData = configTypes[0], // Standard
+                    CompanyId = companies[0].Id,
                     Company = companies[0] // ACME Corp
                 },
                 new Configuration
                 {
                     Name = "Assembly Line A",
                     CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     ConfigurationType = "Premium",
                     ConfigurationTypeData = configTypes[1], // Premium
+                    CompanyId = companies[1].Id,
                     Company = companies[1] // TechVision Ltd
+                },
+                new Configuration
+                {
+                    Name = "Quality Control Station",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    ConfigurationType = "Compact",
+                    ConfigurationTypeData = configTypes[2], // Compact
+                    CompanyId = companies[2].Id,
+                    Company = companies[2] // InnovateTech
                 }
             };
 
@@ -170,6 +230,7 @@ namespace api.Services
                     TrayConfig = "TRAY_CONFIG_1",
                     TrayPosition = 1,
                     CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     Configuration = configurations[0]
                 },
                 new Tray
@@ -177,26 +238,166 @@ namespace api.Services
                     TrayConfig = "TRAY_CONFIG_2",
                     TrayPosition = 2,
                     CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     Configuration = configurations[0]
                 },
                 new Tray
                 {
                     TrayConfig = "TRAY_CONFIG_3",
+                    TrayPosition = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Configuration = configurations[0]
+                },
+                new Tray
+                {
+                    TrayConfig = "TRAY_CONFIG_4",
                     TrayPosition = 1,
                     CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     Configuration = configurations[1]
+                },
+                new Tray
+                {
+                    TrayConfig = "TRAY_CONFIG_5",
+                    TrayPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Configuration = configurations[1]
+                },
+                new Tray
+                {
+                    TrayConfig = "TRAY_CONFIG_6",
+                    TrayPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Configuration = configurations[2]
                 }
             };
 
             await context.Trays.AddRangeAsync(trays);
             await context.SaveChangesAsync();
 
-            // Create Many-to-Many relationships (Products in Trays)
-            trays[0].Products.Add(products[0]); // Widget A in Tray 1
-            trays[0].Products.Add(products[1]); // Component B in Tray 1
-            trays[1].Products.Add(products[2]); // Module C in Tray 2
-            trays[2].Products.Add(products[3]); // Part D in Tray 3
+            // Create Many-to-Many relationships through TrayProduct junction table
+            var trayProducts = new List<TrayProduct>
+            {
+                // Configuration 0 (Production Line 1) - Tray 1
+                new TrayProduct
+                {
+                    TrayId = trays[0].Id,
+                    ProductId = products[0].Id, // Widget A
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[0],
+                    Product = products[0]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[0].Id,
+                    ProductId = products[3].Id, // Part D
+                    ProductChannelPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[0],
+                    Product = products[3]
+                },
+                // Configuration 0 (Production Line 1) - Tray 2
+                new TrayProduct
+                {
+                    TrayId = trays[1].Id,
+                    ProductId = products[1].Id, // Component B
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[1],
+                    Product = products[1]
+                },
+                // Configuration 0 (Production Line 1) - Tray 3
+                new TrayProduct
+                {
+                    TrayId = trays[2].Id,
+                    ProductId = products[0].Id, // Widget A
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[2],
+                    Product = products[0]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[2].Id,
+                    ProductId = products[3].Id, // Part D
+                    ProductChannelPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[2],
+                    Product = products[3]
+                },
+                // Configuration 1 (Assembly Line A) - Tray 1
+                new TrayProduct
+                {
+                    TrayId = trays[3].Id,
+                    ProductId = products[1].Id, // Component B
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[3],
+                    Product = products[1]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[3].Id,
+                    ProductId = products[4].Id, // Sensor E
+                    ProductChannelPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[3],
+                    Product = products[4]
+                },
+                // Configuration 1 (Assembly Line A) - Tray 2
+                new TrayProduct
+                {
+                    TrayId = trays[4].Id,
+                    ProductId = products[2].Id, // Module C
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[4],
+                    Product = products[2]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[4].Id,
+                    ProductId = products[5].Id, // Actuator F
+                    ProductChannelPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[4],
+                    Product = products[5]
+                },
+                // Configuration 2 (Quality Control Station) - Tray 1
+                new TrayProduct
+                {
+                    TrayId = trays[5].Id,
+                    ProductId = products[2].Id, // Module C
+                    ProductChannelPosition = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[5],
+                    Product = products[2]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[5].Id,
+                    ProductId = products[5].Id, // Actuator F
+                    ProductChannelPosition = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[5],
+                    Product = products[5]
+                },
+                new TrayProduct
+                {
+                    TrayId = trays[5].Id,
+                    ProductId = products[4].Id, // Sensor E
+                    ProductChannelPosition = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    Tray = trays[5],
+                    Product = products[4]
+                }
+            };
 
+            await context.TrayProducts.AddRangeAsync(trayProducts);
             await context.SaveChangesAsync();
 
             Console.WriteLine("Database seeded successfully!");

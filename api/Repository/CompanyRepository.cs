@@ -37,17 +37,17 @@ namespace api.Repository
 
         public async Task<List<Company>> GetAllAsync()
         {
-            return await _context.Companies.ToListAsync();
+            return await _context.Companies.Include(c => c.Configurations).Include(c => c.Products).ToListAsync();
         }
 
         public async Task<Company?> GetByIdAsync(int id)
         {
-            return await _context.Companies.FindAsync(id);
+            return await _context.Companies.Include(c => c.Configurations).Include(c => c.Products).FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Company?> UpdateAsync(Company company)
         {
-            var existingCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id == company.Id);
+            var existingCompany = await GetByIdAsync(company.Id);
             if (existingCompany == null) return null;
 
             existingCompany = company;

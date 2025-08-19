@@ -38,12 +38,24 @@ namespace api.Repository
 
         public async Task<List<Configuration>> GetAllAsync()
         {
-            return await _context.Configurations.ToListAsync();
+            return await _context.Configurations
+                .Include(c => c.ConfigurationTypeData)
+                .Include(c => c.Company)
+                .Include(c => c.Trays)
+                    .ThenInclude(t => t.TrayProducts)
+                        .ThenInclude(tp => tp.Product)
+                .ToListAsync();
         }
 
         public async Task<Configuration?> GetByIdAsync(int id)
         {
-            return await _context.Configurations.FindAsync(id);
+            return await _context.Configurations
+                .Include(c => c.ConfigurationTypeData)
+                .Include(c => c.Company)
+                .Include(c => c.Trays)
+                    .ThenInclude(t => t.TrayProducts)
+                        .ThenInclude(tp => tp.Product)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Configuration?> UpdateAsync(Configuration configuration)

@@ -14,12 +14,36 @@ namespace api.Data
 
         }
 
-    
+
         public DbSet<Company> Companies { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Tray> Trays { get; set; }
+        public DbSet<TrayProduct> TrayProducts { get; set; }
         public DbSet<Configuration> Configurations { get; set; }
         public DbSet<ConfigurationTypeData> ConfigurationTypeData { get; set; }
 
+                protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configure TrayProduct many-to-many with position
+            modelBuilder.Entity<TrayProduct>()
+                .HasKey(tp => new { tp.TrayId, tp.ProductId });
+
+            modelBuilder.Entity<TrayProduct>()
+                .HasOne(tp => tp.Tray)
+                .WithMany(t => t.TrayProducts)
+                .HasForeignKey(tp => tp.TrayId);
+
+            modelBuilder.Entity<TrayProduct>()
+                .HasOne(tp => tp.Product)
+                .WithMany(p => p.TrayProducts)
+                .HasForeignKey(tp => tp.ProductId);
+
+            // Ensure position is between 1 and 10
+            modelBuilder.Entity<TrayProduct>()
+                .Property(tp => tp.ProductChannelPosition)
+                .IsRequired();
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

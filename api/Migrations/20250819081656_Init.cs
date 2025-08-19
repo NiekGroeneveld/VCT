@@ -32,7 +32,7 @@ namespace api.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ConfigurationTypeDatas",
+                name: "ConfigurationTypeData",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -52,7 +52,7 @@ namespace api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ConfigurationTypeDatas", x => x.Id);
+                    table.PrimaryKey("PK_ConfigurationTypeData", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -71,17 +71,17 @@ namespace api.Migrations
                     Width = table.Column<float>(type: "float", nullable: false),
                     Depth = table.Column<float>(type: "float", nullable: false),
                     Stable = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ColorHex = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    companyId = table.Column<int>(type: "int", nullable: true)
+                    CompanyId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_Companies_companyId",
-                        column: x => x.companyId,
+                        name: "FK_Products_Companies_CompanyId",
+                        column: x => x.CompanyId,
                         principalTable: "Companies",
                         principalColumn: "Id");
                 })
@@ -96,6 +96,7 @@ namespace api.Migrations
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ConfigurationType = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ConfigurationTypeDataId = table.Column<int>(type: "int", nullable: false),
@@ -111,9 +112,9 @@ namespace api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Configurations_ConfigurationTypeDatas_ConfigurationTypeDataId",
+                        name: "FK_Configurations_ConfigurationTypeData_ConfigurationTypeDataId",
                         column: x => x.ConfigurationTypeDataId,
-                        principalTable: "ConfigurationTypeDatas",
+                        principalTable: "ConfigurationTypeData",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -129,6 +130,7 @@ namespace api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TrayPosition = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ConfigurationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -144,24 +146,27 @@ namespace api.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ProductTray",
+                name: "TrayProducts",
                 columns: table => new
                 {
-                    ProductsId = table.Column<int>(type: "int", nullable: false),
-                    TraysId = table.Column<int>(type: "int", nullable: false)
+                    TrayId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    ProductChannelPosition = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductTray", x => new { x.ProductsId, x.TraysId });
+                    table.PrimaryKey("PK_TrayProducts", x => new { x.TrayId, x.ProductId });
                     table.ForeignKey(
-                        name: "FK_ProductTray_Products_ProductsId",
-                        column: x => x.ProductsId,
+                        name: "FK_TrayProducts_Products_ProductId",
+                        column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductTray_Trays_TraysId",
-                        column: x => x.TraysId,
+                        name: "FK_TrayProducts_Trays_TrayId",
+                        column: x => x.TrayId,
                         principalTable: "Trays",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -179,14 +184,14 @@ namespace api.Migrations
                 column: "ConfigurationTypeDataId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_companyId",
+                name: "IX_Products_CompanyId",
                 table: "Products",
-                column: "companyId");
+                column: "CompanyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductTray_TraysId",
-                table: "ProductTray",
-                column: "TraysId");
+                name: "IX_TrayProducts_ProductId",
+                table: "TrayProducts",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Trays_ConfigurationId",
@@ -198,7 +203,7 @@ namespace api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ProductTray");
+                name: "TrayProducts");
 
             migrationBuilder.DropTable(
                 name: "Products");
@@ -213,7 +218,7 @@ namespace api.Migrations
                 name: "Companies");
 
             migrationBuilder.DropTable(
-                name: "ConfigurationTypeDatas");
+                name: "ConfigurationTypeData");
         }
     }
 }

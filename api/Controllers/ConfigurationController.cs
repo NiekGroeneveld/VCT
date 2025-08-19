@@ -15,20 +15,24 @@ namespace api.Controllers
     {
         private readonly IProductRepository _productRepository;
         private readonly IConfigurationRepository _configurationRepository;
+        private readonly IConfigurationTypeDataRepository _configurationTypeDataRepository;
+        private readonly ICompanyRepository _companyRepository;
         private readonly ITrayRepository _trayRepository;
 
-        public ConfigurationController(IProductRepository productRepository, IConfigurationRepository configurationRepository, ITrayRepository trayRepository)
+        public ConfigurationController(IProductRepository productRepository, IConfigurationRepository configurationRepository, ICompanyRepository companyRepository, ITrayRepository trayRepository, IConfigurationTypeDataRepository configurationTypeDataRepository)
         {
             _productRepository = productRepository;
             _configurationRepository = configurationRepository;
+            _companyRepository = companyRepository;
             _trayRepository = trayRepository;
+            _configurationTypeDataRepository = configurationTypeDataRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var configurations = await _configurationRepository.GetAllAsync();
-            return Ok(configurations);
+            return Ok(configurations.Select(c => c.ToDTO()));
         }
 
         [HttpGet("{id}")]
@@ -37,56 +41,31 @@ namespace api.Controllers
             var configuration = await _configurationRepository.GetByIdAsync(id);
             if (configuration == null) return NotFound();
 
-            return Ok(configuration);
+            return Ok(configuration.ToDTO());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromRoute] int companyId, [FromBody] CreateConfigurationDTO configurationDto)
         {
             // TODO: Implement GetById for Company and GetByConfigurationType for ConfigurationTypeData
-            Company? company = null; //Add GetbyId
-            ConfigurationTypeData? configurationTypeData = null; //Add GetByConfigurationType
-            
-            if (company == null || configurationTypeData == null)
+            Company? company = await _companyRepository.GetByIdAsync(companyId);
+            ConfigurationTypeData? configurationTypeData = await _configurationTypeDataRepository.GetByTypeNameAsync(configurationDto.ConfigurationType);
+
+            if (company == null)
             {
-                return BadRequest("Company or ConfigurationTypeData not found");
+                return BadRequest($"Company with ID {companyId} not found");
+            }
+
+            if (configurationTypeData == null)
+            {
+                return BadRequest($"ConfigurationTypeData with type '{configurationDto.ConfigurationType}' not found. Available types can be retrieved from /api/ConfigurationTypeData");
             }
             
             var configuration = configurationDto.ToConfigurationFromCreateDTO(configurationTypeData, company);
             await _configurationRepository.CreateAsync(configuration);
-            return CreatedAtAction(nameof(GetById), new { id = configuration.Id }, configuration);
+            return CreatedAtAction(nameof(GetById), new { companyId = companyId, id = configuration.Id }, configuration.ToDTO());
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateConfigurationDTO configurationDto)
-        {
-            var configuration = await _configurationRepository.GetByIdAsync(id);
-            if (configuration == null) return NotFound();
-
-            var trayIds = configuration.Trays.Select(t => t.Id).ToList();
-            var newTrayIds = configurationDto.Trays.Select(t => t.Id).ToList();
-            if (!trayIds.SequenceEqual(newTrayIds))
-            {
-                throw new InvalidOperationException("Tray IDs do not match.");
-            }
-            List<Tray> updatedTrays = new List<Tray>();
-
-            foreach (var UpdateTrayDto in configurationDto.Trays)
-            {
-                var products = await _productRepository.GetProductsByIdsAsync(UpdateTrayDto.Products.Select(p => p.Id).ToList());
-                var tray = await _trayRepository.GetByIdAsync(UpdateTrayDto.Id);
-                if (tray == null) return NotFound("At least one Tray Not Found while Updating Configuration");
-
-                tray = UpdateTrayDto.ToTrayFromUpdateDTO(tray, products);
-                updatedTrays.Add(tray);
-            }
-
-            configuration.Name = configurationDto.Name;
-            configuration.Trays = updatedTrays;
-
-            await _configurationRepository.UpdateAsync(configuration);
-            return Ok(configuration.ToDTO());
-        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
