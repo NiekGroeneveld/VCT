@@ -13,7 +13,7 @@ namespace api.Models
         public DateTime CreatedAt { get; set; }
 
         //Many-To-Many
-        //public ICollection<User> Users { get; set; }
+        public ICollection<AppUser> Users { get; set; } = new List<AppUser>();
 
 
         //One-To-Many

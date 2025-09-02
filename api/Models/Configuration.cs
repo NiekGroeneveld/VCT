@@ -19,6 +19,7 @@ namespace api.Models
 
         //One-To-Many
         public string ConfigurationType { get; set; } = string.Empty;
+        public int ConfigurationTypeDataId { get; set; }
         public ConfigurationTypeData ConfigurationTypeData { get; set; } = new ConfigurationTypeData();
 
 

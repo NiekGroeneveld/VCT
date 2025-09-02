@@ -30,6 +30,8 @@ namespace api.Mappers
                 Name = configurationDto.Name,
                 Trays = new List<Tray>(),
                 CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                ConfigurationTypeDataId = configurationTypeData.Id,
                 ConfigurationTypeData = configurationTypeData,
                 ConfigurationType = configurationTypeData.ConfigurationType,
                 CompanyId = company.Id,
