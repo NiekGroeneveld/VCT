@@ -45,6 +45,11 @@ namespace api.Repository
             return await _context.Companies.Include(c => c.Configurations).Include(c => c.Products).FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        public Task<List<Company>> GetCompaniesForUserAsync(string userId)
+        {
+            return _context.Companies.Where(c => c.Users.Select(u => u.Id).Contains(userId)).Include(c => c.Configurations).Include(c => c.Products).ToListAsync();
+        }
+
         public async Task<Company?> UpdateAsync(Company company)
         {
             var existingCompany = await GetByIdAsync(company.Id);

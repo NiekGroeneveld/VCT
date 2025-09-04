@@ -2,10 +2,13 @@
 import React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { ScalingProvider, useScaling } from './hooks/useScaling';
 import  TopBar  from './app/layout/TopBar';
 import { ProductList } from './domains/product-management/components/ProductList';
 import { ConfigurationArea } from './domains/machine-configuration/components/ConfigurationArea';
+import { UserProvider } from './Context/useAuth';
 
 const MainContent = () => {
   const { scaledValue } = useScaling();
@@ -56,6 +59,7 @@ const MainContent = () => {
 
 function App() {
   return (
+    <UserProvider>
     <DndProvider backend={HTML5Backend}>
       <ScalingProvider>
         <div className="min-h-screen bg-gray-50">
@@ -64,9 +68,13 @@ function App() {
           
           {/* Main content with dynamic scaling */}
           <MainContent />
+          
+          {/* Toast Container for notifications */}
+          <ToastContainer />
         </div>
       </ScalingProvider>
     </DndProvider>
+    </UserProvider>
   );
 }
 

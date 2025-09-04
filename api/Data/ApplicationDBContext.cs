@@ -28,7 +28,10 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            // Configure Company-AppUser many-to-many relationship
+            modelBuilder.Entity<Company>()
+                .HasMany(c => c.Users)
+                .WithMany(u => u.Companies);
 
             // Configure TrayProduct many-to-many with position
             modelBuilder.Entity<TrayProduct>()

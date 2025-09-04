@@ -13,5 +13,8 @@ namespace api.Interfaces
         Task<Company> CreateAsync(Company company);
         Task<Company?> UpdateAsync(Company company);
         Task<Company?> DeleteAsync(int id);
+
+        //Get companies for a specific user
+        Task<List<Company>> GetCompaniesForUserAsync(string userId);
     }
 }

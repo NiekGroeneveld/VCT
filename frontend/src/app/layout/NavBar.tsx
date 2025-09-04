@@ -5,7 +5,7 @@ import SearchableDropdown from '../../shared/components/ui/SearchableDropdown'
 
 type Props = {}
 
-const TopBar: React.FC<Props> = (props: Props) => {
+const NavBar: React.FC<Props> = (props: Props) => {
   return (
     <div className="fixed top-0 left-0 w-screen h-32 flex flex-row bg-gray-900 text-white shadow-md z-[100]">
       {/* Logo */}
@@ -43,4 +43,4 @@ const TopBar: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default TopBar
+export default NavBar
