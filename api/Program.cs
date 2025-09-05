@@ -6,6 +6,7 @@ using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -111,9 +112,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+app.UseCors(
+    x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()
+    //.WithOrigins("http://localhost:3000")
+    .SetIsOriginAllowed(origin => true) // allow any origin
+    );
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-//Removed by AI
-//app.UseHttpsRedirection();
+
 app.Run();
