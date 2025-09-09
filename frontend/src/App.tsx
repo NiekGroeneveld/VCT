@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UserProvider } from './Context/useAuth';
 import AppRoutes from './Routes';
+import { CompanyProvider } from './Context/useCompany';
 
 function App() {
   return (
@@ -12,7 +13,9 @@ function App() {
       <UserProvider>
         <div className="min-h-screen bg-gray-50">
           {/* Routes handle all page navigation */}
+          <CompanyProvider>
           <AppRoutes />
+          </CompanyProvider>
           
           {/* Toast Container for notifications */}
           <ToastContainer

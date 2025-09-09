@@ -39,6 +39,15 @@ namespace api.Mappers
             };
         }
 
+        public static ConfigurationNameIdDTO ToNameIdDTO(this Configuration configuration) 
+        {
+            return new ConfigurationNameIdDTO
+            {
+                Id = configuration.Id,
+                Name = configuration.Name
+            };
+        }
+
     };
 }
 

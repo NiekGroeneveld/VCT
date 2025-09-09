@@ -43,19 +43,27 @@ namespace api.Controllers
             return userCompanies.Any(c => c.Id == companyId);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll([FromRoute] int companyId)
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var configurations = await _configurationRepository.GetAllAsync();
+            // Filter configurations to only include those for this company
+            return Ok(configurations.Select(c => c.ToDTO()));
+        }
+
+        [HttpGet("getCompanyConfigurations")]
+        public async Task<IActionResult> GetAllForCompany([FromRoute] int companyId)
         {
             // Check if user belongs to the company
             if (!await UserBelongsToCompany(companyId))
             {
                 return Forbid("You don't have access to configurations for this company");
             }
+            //Warning, this does not return full configurations, just the names and ids for dropdowns
 
-            var configurations = await _configurationRepository.GetAllAsync();
+            var configurations = await _configurationRepository.GetConfigurationsNamesIdsForCompanyAsync(companyId);
             // Filter configurations to only include those for this company
-            var companyConfigurations = configurations.Where(c => c.CompanyId == companyId);
-            return Ok(companyConfigurations.Select(c => c.ToDTO()));
+            return Ok(configurations.Select(c => c.ToNameIdDTO()));
         }
 
         [HttpGet("{id}")]

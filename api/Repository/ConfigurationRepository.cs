@@ -57,6 +57,14 @@ namespace api.Repository
                         .ThenInclude(tp => tp.Product)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
+        
+        //This method does not retrieve the full Config, just the name and the id for dropdowns
+        public Task<List<Configuration>> GetConfigurationsNamesIdsForCompanyAsync(int companyId)
+        {
+            return _context.Configurations
+                .Where(c => c.CompanyId == companyId)
+                .ToListAsync();
+        }
 
         public async Task<Configuration?> UpdateAsync(Configuration configuration)
         {

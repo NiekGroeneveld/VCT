@@ -14,5 +14,7 @@ namespace api.Interfaces
         Task<Configuration> CreateAsync(Configuration configuration);
         Task<Configuration?> UpdateAsync(Configuration configuration);
         Task<Configuration?> DeleteAsync(int id);
+
+        Task<List<Configuration>> GetConfigurationsNamesIdsForCompanyAsync(int companyId);
     }
 }

@@ -5,6 +5,7 @@ interface SearchableDropdownProps {
   options: string[];
   placeholder?: string;
   onSelect?: (value: string) => void;
+  onChange?: (value: string) => void;
   value?: string;
   className?: string;
   // Color customization props
@@ -23,6 +24,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   options = [], 
   placeholder = "Select an option...", 
   onSelect = () => {},
+  onChange,
   value = "",
   className = "",
   buttonColor = "bg-white",
@@ -81,6 +83,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     setIsOpen(false);
     setSearchTerm('');
     onSelect(option);
+    if (onChange) {
+      onChange(option);
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
