@@ -4,6 +4,7 @@ import SearchableDropdown from '../../shared/components/ui/SearchableDropdown'
 import { useAuth } from '../../Context/useAuth';
 import { Link} from 'lucide-react';
 import  CompanyService from '../../shared/services/CompanyService';
+import * as ConfigurationService from '../../shared/services/ConfigurationService';
 import { useCompany } from '../../Context/useCompany';
 
 
@@ -13,6 +14,8 @@ const NavBar: React.FC<Props> = (props: Props) => {
   const {isLoggedIn, user, token, logoutUser} = useAuth();
   const { selectedCompany, setSelectedCompany } = useCompany();
   const [companies, setCompanies] = React.useState<{ id: string; name: string }[]>([]);
+  const [configurations, setConfigurations] = React.useState<{ id: string; name: string }[]>([]);
+
   useEffect(() => {
     if(!token) return;
     CompanyService.getAllCompaniesAPI().then(res => {
@@ -20,6 +23,25 @@ const NavBar: React.FC<Props> = (props: Props) => {
     })
     .catch(err => { /* handle error */ });
   }, [token]);
+
+  // Load configurations when a company is selected
+  useEffect(() => {
+    if (!selectedCompany) {
+      setConfigurations([]);
+      return;
+    }
+    // Store companyId in localStorage for ConfigurationService
+    localStorage.setItem('companyId', selectedCompany.id);
+    ConfigurationService.getMyConfigurationsAPI()
+      .then((data: any) => {
+        if (data && Array.isArray(data)) {
+          setConfigurations(data);
+        } else {
+          setConfigurations([]);
+        }
+      })
+      .catch(() => setConfigurations([]));
+  }, [selectedCompany]);
   return (
     <div className="fixed top-0 left-0 w-screen h-32 flex flex-row bg-gray-900 text-white shadow-md z-[100]">
       {/* Logo */}
@@ -27,6 +49,7 @@ const NavBar: React.FC<Props> = (props: Props) => {
         <img src={logo} alt="Vendolution Logo" className="h-32 w-auto" />
       </div>
       <div className = "flex-1 flex items-center justify-center gap-4">
+
         <SearchableDropdown 
           className = ""
           options={companies.map(c => c.name)}
@@ -40,13 +63,22 @@ const NavBar: React.FC<Props> = (props: Props) => {
           selectedColor = "bg-vendolutionLightBlue text-white"
           onChange={name=> {
             const company = companies.find(c => c.name === name);
-            if (company) setSelectedCompany(company);
+            if (company) {
+              setSelectedCompany(company);
+              localStorage.setItem('companyId', company.id);
+            }
           }}
         />
 
         <SearchableDropdown 
           className = ""
-          options={["Machine 1", "Machine 2", "Machine 3", "Machine 4", "Machine 5", "Machine 6", "Machine 7"]} 
+          options={
+            !selectedCompany
+              ? ["Kies eerst een bedrijf"]
+              : configurations.length > 0
+                ? configurations.map(cfg => cfg.name)
+                : ["Geen configuraties gevonden"]
+          }
           placeholder="Kies Machine" 
           buttonColor = "bg-vendolutionWarm"
           backgroundColor = "bg-white"
@@ -55,6 +87,12 @@ const NavBar: React.FC<Props> = (props: Props) => {
           hoverColor = "hover:bg-vendolutionColdBlue"
           focusColor = "focus:ring-vendolutionColdBlue focus:border-vendolutionColdBlue"
           selectedColor = "bg-vendolutionLightBlue text-white"
+          onChange={name => {
+            const config = configurations.find(cfg => cfg.name === name);
+            if (config) {
+              localStorage.setItem('configuration', JSON.stringify({ id: config.id, name: config.name }));
+            }
+          }}
         />
 
         {isLoggedIn() ? (
