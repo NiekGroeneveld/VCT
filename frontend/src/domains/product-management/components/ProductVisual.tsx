@@ -97,7 +97,7 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   const combinedStyles = {
     width: `${width}px`,
     height: `${height}px`,
-    backgroundColor: product.color || "#dbeafe",
+    backgroundColor: product.color || product.ColorHex || "#dbeafe",
     ...style,
     ...dragStyles,
   };

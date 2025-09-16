@@ -21,15 +21,7 @@ export interface Tray{
     hasCollision?: boolean; // Flag to indicate if the tray has a persistent collision with other trays
 }
 
-export interface TrayConfiguration {
-    id: number;
-    name: string;       // Name of the tray configuration
-    trays: Tray[];      // Array of trays in the configuration
-    clientId: number; // ID of the client this configuration belongs to
-    machinedId?: number; // ID of the machine this configuration is for
-    createdAt: string; // Timestamp when the configuration was created
-    updatedAt: string; // Timestamp when the configuration was last updated
-}
+
 
 export interface TrayBounds{
     minDot: number;             // Minimum allowed dot position for the tray    

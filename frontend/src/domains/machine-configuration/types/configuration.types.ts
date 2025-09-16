@@ -7,6 +7,19 @@ supports dragging both products and trays
 import { Product } from "../../product-management/types/product.types";
 import { Tray } from "../../tray-management/types/tray.types";
 
+export interface Configuration {
+    id: number;
+    name: string;       // Name of the tray configuration
+    trays: Tray[];      // Array of trays in the configuration
+    clientId: number; // ID of the client this configuration belongs to
+    machinedId?: number; // ID of the machine this configuration is for
+    createdAt: string; // Timestamp when the configuration was created
+    updatedAt: string; // Timestamp when the configuration was last updated
+}
+
+
+
+
 
 export interface DragItem{
     type: 'PRODUCT' | 'TRAY' | 'TRAY_PRODUCT' | 'TRAY_POSITION'; // Type of the item being dragged

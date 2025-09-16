@@ -2,12 +2,20 @@ import { useCallback, useState } from 'react';
 import { Tray } from '../types/tray.types';
 import { TrayPositionService } from '../../machine-configuration/services/TrayPositionService';
 import { getYPositionDot, ConfigurationConstants } from '../../machine-configuration/types/configuration.types';
+import { configurationAPIService } from '../../../domains/machine-configuration/services/ConfigurationAPIService';
+import { useCompany } from '../../../Context/useCompany';
+import { useConfig } from '../../../Context/useConfig';
 
 export const useTrayDragDrop = (
     trays: Tray[],
     setTrays: (trays: Tray[] | ((prev: Tray[]) => Tray[])) => void
 ) => {
     const [draggedTray, setDraggedTray] = useState<Tray | null>(null);
+    const company = useCompany().selectedCompany;
+    const companyId = company ? Number(company.id) : null;
+    const configuration = useConfig().selectedConfiguration;
+    const configurationId = configuration ? Number(configuration.id) : null;
+
 
     /**
      * starts dragging a tray 
@@ -78,6 +86,11 @@ export const useTrayDragDrop = (
             ));
             setDraggedTray(null);
             console.log(`Tray ${trayId} successfully placed at dot ${clampedDot}`);
+            if(!companyId || !configurationId) {
+                console.error("Cannot update tray position: Missing company or configuration ID");
+                return true; // Position is valid, but we cannot sync with backend
+            }
+            configurationAPIService.UpdateTrayPositionInConfigurationAPI( companyId, configurationId, trayId, clampedDot); // TODO: Replace 1,1 with actual companyId and configurationId
             return true;
         } else {
             // Invalid position - allow placement but collision detection will mark it as colliding

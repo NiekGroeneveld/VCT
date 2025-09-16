@@ -9,12 +9,19 @@ import { TrayPositionService } from '../services/TrayPositionService';
 import { MachineConfigurationZone } from './MachineConfigurationZone';
 import { DraggableTrayWrapper } from '../../tray-management/components/DraggableTrayWrapper';
 import { useScaling } from '../../../hooks/useScaling';
+import { configurationAPIService } from '../services/ConfigurationAPIService';
+import { useConfig } from '../../../Context/useConfig';
+import { useCompany } from '../../../Context/useCompany';
+
+
 
 export const ConfigurationArea: React.FC = () => {
     // Initialize with sample trays
     const [trays, setTrays] = useState<Tray[]>([]);
     const { scaledValue } = useScaling();
-    
+    const { selectedCompany } = useCompany();
+    const { selectedConfiguration } = useConfig();
+
     // Hook for tray positioning (existing)
     const {
         startTrayDrag,
@@ -41,7 +48,19 @@ export const ConfigurationArea: React.FC = () => {
     }, [moveProductBetweenTrays]);
 
     const handleAddTray = () => {
-        // Find the first available position for the new tray
+        
+        // Use selectedCompany and selectedConfiguration from top-level
+        const companyId = selectedCompany?.id;
+        if(!companyId) {
+            console.error("No company selected");
+            return;
+        }
+        const configurationId = selectedConfiguration?.id;
+        if (!configurationId) {
+            console.error("No configuration selected");
+            return;
+        }
+        
         const newTray: Tray = {
             id: Date.now(),
             name: `Tray ${trays.length + 1}`,
@@ -50,6 +69,7 @@ export const ConfigurationArea: React.FC = () => {
             width: TrayConstants.DEFAULT_TRAY_WIDTH,
             products: []
         };
+
 
         // Find a valid position for the new tray
         let validDot = 1;
@@ -64,10 +84,21 @@ export const ConfigurationArea: React.FC = () => {
                 break;
             }
         }
+        
+        
+        // Find the first available position for the new tray
+        const finalTray = configurationAPIService.AddTrayToConfigurationAPI(Number(companyId), Number(configurationId), validDot);
+        
+        
+
+
 
         // Create the tray with the valid position
         const finalTray = { ...newTray, dotPosition: validDot };
         setTrays(prev => [...prev, finalTray]);
+
+
+        
     };
 
     return (
@@ -106,6 +137,13 @@ export const ConfigurationArea: React.FC = () => {
                             }}
                             onRemove={() => {
                                 setTrays(prev => prev.filter(t => t.id !== tray.id));
+                                configurationAPIService.RemoveTrayFromConfigurationAPI(
+                                    Number(selectedCompany?.id), 
+                                    Number(selectedConfiguration?.id), 
+                                    tray.id
+                                );
+                        
+
                             }}
                             onDragStart={startTrayDrag}
                             onDragEnd={endTrayDrag}

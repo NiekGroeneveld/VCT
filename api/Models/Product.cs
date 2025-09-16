@@ -17,6 +17,7 @@ namespace api.Models
         public float Depth { get; set; }
         public bool Stable { get; set; }
         public bool IsActive { get; set; } = true;
+        public bool isPublic { get; set; } = false;
         
 
         // Store color as hex string (e.g., "#FFFFFF", "#FF0000")

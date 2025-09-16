@@ -76,15 +76,14 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     setError(null);
 
     try {
-      // Create product object matching the Product interface
-      const newProduct: Omit<Product, "id"> = {
+      // Create product object matching the backend DTO
+      const newProduct = {
         name: formData.name.trim(),
         width: formData.width,
         height: formData.height,
         depth: formData.depth,
-        stable: formData.stable, // Use the actual stable value from form
-        source: "client" as const,
-        color: formData.color, // Use the selected color from form
+        stable: formData.stable,
+        ColorHex: formData.color, // Use ColorHex to match backend
       };
 
       // Call the product service to create the product
@@ -135,7 +134,6 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     height: formData.height || 120,
     depth: formData.depth || 50,
     stable: formData.stable,
-    source: "client",
     color: formData.color || "#3B82F6",
   };
 

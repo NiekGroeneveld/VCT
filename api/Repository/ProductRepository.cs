@@ -49,6 +49,19 @@ namespace api.Repository
             return await _context.Products.FindAsync(id);
         }
 
+        public Task<List<Product>> GetProductsByCompanyIdAsync(int companyId, bool includePublics = false)
+        {
+            var products = _context.Products
+                .Include(p => p.Company)
+                .Where(p => p.CompanyId == companyId);
+
+            if (includePublics)
+            {
+                products.Union(_context.Products.Where(p => p.isPublic));
+            }
+            return products.ToListAsync();
+        }
+
         public async Task<List<Product>> GetProductsByIdsAsync(List<int> productIds)
         {
             return await _context.Products

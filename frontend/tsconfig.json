@@ -26,5 +26,5 @@
   },
   "include": [
     "src"
-  ]
+, "src/pages/LoginPagesrc/pages/MainPagesrc/pages/RegisterPagestersrc/pages/index.tsindex.ts"  ]
 }

@@ -17,6 +17,7 @@ namespace api.Interfaces
 
         //Additional Methods
         Task<List<Product>> GetProductsByIdsAsync(List<int> productIds);
+        Task<List<Product>> GetProductsByCompanyIdAsync(int companyId, bool includePublics = false);
 
     }
 }

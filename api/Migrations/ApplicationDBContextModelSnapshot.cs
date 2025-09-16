@@ -65,13 +65,13 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5f4de4f1-2da0-4f0b-b9a3-bda4d0cdd686",
+                            Id = "35ae8e18-9eac-4c7d-ae20-7e3b25b7801c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "67cf985f-b964-404d-b387-ee93f8d06147",
+                            Id = "31c93470-fa3f-4a53-87b1-032933cb700d",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -391,6 +391,9 @@ namespace api.Migrations
 
                     b.Property<float>("Width")
                         .HasColumnType("float");
+
+                    b.Property<bool>("isPublic")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 

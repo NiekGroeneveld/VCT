@@ -4,8 +4,12 @@ import SearchableDropdown from '../../shared/components/ui/SearchableDropdown'
 import { useAuth } from '../../Context/useAuth';
 import { Link} from 'lucide-react';
 import  CompanyService from '../../shared/services/CompanyService';
-import * as ConfigurationService from '../../shared/services/ConfigurationService';
+import CreateCompanyModal from '../../shared/modals/createCompanyModal';
+import CreateConfigurationModal from '../../shared/modals/createConfigurationModal';
+import {configurationService} from '../../domains/machine-configuration/services/ConfigurationService';
 import { useCompany } from '../../Context/useCompany';
+import { useConfig } from '../../Context/useConfig';
+import { set } from 'react-hook-form';
 
 
 type Props = {}
@@ -13,12 +17,17 @@ type Props = {}
 const NavBar: React.FC<Props> = (props: Props) => {
   const {isLoggedIn, user, token, logoutUser} = useAuth();
   const { selectedCompany, setSelectedCompany } = useCompany();
+  const { selectedConfiguration, setSelectedConfiguration } = useConfig();
   const [companies, setCompanies] = React.useState<{ id: string; name: string }[]>([]);
   const [configurations, setConfigurations] = React.useState<{ id: string; name: string }[]>([]);
+  // Dropdown menu state and close logic
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [showCreateCompany, setShowCreateCompany] = React.useState(false);
+  const [showCreateConfiguration, setShowCreateConfiguration] = React.useState(false);
 
   useEffect(() => {
     if(!token) return;
-    CompanyService.getAllCompaniesAPI().then(res => {
+    CompanyService.getMyCompaniesAPI().then(res => {
       if (res && res.data) setCompanies(res.data);
     })
     .catch(err => { /* handle error */ });
@@ -26,13 +35,13 @@ const NavBar: React.FC<Props> = (props: Props) => {
 
   // Load configurations when a company is selected
   useEffect(() => {
+    // Reset selected configuration when company changes
+    setSelectedConfiguration(null);
     if (!selectedCompany) {
       setConfigurations([]);
       return;
     }
-    // Store companyId in localStorage for ConfigurationService
-    localStorage.setItem('companyId', selectedCompany.id);
-    ConfigurationService.getMyConfigurationsAPI()
+    configurationService.GetMyConfigurationsAPI(Number(selectedCompany.id))
       .then((data: any) => {
         if (data && Array.isArray(data)) {
           setConfigurations(data);
@@ -42,6 +51,17 @@ const NavBar: React.FC<Props> = (props: Props) => {
       })
       .catch(() => setConfigurations([]));
   }, [selectedCompany]);
+
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.relative')) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
   return (
     <div className="fixed top-0 left-0 w-screen h-32 flex flex-row bg-gray-900 text-white shadow-md z-[100]">
       {/* Logo */}
@@ -64,8 +84,8 @@ const NavBar: React.FC<Props> = (props: Props) => {
           onChange={name=> {
             const company = companies.find(c => c.name === name);
             if (company) {
-              setSelectedCompany(company);
-              localStorage.setItem('companyId', company.id);
+              setSelectedCompany({ id: company.id, name: company.name });
+              setSelectedConfiguration(null); // Clear selected configuration when company changes
             }
           }}
         />
@@ -76,10 +96,11 @@ const NavBar: React.FC<Props> = (props: Props) => {
             !selectedCompany
               ? ["Kies eerst een bedrijf"]
               : configurations.length > 0
-                ? configurations.map(cfg => cfg.name)
+                ? ["Kies Machine", ...configurations.map(cfg => cfg.name)]
                 : ["Geen configuraties gevonden"]
           }
-          placeholder="Kies Machine" 
+          placeholder="kies een configuratie"
+          value={selectedConfiguration ? selectedConfiguration.name : ""}
           buttonColor = "bg-vendolutionWarm"
           backgroundColor = "bg-white"
           textColor = "text-black"
@@ -90,22 +111,46 @@ const NavBar: React.FC<Props> = (props: Props) => {
           onChange={name => {
             const config = configurations.find(cfg => cfg.name === name);
             if (config) {
-              localStorage.setItem('configuration', JSON.stringify({ id: config.id, name: config.name }));
+              setSelectedConfiguration({ id: config.id, name: config.name });
             }
           }}
         />
 
         {isLoggedIn() ? (
           <div className ="hidden lg:flex items-center space-x-6 test-back">
-            <div className="hover:text-vendolutionLightBlue"> {user?.email} </div>
-            <a
-              onClick={logoutUser}
-              className = "px-8 py-3 font-bold rounded text white bg-vendolutionGreen hover:opacity-70"
-            >
-              Logout
-            </a>
+            {/* Hamburger menu button with user email inside */}
+            <div className="relative">
+              <button
+                className="flex flex-row items-center justify-between min-w-[200px] h-10 px-4 bg-vendolutionGreen rounded hover:bg-vendolutionColdBlue border border-gray-300 focus:outline-none"
+                type="button"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <span className="truncate mr-2 text-white">{user?.email}</span>
+                <span className="flex flex-col justify-center ml-2">
+                  <span className="block w-6 h-0.5 bg-white mb-1"></span>
+                  <span className="block w-6 h-0.5 bg-white mb-1"></span>
+                  <span className="block w-6 h-0.5 bg-white"></span>
+                </span>
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <button
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={logoutUser}
+                  >Logout</button>
+                  <button
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => { setShowCreateCompany(true); setMenuOpen(false); }}
+                  >Create Company</button>
+                  <button
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => {setShowCreateConfiguration(true); setMenuOpen(false); }}
+                  >Create Configuration</button>
+                </div>
+              )}
+            </div>
           </div>
-          ) : (
+        ) : (
           <div className ="hidden lg:flex items-center space-x-6 test-back">
             <Link to="/login" className="hover:text-vendolutionLightBlue">Login </Link>
             <Link 
@@ -115,8 +160,37 @@ const NavBar: React.FC<Props> = (props: Props) => {
               Make Account
             </Link>
           </div>
-          )}
+        )}
       </div>
+      {/* Create Company Modal */}
+      <CreateCompanyModal
+        isOpen={showCreateCompany}
+        onClose={() => setShowCreateCompany(false)}
+        onCreate={() => {
+          // Refresh companies after creating a new one
+          if (token) {
+            CompanyService.getMyCompaniesAPI().then(res => {
+              if (res && res.data) setCompanies(res.data);
+            });
+          }
+        }}
+      />
+
+      {/* Create Configuration Modal */}
+      <CreateConfigurationModal
+        isOpen={showCreateConfiguration}
+        onClose={() => setShowCreateConfiguration(false)}
+        onCreate={() => {
+          // Refresh configurations after creating a new one
+          if (selectedCompany || token) {
+            configurationService.GetMyConfigurationsAPI(Number(selectedCompany?.id)).then(res => {
+              if (res && Array.isArray(res)) setConfigurations(res);
+            });
+          }
+        }}
+      />
+            
+                  
     </div>
   );
 };

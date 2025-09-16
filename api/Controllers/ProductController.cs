@@ -49,9 +49,20 @@ namespace api.Controllers
             }
 
             var products = await _productRepo.GetAllAsync();
-            // Filter products to only include those for this company
-            var companyProducts = products.Where(p => p.CompanyId == companyId);
-            return Ok(companyProducts.Select(p => p.ToDTO()));
+            return Ok(products.Select(p => p.ToDTO()));
+        }
+
+        [HttpGet("getCompanyProducts/{usePublics?}")]
+        public async Task<IActionResult> GetAllForCompany([FromRoute] int companyId, [FromRoute] bool usePublics)
+        {
+            // Check if user belongs to the company
+            if (!await UserBelongsToCompany(companyId))
+            {
+                return Forbid("You don't have access to products for this company");
+            }
+
+            var products = await _productRepo.GetProductsByCompanyIdAsync(companyId);
+            return Ok(products.Select(p => p.ToDTO()));
         }
 
         [HttpGet("{id}")]

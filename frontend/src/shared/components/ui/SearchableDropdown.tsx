@@ -39,6 +39,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedValue, setSelectedValue] = useState(value);
+
+  // Keep selectedValue in sync with value prop (controlled component)
+  useEffect(() => {
+    setSelectedValue(value);
+  }, [value]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 

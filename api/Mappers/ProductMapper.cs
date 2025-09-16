@@ -35,7 +35,7 @@ namespace api.Mappers
                 Depth = productDto.Depth,
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
-                Company = null //implement when controller is ready
+                Company = null //added later in controller
             };
         }
 
@@ -50,7 +50,7 @@ namespace api.Mappers
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
                 CreatedAt = DateTime.UtcNow,
-                Company = null //add functionality later on when the Company repository is ready
+                Company = null //added later in controller
             };
         }
 

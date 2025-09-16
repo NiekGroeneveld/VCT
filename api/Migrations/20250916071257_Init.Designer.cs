@@ -12,8 +12,8 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250902145613_AddConfigurationTypeDataId")]
-    partial class AddConfigurationTypeDataId
+    [Migration("20250916071257_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,13 +68,13 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "852f6f25-eae4-4ab3-977b-77a775646a37",
+                            Id = "329e774d-f81b-46d2-8529-8ae7cb6bef46",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c93f58bc-3af0-449e-a574-b7078f930350",
+                            Id = "911c6ff1-e785-4fee-adbc-06541de0e52b",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -394,6 +394,9 @@ namespace api.Migrations
 
                     b.Property<float>("Width")
                         .HasColumnType("float");
+
+                    b.Property<bool>("isPublic")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 

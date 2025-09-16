@@ -7,8 +7,8 @@ export interface Product {
     height: number;     // Height in mm
     depth: number;      // Depth in mm
     stable: boolean;    // Indicates if the product is stable
-    source: 'client' | 'account'; //Origin of the product data
     color: string;      // Visual representation color of the product
+    ColorHex?: string;  // Optional: backend color property for fallback
 }
 
 export interface PlacedProductBase extends Product {

@@ -1,5 +1,6 @@
 // src/components/ProductList.tsx - Clean version using ProductVisual
 import React, { useState, useEffect } from "react";
+import { useCompany } from "../../../Context/useCompany";
 import { Plus, Search } from "lucide-react";
 import { Product } from "../types/product.types";
 import { productService } from "../services/productService";
@@ -20,23 +21,34 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [addProductModalOpen, setAddProductModalOpen] =
     useState<boolean>(false);
   const { scale } = useScaling();
+  const { selectedCompany } = useCompany();
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    if (selectedCompany) {
+      loadProducts();
+    } else {
+      setProducts([]);
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompany]);
 
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const libraryProducts = await productService.getLibraryProducts();
-      setProducts(libraryProducts);
+      if (!selectedCompany) {
+        setProducts([]);
+        return;
+      }
+    const CompanyProducts = await productService.GetCompanyProductsAPI(Number(selectedCompany.id));
+      setProducts(CompanyProducts);
     } catch (error) {
       console.error("Failed to load products:", error);
     } finally {
       setLoading(false);
     }
   };
-
+// Removed stray if (!selectedCompany) {
   // ✅ NEW: Filter products based on search term
   const filteredProducts = React.useMemo(() => {
     if (!searchTerm.trim()) {
@@ -136,8 +148,8 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         <div
           className="grid gap-3"
           style={{
-            gridTemplateColumns: `repeat(${gridDimensions.cols}, max-content)`, // ✅ FIXED: Each column sizes to its content
-            justifyContent: "start", // ✅ FIXED: Align grid to start instead of stretch
+            gridTemplateColumns: `repeat(${gridDimensions.cols}, max-content)`, 
+            justifyContent: "start", 
             alignItems: "start",
           }}
         >
@@ -170,4 +182,4 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       />
     </div>
   );
-};
+}

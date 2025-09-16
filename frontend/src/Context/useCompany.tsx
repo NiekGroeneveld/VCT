@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 type Company = {
     id: string;
     name: string;

@@ -99,11 +99,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
-// Seed the database with test data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-    await DatabaseSeeder.SeedAsync(context);
+   // await DatabaseSeeder.SeedAsync(context);
 }
 
 // Configure the HTTP request pipeline.

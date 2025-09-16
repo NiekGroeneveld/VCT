@@ -1,5 +1,6 @@
 import { useAuth } from "../../Context/useAuth";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -20,6 +21,7 @@ const validation = Yup.object().shape({
 
 const LoginPage = (props: Props) => {
   const { loginUser } = useAuth();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -86,12 +88,13 @@ const LoginPage = (props: Props) => {
               </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don’t have an account yet?{" "}
-                <a
-                  href="#"
-                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                <button
+                  type="button"
+                  onClick={() => navigate("/register")}
+                  className="font-medium text-primary-600 hover:underline dark:text-primary-500 bg-transparent border-none cursor-pointer"
                 >
                   Sign up
-                </a>
+                </button>
               </p>
             </form>
           </div>
