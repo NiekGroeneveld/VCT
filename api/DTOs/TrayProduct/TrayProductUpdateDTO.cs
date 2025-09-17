@@ -8,6 +8,6 @@ namespace api.DTOs.TrayProduct
     public class TrayProductUpdateDTO
     {
         public int ProductId { get; set; }
-        public int ProductChannelPosition { get; set; }
+        public int OnTrayIndex { get; set; }
     }
 }

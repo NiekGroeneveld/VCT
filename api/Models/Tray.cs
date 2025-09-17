@@ -19,6 +19,6 @@ namespace api.Models
         public Configuration Configuration { get; set; } = new Configuration();
 
         [NotMapped]
-        public IEnumerable<Product> Products => TrayProducts.OrderBy(tp => tp.ProductChannelPosition).Select(tp => tp.Product);
+        public IEnumerable<Product> Products => TrayProducts.OrderBy(tp => tp.OnTrayIndex).Select(tp => tp.Product);
     }
 }

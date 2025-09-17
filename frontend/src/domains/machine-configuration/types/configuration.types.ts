@@ -11,8 +11,7 @@ export interface Configuration {
     id: number;
     name: string;       // Name of the tray configuration
     trays: Tray[];      // Array of trays in the configuration
-    clientId: number; // ID of the client this configuration belongs to
-    machinedId?: number; // ID of the machine this configuration is for
+    CompanyId: number; // ID of the client this configuration belongs to
     createdAt: string; // Timestamp when the configuration was created
     updatedAt: string; // Timestamp when the configuration was last updated
 }

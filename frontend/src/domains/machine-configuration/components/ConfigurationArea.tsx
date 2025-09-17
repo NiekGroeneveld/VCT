@@ -61,6 +61,10 @@ export const ConfigurationArea: React.FC = () => {
             return;
         }
         
+        
+        
+        
+        
         const newTray: Tray = {
             id: Date.now(),
             name: `Tray ${trays.length + 1}`,
@@ -69,7 +73,6 @@ export const ConfigurationArea: React.FC = () => {
             width: TrayConstants.DEFAULT_TRAY_WIDTH,
             products: []
         };
-
 
         // Find a valid position for the new tray
         let validDot = 1;
@@ -85,13 +88,6 @@ export const ConfigurationArea: React.FC = () => {
             }
         }
         
-        
-        // Find the first available position for the new tray
-        const finalTray = configurationAPIService.AddTrayToConfigurationAPI(Number(companyId), Number(configurationId), validDot);
-        
-        
-
-
 
         // Create the tray with the valid position
         const finalTray = { ...newTray, dotPosition: validDot };

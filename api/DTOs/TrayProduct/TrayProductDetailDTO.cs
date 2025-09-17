@@ -9,6 +9,6 @@ namespace api.DTOs.TrayProduct
     public class TrayProductDetailDTO
     {
         public ProductDTO Product { get; set; } = new ProductDTO();
-        public int ProductChannelPosition { get; set; }
+        public int OnTrayIndex { get; set; }
     }
 }

@@ -13,7 +13,7 @@ export interface Product {
 
 export interface PlacedProductBase extends Product {
     x: number;        // X coordinate wihtin tray
-    y: number;        // Y coordinate qwithin tray
+    y: number;        // Y coordinate within tray
     onTrayIndex: number; // The place of the product in the tray
     placedAt: number; // Timestamp when the product was placed
     trayId: number; // ID of the tray where the product is placed

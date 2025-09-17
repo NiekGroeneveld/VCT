@@ -49,7 +49,7 @@ namespace api.Data
 
             // Ensure position is between 1 and 10
             modelBuilder.Entity<TrayProduct>()
-                .Property(tp => tp.ProductChannelPosition)
+                .Property(tp => tp.OnTrayIndex)
                 .IsRequired();
 
             base.OnModelCreating(modelBuilder);

@@ -13,7 +13,7 @@ namespace api.Models
         public int TrayId { get; set; }
         public int ProductId { get; set; }
         [Range(1, 10)]
-        public int ProductChannelPosition { get; set; }
+        public int OnTrayIndex { get; set; }
         public DateTime CreatedAt { get; set; }
 
         //Navigation Properties

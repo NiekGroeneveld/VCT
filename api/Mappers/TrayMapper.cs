@@ -22,8 +22,8 @@ namespace api.Mappers
                 Products = tray.TrayProducts?.Select(tp => new TrayProductDetailDTO
                 {
                     Product = tp.Product.ToDTO(),
-                    ProductChannelPosition = tp.ProductChannelPosition
-                }).OrderBy(tp => tp.ProductChannelPosition).ToList() ?? new List<TrayProductDetailDTO>()
+                    OnTrayIndex = tp.OnTrayIndex
+                }).OrderBy(tp => tp.OnTrayIndex).ToList() ?? new List<TrayProductDetailDTO>()
             };
         }
 

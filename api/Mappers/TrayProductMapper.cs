@@ -15,7 +15,7 @@ namespace api.Mappers
             return new TrayProductDetailDTO
             {
                 Product = trayProduct.Product.ToDTO(),
-                ProductChannelPosition = trayProduct.ProductChannelPosition
+                OnTrayIndex = trayProduct.OnTrayIndex
             };
         }
 
@@ -25,7 +25,7 @@ namespace api.Mappers
             {
                 TrayId = trayId,
                 ProductId = trayProductDto.ProductId,
-                ProductChannelPosition = trayProductDto.ProductChannelPosition
+                OnTrayIndex = trayProductDto.OnTrayIndex
             };
         }
     }
