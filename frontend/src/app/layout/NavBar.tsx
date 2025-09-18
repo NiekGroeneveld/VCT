@@ -6,10 +6,10 @@ import { Link} from 'lucide-react';
 import  CompanyService from '../../shared/services/CompanyService';
 import CreateCompanyModal from '../../shared/modals/createCompanyModal';
 import CreateConfigurationModal from '../../shared/modals/createConfigurationModal';
-import {configurationService} from '../../domains/machine-configuration/services/ConfigurationService';
 import { useCompany } from '../../Context/useCompany';
 import { useConfig } from '../../Context/useConfig';
-import { set } from 'react-hook-form';
+import { configurationService } from '../../domains/machine-configuration/services/ConfigurationService';
+
 
 
 type Props = {}
@@ -108,10 +108,11 @@ const NavBar: React.FC<Props> = (props: Props) => {
           hoverColor = "hover:bg-vendolutionColdBlue"
           focusColor = "focus:ring-vendolutionColdBlue focus:border-vendolutionColdBlue"
           selectedColor = "bg-vendolutionLightBlue text-white"
-          onChange={name => {
+          onChange={async name => {
             const config = configurations.find(cfg => cfg.name === name);
             if (config) {
-              setSelectedConfiguration({ id: config.id, name: config.name });
+              const fullConfig = await configurationService.LoadConfigurationAPI(Number(selectedCompany?.id), Number(config.id));
+              setSelectedConfiguration(fullConfig);
             }
           }}
         />

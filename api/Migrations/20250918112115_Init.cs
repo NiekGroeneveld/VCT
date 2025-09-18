@@ -362,7 +362,7 @@ namespace api.Migrations
                     TrayId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false),
-                    ProductChannelPosition = table.Column<int>(type: "int", nullable: false),
+                    OnTrayIndex = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
@@ -388,8 +388,8 @@ namespace api.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "329e774d-f81b-46d2-8529-8ae7cb6bef46", null, "Admin", "ADMIN" },
-                    { "911c6ff1-e785-4fee-adbc-06541de0e52b", null, "User", "USER" }
+                    { "34039f44-82cc-4011-b5ce-e2532395ad37", null, "Admin", "ADMIN" },
+                    { "8e2e3d99-a661-4a93-938e-5175279ab7b7", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(

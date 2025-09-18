@@ -9,9 +9,9 @@ import { TrayPositionService } from '../services/TrayPositionService';
 import { MachineConfigurationZone } from './MachineConfigurationZone';
 import { DraggableTrayWrapper } from '../../tray-management/components/DraggableTrayWrapper';
 import { useScaling } from '../../../hooks/useScaling';
-import { configurationAPIService } from '../services/ConfigurationAPIService';
 import { useConfig } from '../../../Context/useConfig';
 import { useCompany } from '../../../Context/useCompany';
+import { configurationService } from '../services/ConfigurationService';
 
 
 
@@ -133,7 +133,7 @@ export const ConfigurationArea: React.FC = () => {
                             }}
                             onRemove={() => {
                                 setTrays(prev => prev.filter(t => t.id !== tray.id));
-                                configurationAPIService.RemoveTrayFromConfigurationAPI(
+                                configurationService.RemoveTrayFromConfigurationAPI(
                                     Number(selectedCompany?.id), 
                                     Number(selectedConfiguration?.id), 
                                     tray.id

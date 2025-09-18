@@ -12,8 +12,8 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250916072228_Init2")]
-    partial class Init2
+    [Migration("20250918112115_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,13 +68,13 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "35ae8e18-9eac-4c7d-ae20-7e3b25b7801c",
+                            Id = "34039f44-82cc-4011-b5ce-e2532395ad37",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "31c93470-fa3f-4a53-87b1-032933cb700d",
+                            Id = "8e2e3d99-a661-4a93-938e-5175279ab7b7",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -450,7 +450,7 @@ namespace api.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductChannelPosition")
+                    b.Property<int>("OnTrayIndex")
                         .HasColumnType("int");
 
                     b.HasKey("TrayId", "ProductId");

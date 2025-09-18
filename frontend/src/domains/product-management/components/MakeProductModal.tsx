@@ -3,6 +3,8 @@ import { Product } from "../types/product.types";
 import { productService } from "../services/productService";
 import { ColorPicker } from "../../../shared/components/ui/ColorPicker";
 import { ProductVisual } from "./ProductVisual";
+import { useCompany } from "../../../Context/useCompany";
+
 
 type MakeProductModalProps = {
   open: boolean;
@@ -34,6 +36,8 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { selectedCompany } = useCompany();
+  const companyId = selectedCompany ? Number(selectedCompany.id) : 0;
 
   const handleInputChange = (
     field: keyof ProductFormData,
@@ -87,7 +91,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       };
 
       // Call the product service to create the product
-      await productService.createProduct(newProduct);
+      await productService.CreateProductAPI(companyId, newProduct);
 
       // Reset form
       setFormData({
