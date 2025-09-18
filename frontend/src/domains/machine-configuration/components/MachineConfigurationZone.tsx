@@ -74,7 +74,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     const isDotOccupied = (dotNumber: number): boolean => {
         return trays.some(tray => {
             const trayBottomDot = tray.dotPosition;
-            const trayTopDot = trayBottomDot + Math.ceil(tray.height / ConfigurationConstants.DOT_DELTA) - 1;
+            const trayTopDot = trayBottomDot + Math.ceil(tray.trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
             return dotNumber >= trayBottomDot && dotNumber <= trayTopDot;
         });
     };
@@ -111,7 +111,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         
         // Gap from top (72) to first tray
         if (sortedTrays.length > 0) {
-            const firstTrayTop = sortedTrays[0].dotPosition + Math.ceil(sortedTrays[0].height / ConfigurationConstants.DOT_DELTA) - 1;
+            const firstTrayTop = sortedTrays[0].dotPosition + Math.ceil(sortedTrays[0].trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
             const gapFromTop = ConfigurationConstants.DOTS - firstTrayTop;
             if (gapFromTop > 0) {
                 gaps.push({ dotNumber: ConfigurationConstants.DOTS, gap: gapFromTop });
@@ -120,7 +120,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         
         // Gaps between trays
         for (let i = 0; i < sortedTrays.length - 1; i++) {
-            const currentTrayTop = sortedTrays[i].dotPosition + Math.ceil(sortedTrays[i].height / ConfigurationConstants.DOT_DELTA) - 1;
+            const currentTrayTop = sortedTrays[i].dotPosition + Math.ceil(sortedTrays[i].trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
             const nextTrayBottom = sortedTrays[i + 1].dotPosition;
             const gap = nextTrayBottom - currentTrayTop - 1;
             if (gap > 0) {

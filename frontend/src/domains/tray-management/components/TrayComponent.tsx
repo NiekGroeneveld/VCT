@@ -90,8 +90,8 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   `.trim();
 
   const trayStyle = {
-    width: `${scaledValue(tray.width)}px`, // Scaled width
-    height: `${scaledValue(tray.height)}px`, // Scaled height
+    width: `${scaledValue(tray.trayWidth)}px`, // Scaled width
+    height: `${scaledValue(tray.trayHeight)}px`, // Scaled height
   };
 
   return (
@@ -132,12 +132,12 @@ const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => {
   const { scaledValue } = useScaling();
   
   const trayBaseHeight = 28; // Height of the tray base in mm
-  const availableTextHeight = tray.height - trayBaseHeight; // Space above the tray base
+  const availableTextHeight = tray.trayHeight - trayBaseHeight; // Space above the tray base
   
   return (
     <div 
       className="relative text-gray-500"
-      style={{ height: `${scaledValue(tray.height)}px` }}
+      style={{ height: `${scaledValue(tray.trayHeight)}px` }}
     >
       {/* Text positioned in the upper portion, above the tray base */}
       <div 
@@ -159,7 +159,7 @@ const TrayEmptyState: React.FC<{ tray: Tray }> = ({ tray }) => {
         style={{
           left: `${scaledValue(0)}px`, // Small margin from edges
           bottom: `${scaledValue(3)}px`,
-          width: `${scaledValue(tray.width - 3)}px`, // Slightly narrower (4px margin on each side)
+          width: `${scaledValue(tray.trayWidth - 3)}px`, // Slightly narrower (4px margin on each side)
           height: `${scaledValue(trayBaseHeight)}px`,
           zIndex: 0,
         }}
@@ -205,7 +205,7 @@ const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => {
       style={{
         left: `${scaledValue(0)}px`, // Small margin from edges
         bottom: `${scaledValue(0)}px`,
-        width: `${scaledValue(tray.width - 3)}px`, // Slightly narrower (4px margin on each side)
+        width: `${scaledValue(tray.trayWidth - 3)}px`, // Slightly narrower (4px margin on each side)
         height: `${scaledValue(28)}px`,
         zIndex: 1,
       }}

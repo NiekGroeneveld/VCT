@@ -8,8 +8,8 @@ export const TrayConstants = {
 
 export interface Tray{
     id: number;          // Unique identifier for the tray
-    width: number;       // Width in mm
-    height: number;     // Height adjustable by products placed on the tray
+    trayWidth: number;       // Width in mm
+    trayHeight: number;     // Height adjustable by products placed on the tray
     products: PlacedProduct[]; // Array of products placed in the tray
     name?: string;      // Optional name for the tray (maybe for standardtrays later on )
     
