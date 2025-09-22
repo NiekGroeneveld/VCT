@@ -37,7 +37,10 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const unscaledY = containerBottomY / scale;
                 const trayId = item.trayId ?? item.tray?.id;
                 if (trayId != null) {
+                    console.log(`[DND] Drop for tray ${trayId} at unscaledY=${unscaledY}`);
                     onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, unscaledY);
+                } else {
+                    console.warn('[DND] Drop item missing trayId');
                 }
             }
             return { dropped: true };

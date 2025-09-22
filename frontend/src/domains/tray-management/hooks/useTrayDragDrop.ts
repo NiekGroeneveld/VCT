@@ -8,6 +8,8 @@ import {
 import { configurationService } from "../../machine-configuration/services/ConfigurationService";
 import { useCompany } from "../../../Context/useCompany";
 import { useConfig } from "../../../Context/useConfig";
+import { TrayProductManager } from "../services/TrayProductManager";
+import { config } from "process";
 
 export const useTrayDragDrop = (
   trays: Tray[],
@@ -16,8 +18,8 @@ export const useTrayDragDrop = (
   const [draggedTray, setDraggedTray] = useState<Tray | null>(null);
   const company = useCompany().selectedCompany;
   const companyId = company ? Number(company.id) : null;
-  const configuration = useConfig().selectedConfiguration;
-  const configurationId = configuration ? Number(configuration.id) : null;
+  const { selectedConfiguration, setSelectedConfiguration } = useConfig();
+  const configurationId = selectedConfiguration ? Number(selectedConfiguration.id) : null;
 
   /**
    * starts dragging a tray
@@ -45,8 +47,8 @@ export const useTrayDragDrop = (
         // Since dot 1 is at Y=0, dot 2 at Y=135, etc., we can directly convert
         const newDot = getYPositionDot(newYposition);
         const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
+        //console.log(`Dragging tray ${trayId} to Y=${newYposition} (dot ${newDot}, clamped to ${clampedDot})`);
 
-        console.log(`Dragging tray ${trayId} to Y=${newYposition} (dot ${newDot}, clamped to ${clampedDot})`);
 
         setTrays(prev => prev.map(tray => {
             if (tray.id !== trayId) return tray;
@@ -68,6 +70,17 @@ export const useTrayDragDrop = (
    */
   const endTrayDrag = useCallback(
     (trayId: number, _finalYPosition: number) => {
+      if (Number.isNaN(_finalYPosition)) {
+        console.log(`[DND] Cancel drag for tray ${trayId}`);
+      } else {
+        console.log(`[DND] Approve drop for tray ${trayId}`);
+      }
+      // If drag ended without a valid drop target, just reset flags and skip API
+      if (Number.isNaN(_finalYPosition)) {
+        setTrays(prev => prev.map(t => t.id === trayId ? { ...t, isDragging: false, dragStartDot: undefined } : t));
+        setDraggedTray(null);
+        return false;
+      }
       // Use the tray's current dotPosition from state (kept updated by hover)
       const tray = trays.find((t) => t.id === trayId);
 
@@ -96,13 +109,27 @@ export const useTrayDragDrop = (
         );
         setDraggedTray(null);
         if (companyId && configurationId) {
-          configurationService.UpdateTrayPositionInConfigurationAPI(
-            companyId,
-            configurationId,
-            trayId,
-            clampedDot
-          );
+          configurationService
+            .UpdateTrayPositionInConfigurationAPI(
+              companyId,
+              configurationId,
+              trayId,
+              clampedDot
+            )
+            .then(async () => {
+              const config = await configurationService.LoadConfigurationAPI(companyId, configurationId);
+              if (config) {
+                setSelectedConfiguration(config);
+                setTrays(config.trays || []);
+                localStorage.setItem('selectedConfiguration', JSON.stringify(config));
+              }
+            })
+            .catch(err => console.error('[DND] API error updating tray position', err));
+        } else {
+          console.warn('Missing companyId/configurationId; skipping API update.');
         }
+        console.log(`Tray ${trayId} placed at dot ${clampedDot}`);
+
         return true;
       } else {
         // Invalid position - allow placement but collision detection will mark it as colliding
@@ -121,7 +148,7 @@ export const useTrayDragDrop = (
         return true;
       }
     },
-    [setTrays, trays]
+    [setTrays, trays, companyId, configurationId, setSelectedConfiguration]
   );
 
   return {

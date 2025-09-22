@@ -46,14 +46,9 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
             isDragging: monitor.isDragging()
         }),
         end: (item, monitor) => {
-            const clientOffset = monitor.getClientOffset();
-            
-            if (clientOffset) {
-                const success = onDragEnd(tray.id, clientOffset.y);
-                if (!success) {
-                    console.warn(`Failed to place tray ${tray.id} at position`);
-                }
-            }
+            const didDrop = monitor.didDrop();
+            console.log(`[DND] Source end for tray ${tray.id}. didDrop=${didDrop}`);
+            onDragEnd(tray.id, didDrop ? 0 : Number.NaN);
         }
     });
 
