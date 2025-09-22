@@ -27,7 +27,7 @@ export const useCollisionDetection = (
                     id: t.id, 
                     hasCollision: t.hasCollision,
                     position: t.dotPosition,
-                    height: t.height
+                    height: t.trayHeight
                 })));
             }
             
@@ -42,10 +42,12 @@ export const useCollisionDetection = (
         updateCollisionStatus();
     }, [updateCollisionStatus]);
 
-    // Auto-update collision status whenever trays change
+    // Join tray info into a single string to keep dependency array stable
+    const traySignature = trays.map(t => `${t.id}-${t.dotPosition}-${t.trayHeight}`).join('|');
     useEffect(() => {
         updateCollisionStatus();
-    }, [trays.length, ...trays.map(t => `${t.id}-${t.dotPosition}-${t.height}`)]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [traySignature]);
 
     return {
         recalculateCollisions

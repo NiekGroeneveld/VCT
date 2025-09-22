@@ -20,7 +20,7 @@ export class TrayPositionService {
         }
 
         //Check top space constraints
-        const trayTopPosition = getDotYPosition(targetDot) + tray.height;
+        const trayTopPosition = getDotYPosition(targetDot) + tray.trayHeight;
         const maxAllowedHeight = ConfigurationConstants.MACHINE_HEIGHT
 
         if(trayTopPosition > maxAllowedHeight) {
@@ -59,7 +59,7 @@ export class TrayPositionService {
      */
     static calculateTopDotForTray(tray: Tray, targetDot: number): number {
         const bottomY = getDotYPosition(targetDot);
-        const topY = bottomY + tray.height;
+        const topY = bottomY + tray.trayHeight;
         return Math.ceil(topY / ConfigurationConstants.DOT_DELTA);
     }
 

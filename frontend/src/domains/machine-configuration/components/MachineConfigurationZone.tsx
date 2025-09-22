@@ -2,12 +2,14 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { Tray } from '../../tray-management/types/tray.types';
-import { ConfigurationConstants, getDotYPosition } from '../types/configuration.types';
+import { ConfigurationConstants, getDotYPosition, DragItem } from '../types/configuration.types';
 import { useScaling } from '../../../hooks/useScaling';
+import { useCompany } from '../../../Context/useCompany';
+import { useConfig } from '../../../Context/useConfig';
 
 interface MachineConfigurationZoneProps {
     trays: Tray[];
-    onTrayPositionChange: (trayId: number, newYPosition: number) => void;
+    onTrayPositionChange: (companyId: number, configurationId: number, trayId: number, newYPosition: number) => void;
     children: React.ReactNode;
     className?: string;
 }
@@ -19,10 +21,12 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     className = ""
 }) => {
     const { scaledValue, scale } = useScaling();
+    const { selectedConfiguration, setSelectedConfiguration } = useConfig();
+    const { selectedCompany } = useCompany();
     
     const [{ isOver, canDrop, draggedItem }, drop] = useDrop({
         accept: 'TRAY_POSITION',
-        drop: (item: any, monitor) => {
+        drop: (item: DragItem, monitor) => {
             const clientOffset = monitor.getClientOffset();
             const containerRect = divRef.current?.getBoundingClientRect();
             if (clientOffset && containerRect) {
@@ -31,7 +35,10 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const containerBottomY = containerRect.height - relativeY;
                 // Convert back to unscaled coordinates for data storage
                 const unscaledY = containerBottomY / scale;
-                onTrayPositionChange(item.trayId, unscaledY);
+                const trayId = item.trayId ?? item.tray?.id;
+                if (trayId != null) {
+                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, unscaledY);
+                }
             }
             return { dropped: true };
         },
@@ -40,7 +47,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             canDrop: monitor.canDrop(),
             draggedItem: monitor.getItem()
         }),
-        hover: (item: any, monitor) => {
+        hover: (item: DragItem, monitor) => {
             const clientOffset = monitor.getClientOffset();
             const containerRect = divRef.current?.getBoundingClientRect();
             if (clientOffset && containerRect) {
@@ -49,7 +56,10 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const containerBottomY = containerRect.height - relativeY;
                 // Convert back to unscaled coordinates for data storage
                 const unscaledY = containerBottomY / scale;
-                onTrayPositionChange(item.trayId, unscaledY);
+                const trayId = item.trayId ?? item.tray?.id;
+                if (trayId != null) {
+                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, unscaledY);
+                }
             }
         }
     });
@@ -236,7 +246,11 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                             {canDrop ? '✓ Valid Position' : '✗ Invalid Position'}
                         </div>
                         <div className="text-xs text-gray-600 mt-1">
-                            Moving {draggedItem.tray?.name || `Tray ${draggedItem.trayId}`}
+                            {(() => {
+                                const name = (draggedItem as DragItem)?.tray?.name;
+                                const id = (draggedItem as DragItem)?.trayId ?? (draggedItem as DragItem)?.tray?.id;
+                                return `Moving ${name ?? `Tray ${id}`}`;
+                            })()}
                         </div>
                         {!canDrop && (
                             <div className="text-xs text-red-500 mt-1">
