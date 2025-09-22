@@ -359,15 +359,16 @@ namespace api.Migrations
                 name: "TrayProducts",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     TrayId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
                     OnTrayIndex = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TrayProducts", x => new { x.TrayId, x.ProductId });
+                    table.PrimaryKey("PK_TrayProducts", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TrayProducts_Products_ProductId",
                         column: x => x.ProductId,
@@ -388,8 +389,8 @@ namespace api.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "34039f44-82cc-4011-b5ce-e2532395ad37", null, "Admin", "ADMIN" },
-                    { "8e2e3d99-a661-4a93-938e-5175279ab7b7", null, "User", "USER" }
+                    { "36120e15-6e2c-4f25-9b10-965d562b4761", null, "User", "USER" },
+                    { "da137b66-6bfe-4e6e-beb2-ae0c4e2db348", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -453,6 +454,12 @@ namespace api.Migrations
                 name: "IX_TrayProducts_ProductId",
                 table: "TrayProducts",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrayProducts_TrayId_OnTrayIndex",
+                table: "TrayProducts",
+                columns: new[] { "TrayId", "OnTrayIndex" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Trays_ConfigurationId",

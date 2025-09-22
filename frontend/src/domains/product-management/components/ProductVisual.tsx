@@ -61,7 +61,8 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
           `Dropped product ${item.product.name} into tray ${dropResult.trayId}`
         );
         if (companyId && configurationId) {
-          const positionOnTray = dropResult.targetIndex ?? 0;
+          // Backend expects 1-based OnTrayIndex
+          const positionOnTray = (dropResult.targetIndex ?? 0) + 1;
           configurationService.PlaceProductOnTrayAPI(Number(companyId), Number(configurationId), dropResult.trayId, item.product.id, positionOnTray);
         }
         else{

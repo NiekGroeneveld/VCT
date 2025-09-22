@@ -42,6 +42,7 @@ namespace api.Controllers
             var product = await _productRepo.GetByIdAsync(productId);
             if (product == null) return NotFound("Product not found");
 
+
             if (tray.TrayProducts.Any(tp => tp.OnTrayIndex == positionOnTray))
             {
                 return BadRequest($"Position {positionOnTray} on tray {trayId} is already occupied.");

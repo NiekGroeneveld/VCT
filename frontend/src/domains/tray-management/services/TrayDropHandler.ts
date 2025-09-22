@@ -60,17 +60,22 @@ export class TrayDropHandler {
 
         const updatedTray = TrayProductManager.addProductToTray(tray, item.product);
         if (updatedTray){
-            // Find the newly added product by most recent placedAt timestamp
-            const newProduct = updatedTray.products.reduce((latest, p) => p.placedAt > latest.placedAt ? p : latest, updatedTray.products[0]);
+            // Identify newly added product by latest placedAt (handle undefined as lowest)
+            const newProduct = updatedTray.products.reduce((latest, p) => {
+                const lp = (latest.placedAt as number | undefined) ?? -Infinity;
+                const cp = (p.placedAt as number | undefined) ?? -Infinity;
+                return cp > lp ? p : latest;
+            }, updatedTray.products[0]);
 
             onTrayUpdate(updatedTray);
 
+            const targetIndex = updatedTray.products.findIndex(p => p === newProduct);
             return {
                 trayId: updatedTray.id,
                 position: { x: newProduct.x, y: newProduct.y },
                 isValid: true,
                 operation: 'add-product',
-                targetIndex: newProduct.onTrayIndex
+                targetIndex: targetIndex >= 0 ? targetIndex : newProduct.onTrayIndex
             };
         }
 

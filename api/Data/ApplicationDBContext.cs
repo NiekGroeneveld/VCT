@@ -35,7 +35,12 @@ namespace api.Data
 
             // Configure TrayProduct many-to-many with position
             modelBuilder.Entity<TrayProduct>()
-                .HasKey(tp => new { tp.TrayId, tp.ProductId });
+                .HasKey(tp => tp.Id); // Surrogate primary key
+            
+            modelBuilder.Entity<TrayProduct>().Property(tp => tp.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<TrayProduct>()
+                .HasIndex(tp => new { tp.TrayId, tp.OnTrayIndex })
+                .IsUnique();
 
             modelBuilder.Entity<TrayProduct>()
                 .HasOne(tp => tp.Tray)

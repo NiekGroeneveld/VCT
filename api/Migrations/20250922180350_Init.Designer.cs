@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250918112115_Init")]
+    [Migration("20250922180350_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -68,13 +68,13 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "34039f44-82cc-4011-b5ce-e2532395ad37",
+                            Id = "da137b66-6bfe-4e6e-beb2-ae0c4e2db348",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "8e2e3d99-a661-4a93-938e-5175279ab7b7",
+                            Id = "36120e15-6e2c-4f25-9b10-965d562b4761",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -438,24 +438,30 @@ namespace api.Migrations
 
             modelBuilder.Entity("api.Models.TrayProduct", b =>
                 {
-                    b.Property<int>("TrayId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("OnTrayIndex")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Id")
+                    b.Property<int>("TrayId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OnTrayIndex")
-                        .HasColumnType("int");
-
-                    b.HasKey("TrayId", "ProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("TrayId", "OnTrayIndex")
+                        .IsUnique();
 
                     b.ToTable("TrayProducts");
                 });
