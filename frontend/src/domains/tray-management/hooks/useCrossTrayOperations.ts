@@ -3,6 +3,7 @@ import { Tray } from '../../tray-management/types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
 import { TrayProductManager } from '../services/TrayProductManager';
 import { CrossTrayDragDropService } from '../services/CrossTrayDragDropService';
+import { configurationService } from '@/domains/machine-configuration/services/ConfigurationService';
 
 /**
  * Hook for managing cross-tray drag and drop operations
@@ -78,6 +79,7 @@ export const useCrossTrayOperations = (
       }));
 
       console.log(`Successfully moved ${productToMove.name} from tray ${sourceTrayId} to tray ${targetTrayId}`);
+
       return true;
     }
 

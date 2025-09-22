@@ -1,8 +1,9 @@
 import axios from "axios";
 import { Configuration } from "../types/configuration.types";
 import { handleError } from "../../../shared/utils/ErrorHandler";
+import { Product } from "@/domains/product-management/types/product.types";
 
-export const AddTrayToConfigurationAPI = async(companyId: number, configurationId: number, trayPosition: number): Promise<any> => {
+export const AddTrayToConfigurationAPI = async(companyId: number, configurationId: number, trayPosition: number): Promise<Configuration | null> => {
     try{
         const api = "http://localhost:5268/api/";
         const token  = localStorage.getItem("token");
@@ -121,18 +122,43 @@ export const GetConfigurationByIdAPI = async(companyId: number, configurationid:
         const token  = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
         if (!companyId) throw new Error("No company selected");
-        const response = await axios.get(api + `companies/${companyId}/configurations/${configurationid}`, {
+        const configuration = await axios.get(api + `companies/${companyId}/configurations/${configurationid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return response.data as Configuration;
+        
+        return configuration.data as Configuration;
     }
     catch (error) {
         handleError(error);
         return null;
     }
 };
+
+export const PlaceProductOnTrayAPI = async(companyId: number, configurationId: number, trayId: number, productId: number, positionOnTray: number): Promise<any> => {
+    try{
+        const api = "http://localhost:5268/api/";
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error("No company selected");
+        if (!configurationId) throw new Error("No configuration selected");
+        const response = await axios.put(
+            api + `companies/${companyId}/configuration/${configurationId}/placedProduct/addProductToTray/${trayId}/${productId}/${positionOnTray}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    }  catch (error) {
+        handleError(error);
+        return null;
+    }
+};
+
 
 // Export a singleton instance
 export const configurationService = {
@@ -142,5 +168,6 @@ export const configurationService = {
     LoadConfigurationAPI
     ,GetMyConfigurationsAPI,
     CreateConfigurationAPI,
-    GetConfigurationByIdAPI 
+    GetConfigurationByIdAPI,
+    PlaceProductOnTrayAPI
 }

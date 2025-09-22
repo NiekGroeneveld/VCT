@@ -3,7 +3,9 @@ import React from "react";
 import { useDrag } from "react-dnd";
 import { DragItem } from '../../machine-configuration/types/configuration.types'; // Adjust the import path as needed
 import { Product, PlacedProduct } from "../types/product.types";
-
+import { useCompany } from "../../../Context/useCompany";
+import { useConfig } from "../../../Context/useConfig";
+import { configurationService } from "../../../domains/machine-configuration/services/ConfigurationService";
 
 interface ProductVisualProps {
   product: Product | PlacedProduct;
@@ -15,7 +17,6 @@ interface ProductVisualProps {
   showStabilityIndicator?: boolean;
   draggable?: boolean;
 }
-
 export const ProductVisual: React.FC<ProductVisualProps> = ({
   product,
   scale = 1, // ✅ DEFAULT: 1mm = 1px (real size)
@@ -26,6 +27,10 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   showStabilityIndicator = true,
   draggable = false,
 }) => {
+  const { selectedCompany } = useCompany();
+  const { selectedConfiguration } = useConfig();
+  const companyId = selectedCompany ? Number(selectedCompany.id) : null;
+  const configurationId = selectedConfiguration ? Number(selectedConfiguration.id) : null;
   // ✅ REAL SIZE: Direct conversion mm to px
   const [{ isDragging }, drag] = useDrag<
     DragItem,
@@ -55,6 +60,14 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
         console.log(
           `Dropped product ${item.product.name} into tray ${dropResult.trayId}`
         );
+        if (companyId && configurationId) {
+          const positionOnTray = dropResult.targetIndex ?? 0;
+          configurationService.PlaceProductOnTrayAPI(Number(companyId), Number(configurationId), dropResult.trayId, item.product.id, positionOnTray);
+        }
+        else{
+          console.error("Cannot place product on tray: Missing company or configuration ID");
+        }
+
       } else if (item.product) {
         console.log(
           `Product ${item.product.name} was dragged but not dropped into a tray`

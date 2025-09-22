@@ -13,7 +13,7 @@ export class ProductSpacingService {
     
         console.log(`TrayProductManager.calculateAdvancedSpacing for ${products.length} products in tray ${tray.id}`);
     
-        const trayWidth = tray.width;
+  const trayWidth = (tray as any).trayWidth ?? (tray as any).width;
         const totalProductWidth = products.reduce((sum, p) => sum + p.width, 0);
         const productCount = products.length;
         

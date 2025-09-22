@@ -20,5 +20,10 @@ namespace api.Models
 
         [NotMapped]
         public IEnumerable<Product> Products => TrayProducts.OrderBy(tp => tp.OnTrayIndex).Select(tp => tp.Product);
+
+        internal object? ToConfigurationAreaTrayDTO()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
