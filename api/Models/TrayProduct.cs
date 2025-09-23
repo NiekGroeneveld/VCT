@@ -12,8 +12,9 @@ namespace api.Models
         public int Id { get; set; }
         public int TrayId { get; set; }
         public int ProductId { get; set; }
-        [Range(1, 10)]
-        public int OnTrayIndex { get; set; }
+    // Use 0-based indexing for positions on the tray
+    [Range(0, 9, ErrorMessage = "OnTrayIndex must be between 0 and 9.")]
+    public int OnTrayIndex { get; set; }
         public DateTime CreatedAt { get; set; }
 
         //Navigation Properties

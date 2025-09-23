@@ -238,5 +238,7 @@ export const configurationService = {
     CreateConfigurationAPI,
     GetConfigurationByIdAPI,
     PlaceProductOnTrayAPI,
-    RemoveProductFromTrayAPI
+    RemoveProductFromTrayAPI,
+    MoveProductBetweenTraysAPI,
+    SameTrayReorderAPI
 }

@@ -38,9 +38,9 @@ namespace api.Data
                 .HasKey(tp => tp.Id); // Surrogate primary key
             
             modelBuilder.Entity<TrayProduct>().Property(tp => tp.Id).ValueGeneratedOnAdd();
+            // Keep a non-unique index for performance but allow flexible reordering at the app level
             modelBuilder.Entity<TrayProduct>()
-                .HasIndex(tp => new { tp.TrayId, tp.OnTrayIndex })
-                .IsUnique();
+                .HasIndex(tp => new { tp.TrayId, tp.OnTrayIndex });
 
             modelBuilder.Entity<TrayProduct>()
                 .HasOne(tp => tp.Tray)

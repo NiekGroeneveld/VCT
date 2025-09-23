@@ -3,6 +3,7 @@
 import { Tray, TrayConstants } from "../types/tray.types";
 import { PlacedProduct } from "../../product-management/types/product.types";
 import  {ProductSpacingService} from "./ProductSpacingService";
+import { TrayProductManager } from "./TrayProductManager";
 
 /**
  * Service for handling product reordering and positioning within trays
@@ -37,10 +38,11 @@ export class TrayProductReorderService {
     // Recalculate positions
     const repositionedProducts = ProductSpacingService.calculateAdvancedSpacing(tray, products);
 
-    return {
+    // Ensure 1-based onTrayIndex reflecting left-to-right order
+    return TrayProductManager.assignOnTrayIndex({
       ...tray,
       products: repositionedProducts
-    };
+    });
   }
 
   /**

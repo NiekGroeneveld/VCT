@@ -100,9 +100,34 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   /**
    * Handles reordering products within the tray
    */
-  const handleReorderProducts = (fromIndex: number, toIndex: number) => {
+  const handleReorderProducts = async (fromIndex: number, toIndex: number) => {
+    // 0-based indices (backend expects 0-based now)
+    const oldIndex = fromIndex;
+    const newIndex = toIndex;
+
+    // Optimistic update locally
+    const prevTray = tray;
     const updatedTray = TrayProductReorderService.reorderProducts(tray, fromIndex, toIndex);
     onUpdate(updatedTray);
+
+    if (!companyId || !configurationId) {
+      console.error('Company ID or Configuration ID not provided for reorder');
+      return;
+    }
+
+    try {
+      await configurationService.SameTrayReorderAPI(
+        companyId,
+        configurationId,
+        tray.id,
+        oldIndex,
+        newIndex
+      );
+    } catch (err) {
+      console.error('Reorder API failed, rolling back UI change', err);
+      // Rollback UI on failure
+      onUpdate(prevTray);
+    }
   };
 
   /**

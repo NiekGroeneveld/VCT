@@ -43,6 +43,7 @@ namespace api.Controllers
             if (product == null) return NotFound("Product not found");
 
 
+            // 0-based index; ensure no duplicate index exists
             if (tray.TrayProducts.Any(tp => tp.OnTrayIndex == positionOnTray))
             {
                 return BadRequest($"Position {positionOnTray} on tray {trayId} is already occupied.");
@@ -120,7 +121,7 @@ namespace api.Controllers
             fromTray.TrayProducts.Remove(trayProduct);
 
             // Add to destination tray at the end
-            int newIndex = toTray.TrayProducts.Count > 0 ? toTray.TrayProducts.Max(tp => tp.OnTrayIndex) + 1 : 1;
+            int newIndex = toTray.TrayProducts.Count > 0 ? toTray.TrayProducts.Max(tp => tp.OnTrayIndex) + 1 : 0;
             trayProduct.OnTrayIndex = newIndex;
             trayProduct.Tray = toTray; // Update the Tray reference
             toTray.TrayProducts.Add(trayProduct);
@@ -155,22 +156,23 @@ namespace api.Controllers
             if (tray == null) return NotFound("Tray not found");
             if (tray.Configuration.Id != configurationId) return BadRequest("Tray does not belong to the specified configuration");
 
-            var trayProduct = tray.TrayProducts.FirstOrDefault(tp => tp.OnTrayIndex == oldIndex);
-            if (trayProduct == null)
+            // Bounds: 0..Count-1
+            int count = tray.TrayProducts.Count;
+            if (oldIndex < 0 || oldIndex >= count || newIndex < 0 || newIndex >= count)
             {
-                return NotFound($"No product found at position {oldIndex} on tray {trayId}.");
+                return BadRequest($"Indices must be between 0 and {count - 1}.");
             }
 
-            if (tray.TrayProducts.Any(tp => tp.OnTrayIndex == newIndex))
+            var ok = await _trayRepo.ReorderWithinTrayAsync(trayId, oldIndex, newIndex);
+            if (!ok)
             {
-                return BadRequest($"Position {newIndex} on tray {trayId} is already occupied.");
+                return BadRequest("Reorder failed.");
             }
 
-            // Update the index
-            trayProduct.OnTrayIndex = newIndex;
-
-            // Persist the change
-            await _trayRepo.UpdateAsync(tray);
+            // Reload tray to reflect DB state using a fresh, untracked query (raw SQL bypassed EF tracking)
+            tray = await _trayRepo.GetByIdFreshAsync(trayId);
+            if (tray == null)
+                return NotFound("Tray not found after reorder.");
 
             if (!TrayProductsIndicesAreValid(tray))
             {
@@ -186,7 +188,8 @@ namespace api.Controllers
         private bool TrayProductsIndicesAreValid(Models.Tray tray)
         {
             var indices = tray.TrayProducts.Select(tp => tp.OnTrayIndex).ToList();
-            for (int i = 1; i <= indices.Count; i++)
+            // 0-based contiguous: 0..Count-1
+            for (int i = 0; i < indices.Count; i++)
             {
                 if (!indices.Contains(i)) return false;
             }

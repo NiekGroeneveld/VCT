@@ -22,7 +22,7 @@ export class TrayProductManager {
     
     // Assign index based on sorted order
     for (let i = 0; i < sortedProducts.length; i++) {
-      sortedProducts[i].onTrayIndex = i;
+      sortedProducts[i].onTrayIndex = i; // 0-based index
     }
     
     return {
@@ -47,7 +47,7 @@ export class TrayProductManager {
       y,
       placedAt: Date.now(),
       trayId,
-      onTrayIndex: 0 // Will be recalculated by assignOnTrayIndex
+  onTrayIndex: 0 // Will be recalculated by assignOnTrayIndex (0-based)
     };
 
     if (product.stable) {
