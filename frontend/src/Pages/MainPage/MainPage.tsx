@@ -1,13 +1,33 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ScalingProvider, useScaling } from '../../hooks/useScaling';
 import TopBar from '../../app/layout/NavBar';
 import { ProductList } from '../../domains/product-management/components/ProductList';
 import { ConfigurationArea } from '../../domains/machine-configuration/components/ConfigurationArea';
+import { openA4PrintWindowForMachineConfiguration } from '../../shared/services/PdfExportService';
+import { useCompany } from '../../Context/useCompany';
+import { useConfig } from '../../Context/useConfig';
 
 const MainContent = () => {
   const { scaledValue } = useScaling();
+  const { selectedCompany } = useCompany();
+  const { selectedConfiguration } = useConfig();
+
+  const handlePrintToPdf = useCallback(async () => {
+    const el = document.getElementById('machine-configuration-zone');
+    if (!el) {
+      console.error('MachineConfigurationZone element not found');
+      return;
+    }
+    await openA4PrintWindowForMachineConfiguration({
+      element: el,
+      companyName: selectedCompany?.name,
+      configurationName: selectedConfiguration?.name,
+      configurationTypeDataName: (selectedConfiguration as any)?.configurationType || (selectedConfiguration as any)?.configurationTypeDataName,
+      orientation: 'portrait'
+    });
+  }, [selectedCompany?.name, selectedConfiguration?.name, selectedConfiguration]);
   
   return (
     <main className="pt-32 p-4 h-screen overflow-hidden">
@@ -33,14 +53,15 @@ const MainContent = () => {
               Manage your trays and view configuration details here.
             </div>
             
-            {/* Placeholder for tray management - this will be enhanced later */}
+            {/* ButtonSpace */}
             <div className="space-y-2 mb-4">
-              <div className="text-sm p-2 bg-gray-50 rounded">
-                <div className="font-medium">No trays configured</div>
-                <div className="text-gray-500 text-xs">
-                  Add trays to see them here
-                </div>
-              </div>
+              <button
+                onClick={handlePrintToPdf}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded shadow"
+                title="Export Configuration to PDF"
+              >
+                Print to PDF
+              </button>
             </div>
             
             <div className="text-xs text-gray-400">

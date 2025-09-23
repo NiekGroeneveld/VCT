@@ -145,7 +145,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     };
 
     return (
-        <div className="flex">
+        <div className="flex" id="machine-configuration-zone">
             {/* Left side: Dot indicators */}
             <div 
                 className="flex-shrink-0 relative bg-gray-100 border-r-2 border-black"
