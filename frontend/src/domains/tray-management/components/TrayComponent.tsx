@@ -10,6 +10,7 @@ import { TrayProductManager } from "../services/TrayProductManager";
 import { TrayProductReorderService } from "../services/TrayProductReorderService";
 import { DraggableTrayProduct } from "./DraggableTrayProduct";
 import { useScaling } from "../../../hooks/useScaling";
+import { configurationService } from "../../machine-configuration/services/ConfigurationService";
 
 interface TrayComponentProps {
   tray: Tray;
@@ -17,6 +18,8 @@ interface TrayComponentProps {
   onRemove: () => void;
   onProductMoveBetweenTrays?: (product: PlacedProduct, fromIndex: number, fromTrayId: number, toTrayId: number) => void;
   variant?: 'standalone' | 'managed'; // New prop to control behavior
+  companyId?: number; // Add company ID for API calls
+  configurationId?: number; // Add configuration ID for API calls
 }
 
 export const TrayComponent: React.FC<TrayComponentProps> = ({
@@ -24,7 +27,9 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   onUpdate,
   onRemove,
   onProductMoveBetweenTrays,
-  variant = 'standalone'
+  variant = 'standalone',
+  companyId,
+  configurationId
 }) => {
   const { scaledValue } = useScaling();
   
@@ -59,9 +64,37 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   /**
    * Handles product removal by index
    */
-  const handleRemoveProduct = (productIndex: number) => {
-    const updatedTray = TrayProductManager.removeProductByIndex(tray, productIndex);
-    onUpdate(updatedTray);
+  const handleRemoveProduct = async (productIndex: number) => {
+    if (!companyId || !configurationId) {
+      console.error('Company ID or Configuration ID not provided for product removal');
+      return;
+    }
+
+    try {
+      // Get the product to find its position on tray
+      const productToRemove = tray.products[productIndex];
+      if (!productToRemove) {
+        console.error('Product not found at index:', productIndex);
+        return;
+      }
+
+      // Call API to remove product from backend
+      await configurationService.RemoveProductFromTrayAPI(
+        companyId,
+        configurationId,
+        tray.id,
+        productToRemove.onTrayIndex
+      );
+
+      // Update local state by removing the product
+      const updatedTray = TrayProductManager.removeProductByIndex(tray, productIndex);
+      onUpdate(updatedTray);
+
+      console.log(`Successfully removed product ${productToRemove.name} from tray ${tray.id}`);
+    } catch (error) {
+      console.error('Failed to remove product:', error);
+      // You might want to show a user-friendly error message here
+    }
   };
 
   /**

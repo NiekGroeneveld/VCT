@@ -93,6 +93,7 @@ builder.Services.AddScoped<ITrayRepository, TrayRepository>();
 builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddScoped<IConfigurationTypeDataRepository, ConfigurationTypeDataRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ITrayProductRepository, TrayProductRepository>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 

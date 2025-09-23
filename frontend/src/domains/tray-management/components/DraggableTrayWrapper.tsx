@@ -14,6 +14,8 @@ interface DraggableTrayWrapperProps {
     onDragUpdate: (trayId: number, currentYPosition: number) => void;
     // ADD THIS: Props for cross-tray operations
     onProductMoveBetweenTrays?: (product: PlacedProduct, fromIndex: number, fromTrayId: number, toTrayId: number) => void;
+    companyId?: number; // Add company ID for API calls
+    configurationId?: number; // Add configuration ID for API calls
     style?: React.CSSProperties;
     className?: string;
 }
@@ -26,6 +28,8 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
     onDragEnd,
     onDragUpdate,
     onProductMoveBetweenTrays, // ADD THIS
+    companyId,
+    configurationId,
     style,
     className = ""
 }) => {
@@ -136,6 +140,8 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     onUpdate={onUpdate}
                     onRemove={onRemove}
                     onProductMoveBetweenTrays={onProductMoveBetweenTrays} // ADD THIS LINE
+                    companyId={companyId}
+                    configurationId={configurationId}
                     variant="managed" // ADD THIS LINE
                 />
             </div>

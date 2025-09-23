@@ -42,6 +42,11 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       }
     const CompanyProducts = await productService.GetCompanyProductsAPI(Number(selectedCompany.id));
       setProducts(CompanyProducts);
+      
+      // Dispatch event to notify other components (like ConfigurationArea) that products were refreshed
+      window.dispatchEvent(new CustomEvent('productRefresh', { 
+        detail: { products: CompanyProducts, companyId: selectedCompany.id } 
+      }));
     } catch (error) {
       console.error("Failed to load products:", error);
     } finally {

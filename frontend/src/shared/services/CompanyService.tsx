@@ -1,13 +1,12 @@
 import axios from "axios";
 import { handleError } from "../utils/ErrorHandler";
 import { UserProfileToken } from "../types/User";
-
-const api = "http://localhost:5268/api/";
+import { API_BASE_URL } from "../constants";
 
 export const getMyCompaniesAPI = async () => {
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.get(api + "companies/my-companies", {
+        const data = await axios.get(API_BASE_URL + "companies/my-companies", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -21,7 +20,7 @@ export const getMyCompaniesAPI = async () => {
 export const getAllCompaniesAPI = async () => {
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.get(api + "companies", {
+        const data = await axios.get(API_BASE_URL + "companies", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -35,7 +34,7 @@ export const getAllCompaniesAPI = async () => {
 export const createCompanyAPI = async (name: string) => {
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.post(api + "companies", {
+        const data = await axios.post(API_BASE_URL + "companies", {
             name: name,
         }, { headers: {
             Authorization: `Bearer ${token}`
@@ -49,7 +48,7 @@ export const createCompanyAPI = async (name: string) => {
 export const deleteCompanyAPI = async (id: number) => {
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.delete(api + `companies/${id}`, {
+        const data = await axios.delete(API_BASE_URL + `companies/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`    
             }
@@ -64,7 +63,7 @@ export const deleteCompanyAPI = async (id: number) => {
 export const updateCompanyAPI = async (id: number, name: string) => {   
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.put(api + `companies/${id}`, {
+        const data = await axios.put(API_BASE_URL + `companies/${id}`, {
             name: name,
         }, { headers: { 
             Authorization: `Bearer ${token}`
@@ -78,7 +77,7 @@ export const updateCompanyAPI = async (id: number, name: string) => {
 export const getCompanyByIdAPI = async (id: number) => {
     try {
         const token  = localStorage.getItem("token");
-        const data = await axios.get(api + `companies/${id}`, { 
+        const data = await axios.get(API_BASE_URL + `companies/${id}`, { 
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -309,4 +309,23 @@ export class TrayProductManager {
 
     return { canMove: true };
   }
+
+  static ensureCorrectYCoordinates(tray: Tray): Tray {
+    const correctedProducts = tray.products.map(product => ({
+      ...product,
+      y: calculateYPosition(product)
+    }));
+
+    return {
+      ...tray,
+      products: correctedProducts
+    };
+  }
+
+  /**
+   * Ensures all products in all trays have correct y coordinates
+   */
+  static ensureCorrectYCoordinatesForAllTrays(trays: Tray[]): Tray[] {
+    return trays.map(tray => this.ensureCorrectYCoordinates(tray));
+  }
 }

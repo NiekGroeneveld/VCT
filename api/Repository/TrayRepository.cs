@@ -66,6 +66,9 @@ namespace api.Repository
                     }
                 }
             }
+            tray.UpdatedAt = DateTime.UtcNow;
+            // Reorder OnTrayIndex to be sequential starting from 1
+            tray.TrayProducts = ReorderTrayProducts(tray.TrayProducts);
 
             await _context.SaveChangesAsync();
             return tray;
@@ -78,6 +81,16 @@ namespace api.Repository
                 await UpdateAsync(tray);
             }
             return trays;
+        }
+
+        private List<TrayProduct> ReorderTrayProducts(ICollection<TrayProduct> trayProducts)
+        {
+            var ordered = trayProducts.OrderBy(tp => tp.OnTrayIndex).ToList();
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                ordered[i].OnTrayIndex = i + 1;
+            }
+            return ordered;
         }
     }
 }

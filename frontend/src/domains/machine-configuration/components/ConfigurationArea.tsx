@@ -14,7 +14,8 @@ import { useCollisionDetection } from "../hooks/useCollisionDetection";
 import { useCrossTrayOperations } from "../../../domains/tray-management/hooks/useCrossTrayOperations";
 import { TrayPositionService } from "../services/TrayPositionService";
 import { configurationService } from "../services/ConfigurationService";
-import { Plus } from "lucide-react";
+import { ProductSpacingService } from "../../tray-management/services/ProductSpacingService";
+import { Plus, AlignJustify } from "lucide-react";
 import { get } from "http";
 
 export const ConfigurationArea: React.FC = () => {
@@ -36,6 +37,26 @@ export const ConfigurationArea: React.FC = () => {
     }
   }, [selectedConfiguration]);
 
+  // Apply spacing to all trays after they are loaded
+  const applySpacingToAllTrays = useCallback(() => {
+    setTrays(currentTrays => {
+      const spacedTrays = ProductSpacingService.spaceOutAllTrays(currentTrays);
+      return spacedTrays;
+    });
+  }, []);
+
+  // Auto-apply spacing whenever trays change (e.g., after API refresh)
+  useEffect(() => {
+    if (trays.length > 0) {
+      // Small delay to ensure trays are fully loaded before spacing
+      const timeoutId = setTimeout(() => {
+        applySpacingToAllTrays();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [selectedConfiguration, applySpacingToAllTrays]);
+
   //Hook for collision detection
   const checkCollision = useCollisionDetection(trays, setTrays);
 
@@ -56,16 +77,28 @@ export const ConfigurationArea: React.FC = () => {
       );
     };
 
+    // Listen for product refresh events to automatically apply spacing
+    const handleProductRefresh = () => {
+      console.log("Product refresh detected, applying spacing to all trays");
+      setTimeout(() => {
+        applySpacingToAllTrays();
+      }, 200);
+    };
+
     window.addEventListener(
       "requestCrossTrayProductMove",
       handleCrossTrayRequest
     );
-    return () =>
+    window.addEventListener("productRefresh", handleProductRefresh);
+    
+    return () => {
       window.removeEventListener(
         "requestCrossTrayProductMove",
         handleCrossTrayRequest
       );
-  }, [moveProductBetweenTrays]);
+      window.removeEventListener("productRefresh", handleProductRefresh);
+    };
+  }, [moveProductBetweenTrays, applySpacingToAllTrays]);
 
   const handleAddTray = async () => {
     const companyId = selectedCompany?.id;
@@ -94,6 +127,14 @@ export const ConfigurationArea: React.FC = () => {
       setSelectedConfiguration(config);
       setTrays(config.trays || []);
       localStorage.setItem("selectedConfiguration", JSON.stringify(config));
+      
+      // Apply spacing after loading configuration
+      setTimeout(() => {
+        if (config.trays && config.trays.length > 0) {
+          const spacedTrays = ProductSpacingService.spaceOutAllTrays(config.trays);
+          setTrays(spacedTrays);
+        }
+      }, 150);
     }
   };
 
@@ -140,6 +181,14 @@ export const ConfigurationArea: React.FC = () => {
       setSelectedConfiguration(config);
       setTrays(config.trays || []);
       localStorage.setItem("selectedConfiguration", JSON.stringify(config));
+      
+      // Apply spacing after reloading configuration
+      setTimeout(() => {
+        if (config.trays && config.trays.length > 0) {
+          const spacedTrays = ProductSpacingService.spaceOutAllTrays(config.trays);
+          setTrays(spacedTrays);
+        }
+      }, 150);
     }
   };
 
@@ -149,13 +198,23 @@ export const ConfigurationArea: React.FC = () => {
       <div className="bg-white rounded-t-lg border-b border-gray-300">
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Configuratie</h3>
-          <button
-            onClick={handleAddTray}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md flex items-center gap-2 transition-colors text-sm"
-          >
-            <Plus size={16} />
-            <span>Lade Toevoegen</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={applySpacingToAllTrays}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md flex items-center gap-2 transition-colors text-sm"
+              title="Apply spacing to all products in all trays"
+            >
+              <AlignJustify size={16} />
+              <span>Spacing</span>
+            </button>
+            <button
+              onClick={handleAddTray}
+              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md flex items-center gap-2 transition-colors text-sm"
+            >
+              <Plus size={16} />
+              <span>Lade Toevoegen</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -172,6 +231,8 @@ export const ConfigurationArea: React.FC = () => {
             <DraggableTrayWrapper
               key={tray.id}
               tray={tray}
+              companyId={selectedCompany?.id ? Number(selectedCompany.id) : undefined}
+              configurationId={selectedConfiguration?.id ? Number(selectedConfiguration.id) : undefined}
               onUpdate={(updatedTray) => {
                 setTrays((prevTrays) =>
                   prevTrays.map((t) =>

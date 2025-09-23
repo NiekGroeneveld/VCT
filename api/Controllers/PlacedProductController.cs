@@ -60,5 +60,138 @@ namespace api.Controllers
             return Ok(tray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData));
         }
 
+        [HttpDelete]
+        [Route("removeProductFromTray/{trayId}/{positionOnTray}")]
+        public async Task<IActionResult> RemoveProductFromTray(int companyId, int configurationId, int trayId, int positionOnTray)
+        {
+            var company = await _companyRepo.GetByIdAsync(companyId);
+            if (company == null) return NotFound("Company not found");
+
+            var configuration = await _configurationRepo.GetByIdAsync(configurationId);
+            if (configuration == null) return NotFound("Configuration not found");
+
+            var tray = await _trayRepo.GetByIdAsync(trayId);
+            if (tray == null) return NotFound("Tray not found");
+            if (tray.Configuration.Id != configurationId) return BadRequest("Tray does not belong to the specified configuration");
+
+            var trayProduct = tray.TrayProducts.FirstOrDefault(tp => tp.OnTrayIndex == positionOnTray);
+            if (trayProduct == null)
+            {
+                return NotFound($"No product found at position {positionOnTray} on tray {trayId}.");
+            }
+
+            tray.TrayProducts.Remove(trayProduct);
+            // Persist the change so subsequent GETs reflect the removal
+            await _trayRepo.UpdateAsync(tray);
+
+            if(!TrayProductsIndicesAreValid(tray))
+            {
+                return BadRequest("TrayProduct indices are not valid after removal.");
+            }
+
+            return Ok(tray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData));
+        }
+
+        [HttpPut]
+        [Route("moveProductBetweenTrays/{fromTrayId}/{toTrayId}/{OldIndex}")]
+        public async Task<IActionResult> MoveProductBetweenTrays(int companyId, int configurationId, int fromTrayId, int toTrayId, int OldIndex)
+        {
+            var company = await _companyRepo.GetByIdAsync(companyId);
+            if (company == null) return NotFound("Company not found");
+
+            var configuration = await _configurationRepo.GetByIdAsync(configurationId);
+            if (configuration == null) return NotFound("Configuration not found");
+
+            var fromTray = await _trayRepo.GetByIdAsync(fromTrayId);
+            if (fromTray == null) return NotFound("Source Tray not found");
+            if (fromTray.Configuration.Id != configurationId) return BadRequest("Source Tray does not belong to the specified configuration");
+
+            var toTray = await _trayRepo.GetByIdAsync(toTrayId);
+            if (toTray == null) return NotFound("Destination Tray not found");
+            if (toTray.Configuration.Id != configurationId) return BadRequest("Destination Tray does not belong to the specified configuration");
+
+            var trayProduct = fromTray.TrayProducts.FirstOrDefault(tp => tp.OnTrayIndex == OldIndex);
+            if (trayProduct == null)
+            {
+                return NotFound($"No product found at position {OldIndex} on tray {fromTrayId}.");
+            }
+
+            // Remove from source tray
+            fromTray.TrayProducts.Remove(trayProduct);
+
+            // Add to destination tray at the end
+            int newIndex = toTray.TrayProducts.Count > 0 ? toTray.TrayProducts.Max(tp => tp.OnTrayIndex) + 1 : 1;
+            trayProduct.OnTrayIndex = newIndex;
+            trayProduct.Tray = toTray; // Update the Tray reference
+            toTray.TrayProducts.Add(trayProduct);
+
+            // Persist changes
+            await _trayRepo.UpdateAsync(fromTray);
+            await _trayRepo.UpdateAsync(toTray);
+
+            if (!TrayProductsIndicesAreValid(fromTray) || !TrayProductsIndicesAreValid(toTray))
+            {
+                return BadRequest("TrayProduct indices are not valid after moving product.");
+            }
+
+            return Ok(new
+            {
+                FromTray = fromTray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData),
+                ToTray = toTray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData)
+            });
+        }
+
+        [HttpPut]
+        [Route("updateProductPositionInTray/{trayId}/{oldIndex}/{newIndex}")]
+        public async Task<IActionResult> UpdateProductPositionInTray(int companyId, int configurationId, int trayId, int oldIndex, int newIndex)
+        {
+            var company = await _companyRepo.GetByIdAsync(companyId);
+            if (company == null) return NotFound("Company not found");
+
+            var configuration = await _configurationRepo.GetByIdAsync(configurationId);
+            if (configuration == null) return NotFound("Configuration not found");
+
+            var tray = await _trayRepo.GetByIdAsync(trayId);
+            if (tray == null) return NotFound("Tray not found");
+            if (tray.Configuration.Id != configurationId) return BadRequest("Tray does not belong to the specified configuration");
+
+            var trayProduct = tray.TrayProducts.FirstOrDefault(tp => tp.OnTrayIndex == oldIndex);
+            if (trayProduct == null)
+            {
+                return NotFound($"No product found at position {oldIndex} on tray {trayId}.");
+            }
+
+            if (tray.TrayProducts.Any(tp => tp.OnTrayIndex == newIndex))
+            {
+                return BadRequest($"Position {newIndex} on tray {trayId} is already occupied.");
+            }
+
+            // Update the index
+            trayProduct.OnTrayIndex = newIndex;
+
+            // Persist the change
+            await _trayRepo.UpdateAsync(tray);
+
+            if (!TrayProductsIndicesAreValid(tray))
+            {
+                return BadRequest("TrayProduct indices are not valid after reordering.");
+            }
+
+            return Ok(tray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData));
+
+        }
+
+
+
+        private bool TrayProductsIndicesAreValid(Models.Tray tray)
+        {
+            var indices = tray.TrayProducts.Select(tp => tp.OnTrayIndex).ToList();
+            for (int i = 1; i <= indices.Count; i++)
+            {
+                if (!indices.Contains(i)) return false;
+            }
+            return true;
+        }
+
     }
 }
