@@ -23,6 +23,8 @@ namespace api.Models
         public ConfigurationTypeData ConfigurationTypeData { get; set; } = new ConfigurationTypeData();
 
 
+        //Elevator
+        public ElevatorConfig? ElevatorConfig { get; set; }
 
         //Many-To-One
         public int CompanyId { get; set; }

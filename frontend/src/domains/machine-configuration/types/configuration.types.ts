@@ -12,6 +12,9 @@ export interface Configuration {
     name: string;       // Name of the tray configuration
     trays: Tray[];      // Array of trays in the configuration
     CompanyId: number; // ID of the client this configuration belongs to
+    ConfigurationType: string; // Type of configuration, e.g., "VisionV8"
+    ElevatorSetting: 1 | 2 | 3 | 4 // Elevator setting (1 to 4)
+    ElevatorAssecories: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat'; // Elevator accessories
     createdAt: string; // Timestamp when the configuration was created
     updatedAt: string; // Timestamp when the configuration was last updated
 }

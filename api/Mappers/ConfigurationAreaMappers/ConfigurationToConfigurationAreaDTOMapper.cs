@@ -20,7 +20,9 @@ namespace api.Mappers.ConfigurationAreaMappers
                     .Select(t => t.ToConfigurationAreaTrayDTO(configArea.ConfigurationTypeData))
                     .ToList(),
                 CreatedAt = configArea.CreatedAt,
-                UpdatedAt = configArea.UpdatedAt
+                UpdatedAt = configArea.UpdatedAt,
+                ConfigurationType = configArea.ConfigurationType,
+                ElevatorConfig = configArea.ElevatorConfig
             };
         }
     }

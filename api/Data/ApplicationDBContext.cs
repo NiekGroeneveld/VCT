@@ -24,6 +24,7 @@ namespace api.Data
         public DbSet<TrayProduct> TrayProducts { get; set; }
         public DbSet<Configuration> Configurations { get; set; }
         public DbSet<ConfigurationTypeData> ConfigurationTypeData { get; set; }
+        public DbSet<ElevatorConfig> ElevatorConfigs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,7 +37,7 @@ namespace api.Data
             // Configure TrayProduct many-to-many with position
             modelBuilder.Entity<TrayProduct>()
                 .HasKey(tp => tp.Id); // Surrogate primary key
-            
+
             modelBuilder.Entity<TrayProduct>().Property(tp => tp.Id).ValueGeneratedOnAdd();
             // Keep a non-unique index for performance but allow flexible reordering at the app level
             modelBuilder.Entity<TrayProduct>()

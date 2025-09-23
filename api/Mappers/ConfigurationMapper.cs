@@ -34,12 +34,13 @@ namespace api.Mappers
                 ConfigurationTypeDataId = configurationTypeData.Id,
                 ConfigurationTypeData = configurationTypeData,
                 ConfigurationType = configurationTypeData.ConfigurationType,
+                ElevatorConfig = configurationTypeData.assignElevatorConfig(),
                 CompanyId = company.Id,
                 Company = company
             };
         }
 
-        public static ConfigurationNameIdDTO ToNameIdDTO(this Configuration configuration) 
+        public static ConfigurationNameIdDTO ToNameIdDTO(this Configuration configuration)
         {
             return new ConfigurationNameIdDTO
             {
@@ -47,6 +48,13 @@ namespace api.Mappers
                 Name = configuration.Name
             };
         }
+
+        public static ElevatorConfig assignElevatorConfig(this ConfigurationTypeData configurationTypeData) => configurationTypeData.ConfigurationType switch
+        {
+            "VisionV8" => new VisionV8ElevatorConfig { ElevatorSetting = 1, ElevatorAssecories = "Leeg" },
+            "Nuuk" => new NuukElevatorConfig { },
+            _ => new OtherElevatorConfig { } // Default case
+        };
 
     };
 }
