@@ -64,17 +64,56 @@ export const ConfigurationArea: React.FC = () => {
   const { handleProductMoveBetweenTrays, moveProductBetweenTrays } =
     useCrossTrayOperations(trays, setTrays);
 
-  //ADD This: Event lister for cross-tray product operations
+  // Event listener for cross-tray product operations
   useEffect(() => {
     const handleCrossTrayRequest = (event: any) => {
       const { sourceTrayId, targetTrayId, sourceIndex, targetIndex } =
         event.detail;
-      moveProductBetweenTrays(
+      // Optimistic local update first
+      const didMoveLocally = moveProductBetweenTrays(
         sourceTrayId,
         targetTrayId,
         sourceIndex,
         targetIndex
       );
+
+      // Persist to backend
+      const companyId = selectedCompany?.id;
+      const configurationId = selectedConfiguration?.id;
+      if (!companyId || !configurationId) {
+        console.error('Missing company or configuration ID for cross-tray move');
+        return;
+      }
+
+      // Keep a snapshot to rollback if API fails
+      const prevTrays = [...trays];
+      configurationService
+        .MoveProductBetweenTraysAPI(
+          Number(companyId),
+          Number(configurationId),
+          Number(sourceTrayId),
+          Number(targetTrayId),
+          Number(sourceIndex)
+        )
+        .then((res) => {
+          // Response contains FromTray and ToTray DTOs; merge them into UI state
+          if (res && res.FromTray && res.ToTray) {
+            setTrays((prev) => {
+              const updated = prev.map((t) => {
+                if (t.id === res.FromTray.id) return res.FromTray;
+                if (t.id === res.ToTray.id) return res.ToTray;
+                return t;
+              });
+              // Optionally space out after server-confirmed update
+              const spaced = ProductSpacingService.spaceOutAllTrays(updated);
+              return spaced;
+            });
+          }
+        })
+        .catch((err) => {
+          console.error('Cross-tray move API failed, rolling back UI change', err);
+          setTrays(prevTrays);
+        });
     };
 
     // Listen for product refresh events to automatically apply spacing
@@ -85,20 +124,15 @@ export const ConfigurationArea: React.FC = () => {
       }, 200);
     };
 
-    window.addEventListener(
-      "requestCrossTrayProductMove",
-      handleCrossTrayRequest
-    );
+    // Listen to the event dispatched by TrayComponent/TrayDropHandler
+    window.addEventListener("requestCrossTrayMove", handleCrossTrayRequest);
     window.addEventListener("productRefresh", handleProductRefresh);
     
     return () => {
-      window.removeEventListener(
-        "requestCrossTrayProductMove",
-        handleCrossTrayRequest
-      );
+      window.removeEventListener("requestCrossTrayMove", handleCrossTrayRequest);
       window.removeEventListener("productRefresh", handleProductRefresh);
     };
-  }, [moveProductBetweenTrays, applySpacingToAllTrays]);
+  }, [moveProductBetweenTrays, applySpacingToAllTrays, selectedCompany?.id, selectedConfiguration?.id, trays]);
 
   const handleAddTray = async () => {
     const companyId = selectedCompany?.id;
