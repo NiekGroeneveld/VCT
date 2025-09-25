@@ -17,5 +17,6 @@ namespace api.Interfaces
 
         //Additional
         public Task<ConfigurationTypeData?> GetByTypeNameAsync(string type);
+        public Task<List<string>> GetTypesAsync();
     }
 }

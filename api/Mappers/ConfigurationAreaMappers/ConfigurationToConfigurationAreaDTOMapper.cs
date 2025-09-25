@@ -22,7 +22,9 @@ namespace api.Mappers.ConfigurationAreaMappers
                 CreatedAt = configArea.CreatedAt,
                 UpdatedAt = configArea.UpdatedAt,
                 ConfigurationType = configArea.ConfigurationType,
-                ElevatorConfig = configArea.ElevatorConfig
+                ConfigurationTypeData = configArea.ConfigurationTypeData.ToDTO(),
+                ElevatorSetting = configArea.ElevatorSetting,
+                ElevatorAddition = configArea.ElevatorAddition
             };
         }
     }

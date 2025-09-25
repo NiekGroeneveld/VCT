@@ -11,8 +11,7 @@ namespace api.Repository
 {
     public class ConfigurationRepository : IConfigurationRepository
     {
-        private readonly ApplicationDBContext _context;
-
+        private readonly ApplicationDBContext _context; 
         public ConfigurationRepository(ApplicationDBContext context)
         {
             _context = context;
@@ -20,7 +19,7 @@ namespace api.Repository
 
         public async Task<Configuration> CreateAsync(Configuration configuration)
         {
-            await _context.Configurations.AddAsync(configuration);
+            _context.Configurations.Add(configuration);
             await _context.SaveChangesAsync();
             return configuration;
 

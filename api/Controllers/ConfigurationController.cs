@@ -24,6 +24,7 @@ namespace api.Controllers
         private readonly ICompanyRepository _companyRepository;
         private readonly ITrayRepository _trayRepository;
         private readonly UserManager<AppUser> _userManager;
+    
 
         public ConfigurationController(IProductRepository productRepository, IConfigurationRepository configurationRepository, ICompanyRepository companyRepository, ITrayRepository trayRepository, IConfigurationTypeDataRepository configurationTypeDataRepository, UserManager<AppUser> userManager)
         {
@@ -110,7 +111,7 @@ namespace api.Controllers
             {
                 return BadRequest($"ConfigurationTypeData with type '{configurationDto.ConfigurationType}' not found. Available types can be retrieved from /api/ConfigurationTypeData");
             }
-
+           
             var configuration = configurationDto.ToConfigurationFromCreateDTO(configurationTypeData, company);
             await _configurationRepository.CreateAsync(configuration);
             return CreatedAtAction(nameof(GetById), new { companyId = companyId, id = configuration.Id }, configuration.ToDTO());

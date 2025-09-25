@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.DTOs.Configuration;
 using api.Models;
 using api.Mappers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace api.Mappers
 {
@@ -34,7 +35,8 @@ namespace api.Mappers
                 ConfigurationTypeDataId = configurationTypeData.Id,
                 ConfigurationTypeData = configurationTypeData,
                 ConfigurationType = configurationTypeData.ConfigurationType,
-                ElevatorConfig = configurationTypeData.assignElevatorConfig(),
+                ElevatorSetting = SetElevatorSetting(configurationTypeData.ConfigurationType),
+                ElevatorAddition = SetElevatorAddition(configurationTypeData.ConfigurationType),
                 CompanyId = company.Id,
                 Company = company
             };
@@ -49,12 +51,39 @@ namespace api.Mappers
             };
         }
 
-        public static ElevatorConfig assignElevatorConfig(this ConfigurationTypeData configurationTypeData) => configurationTypeData.ConfigurationType switch
+        private static string? SetElevatorAddition(string ConfigurationType)
         {
-            "VisionV8" => new VisionV8ElevatorConfig { ElevatorSetting = 1, ElevatorAssecories = "Leeg" },
-            "Nuuk" => new NuukElevatorConfig { },
-            _ => new OtherElevatorConfig { } // Default case
-        };
+            if (ConfigurationType == "VisionV8")
+            {
+                return "Leeg";
+            }
+            else if (ConfigurationType == "Nuuk")
+            {
+                return null;
+            }
+            else if (ConfigurationType == "Other")
+            {
+                return null;
+            }
+            return null;
+        }
+
+        private static int? SetElevatorSetting(string ConfigurationType)
+        {
+            if (ConfigurationType == "VisionV8")
+            {
+                return 1;
+            }
+            else if (ConfigurationType == "Nuuk")
+            {
+                return null;
+            }
+            else if (ConfigurationType == "Other")
+            {
+                return null;
+            }
+            return null;
+        }
 
     };
 }

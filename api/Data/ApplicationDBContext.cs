@@ -24,7 +24,7 @@ namespace api.Data
         public DbSet<TrayProduct> TrayProducts { get; set; }
         public DbSet<Configuration> Configurations { get; set; }
         public DbSet<ConfigurationTypeData> ConfigurationTypeData { get; set; }
-        public DbSet<ElevatorConfig> ElevatorConfigs { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +57,7 @@ namespace api.Data
             modelBuilder.Entity<TrayProduct>()
                 .Property(tp => tp.OnTrayIndex)
                 .IsRequired();
+
 
             base.OnModelCreating(modelBuilder);
 

@@ -13,10 +13,45 @@ export interface Configuration {
     trays: Tray[];      // Array of trays in the configuration
     CompanyId: number; // ID of the client this configuration belongs to
     ConfigurationType: string; // Type of configuration, e.g., "VisionV8"
-    ElevatorSetting: 1 | 2 | 3 | 4 // Elevator setting (1 to 4)
-    ElevatorAssecories: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat'; // Elevator accessories
+    ConfigurationTypeData: ConfigurationTypeData; // Metadata about the configuration type
+    elevatorSetting: 1 | 2 | 3 | 4 | null; // Elevator setting (1 to 4) or null if not set
+    elevatorAssecories: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat' | null; // Elevator accessories or null if not set
+    // Add other common properties for configurations here
     createdAt: string; // Timestamp when the configuration was created
     updatedAt: string; // Timestamp when the configuration was last updated
+}
+
+export interface ConfigurationTypeData{
+    id: number;
+    configurationType: string; // Type of configuration, e.g., "VisionV8", "Nuuk", "Other"
+    minTrayHeight: number
+    trayWidth: number
+    configHeight: number
+    amountDots: number
+    dotsDelta: number
+    lowExtractorHeight: number
+    lowExtractorDepth: number
+    highExtractorHeight: number
+    highExtractorDepth: number
+    palletDelta: number
+}
+
+
+export interface ElevatorConfig{
+    id: number;
+    elevatorType: string; // Type of elevator, e.g., "VisionV8", "Nuuk", "Other"
+    // Add other common properties for elevator configurations here
+}
+
+export interface VisionV8ElevatorConfig extends ElevatorConfig{
+    ElevatorSetting: 1 | 2 | 3 | 4 // Elevator setting (1 to 4)
+    ElevatorAssecories: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat'; // Elevator accessories
+}
+
+export interface NuukElevatorConfig extends ElevatorConfig{
+}
+
+export interface OtherElevatorConfig extends ElevatorConfig{
 }
 
 

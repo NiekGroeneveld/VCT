@@ -24,7 +24,9 @@ namespace api.Models
 
 
         //Elevator
-        public ElevatorConfig? ElevatorConfig { get; set; }
+        [Range(1, 4)]
+        public int? ElevatorSetting { get; set; }
+        public string? ElevatorAddition { get; set; } 
 
         //Many-To-One
         public int CompanyId { get; set; }

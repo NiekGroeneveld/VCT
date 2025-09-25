@@ -56,5 +56,13 @@ namespace api.Repository
             await _context.SaveChangesAsync();
             return configurationTypeData;
         }
+
+        public Task<List<string>> GetTypesAsync()
+        {
+            return _context.ConfigurationTypeData
+                .Select(c => c.ConfigurationType)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

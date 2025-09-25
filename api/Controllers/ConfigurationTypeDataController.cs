@@ -27,7 +27,7 @@ namespace api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById([FromRoute]int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var configTypeData = await _ConfigurationTypeDataRepository.GetByIdAsync(id);
             if (configTypeData == null)
@@ -38,7 +38,7 @@ namespace api.Controllers
         }
 
         [HttpGet("by-name/{name}")]
-        public async Task<IActionResult> GetByName([FromRoute]string name)
+        public async Task<IActionResult> GetByName([FromRoute] string name)
         {
             var configTypeData = await _ConfigurationTypeDataRepository.GetByTypeNameAsync(name);
             if (configTypeData == null)
@@ -57,7 +57,7 @@ namespace api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update([FromRoute]int id, [FromBody] UpdateConfigurationTypeDataDTO configurationTypeDataDTO)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateConfigurationTypeDataDTO configurationTypeDataDTO)
         {
             var configTypeData = await _ConfigurationTypeDataRepository.GetByIdAsync(id);
             if (configTypeData == null)
@@ -71,7 +71,7 @@ namespace api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete([FromRoute]int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var configTypeData = await _ConfigurationTypeDataRepository.GetByIdAsync(id);
             if (configTypeData == null)
@@ -81,6 +81,13 @@ namespace api.Controllers
 
             await _ConfigurationTypeDataRepository.DeleteAsync(id);
             return NoContent();
+        }
+        
+        [HttpGet("types")]
+        public async Task<IActionResult> GetTypes()
+        {
+            var types = await _ConfigurationTypeDataRepository.GetTypesAsync();
+            return Ok(types);
         }
 
     }

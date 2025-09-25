@@ -1,6 +1,7 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {configurationService} from "../../domains/machine-configuration/services/ConfigurationService";
 import { useCompany } from "../../Context/useCompany";
+import { getConfigTypesAPI } from "../../shared/services/ConfigTypeDataService";
 
 type CreateConfigurationModalProps = {
     isOpen: boolean;
@@ -17,8 +18,25 @@ const CreateConfigurationModal: React.FC<CreateConfigurationModalProps> = ({isOp
     const [formData, setFormData] = useState<ConfigurationFormData>({Name: '', ConfigurationType: 'VisionV8'});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [configTypes, setConfigTypes] = useState<string[]>([]);
     const { selectedCompany } = useCompany();
     const companyId = selectedCompany ? Number(selectedCompany.id) : null;
+
+    useEffect(() => {
+        const loadConfigTypes = async () => {
+            try {
+                const types = await getConfigTypesAPI();
+                setConfigTypes(types);
+                if (types.length > 0 && !types.includes(formData.ConfigurationType)) {
+                    setFormData(prev => ({ ...prev, ConfigurationType: types[0] }));
+                }
+            } catch (err) {
+                console.error("Error loading config types:", err);
+                setError("Failed to load configuration types.");
+            }
+        };
+        loadConfigTypes();
+    }, []);
     const handleInputChange = (
         field : keyof ConfigurationFormData,
         value: string
@@ -36,8 +54,9 @@ const CreateConfigurationModal: React.FC<CreateConfigurationModalProps> = ({isOp
             setError("Configuration name cannot exceed 50 characters");
             return false;
         }
-        if(formData.ConfigurationType !== 'VisionV8'){
-            setError("Invalid configuration type selected, other types than VisionV8 are not supported yet");
+        if(!configTypes.includes(formData.ConfigurationType)){
+            setError("Invalid configuration type selected");
+            return false;
         }
         return true;
     }
@@ -61,7 +80,7 @@ const CreateConfigurationModal: React.FC<CreateConfigurationModalProps> = ({isOp
             );
 
             //Reset formdata
-            setFormData({Name: '', ConfigurationType: 'VisionV8'});
+            setFormData({Name: '', ConfigurationType: configTypes[0] || 'VisionV8'});
             onCreate(formData.Name);
             onClose();
         } catch (err) {
@@ -73,7 +92,7 @@ const CreateConfigurationModal: React.FC<CreateConfigurationModalProps> = ({isOp
     };
 
     const handleClose = () => {
-        setFormData({Name: '', ConfigurationType: 'VisionV8'});
+        setFormData({Name: '', ConfigurationType: configTypes[0] || 'VisionV8'});
         setError(null);
         onClose();
     };
@@ -105,9 +124,9 @@ const CreateConfigurationModal: React.FC<CreateConfigurationModalProps> = ({isOp
                         className="w-full bg-gray-600 border border-gray-300 rounded px-3 py-2 mb-4 text-white"
                         disabled={loading}
                     >     
-                        <option value="VisionV8">VisionV8</option>
-                        {/* Future configuration types can be added here */}
-                        {/* <option value="standard">Standard</option> */}
+                        {configTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
                     </select>
                     <div className="flex justify-end space-x-2">
                         <button 
