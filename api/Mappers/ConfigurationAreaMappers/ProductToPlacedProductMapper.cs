@@ -10,8 +10,10 @@ namespace api.Mappers.ConfigurationAreaMappers
 {
     public static class ProductToPlacedProductMapper
     {
-        public static PlacedProductDTO ToPlacedProductDTO(this TrayProduct TrayProduct, ConfigurationTypeData configurationTypeData)
+        public static PlacedProductDTO ToPlacedProductDTO(this TrayProduct TrayProduct, ConfigurationTypeData? configurationTypeData)
         {
+            if (configurationTypeData == null) throw new InvalidOperationException("ConfigurationTypeData is required for product mapping");
+            if (TrayProduct.Product == null) throw new InvalidOperationException("TrayProduct.Product is null");
             switch (TrayProduct.Product.Stable)
             {
                 case true:

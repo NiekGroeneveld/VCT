@@ -20,6 +20,8 @@ namespace api.Mappers
                 ConfigHeight = configurationTypeData.ConfigHeight,
                 AmountDots = configurationTypeData.AmountDots,
                 DotsDelta = configurationTypeData.DotsDelta,
+                DoubleDotPositions = (configurationTypeData.DoubleDotPositions ?? new List<int>()).OrderBy(x => x).ToList(),
+                ElevatorDotIndicators = (configurationTypeData.ElevatorDotIndicators ?? new List<int>()).OrderBy(x => x).ToList(),
                 LowExtractorHeight = configurationTypeData.LowExtractorHeight,
                 LowExtractorDepth = configurationTypeData.LowExtractorDepth,
                 HighExtractorHeight = configurationTypeData.HighExtractorHeight,
@@ -38,6 +40,8 @@ namespace api.Mappers
                 ConfigHeight = createDto.ConfigHeight,
                 AmountDots = createDto.AmountDots,
                 DotsDelta = createDto.DotsDelta,
+                DoubleDotPositions = createDto.DoubleDotPositions ?? new List<int>(),
+                ElevatorDotIndicators = createDto.ElevatorDotIndicators ?? new List<int>(),
                 LowExtractorHeight = createDto.LowExtractorHeight,
                 LowExtractorDepth = createDto.LowExtractorDepth,
                 HighExtractorHeight = createDto.HighExtractorHeight,
@@ -46,7 +50,7 @@ namespace api.Mappers
             };
         }
 
-        public static ConfigurationTypeData ToConfigurationTypeDataFromUpdateDTO(this UpdateConfigurationTypeDataDTO updateDto, ConfigurationTypeData existingData)
+        public static void ToConfigurationTypeDataFromUpdateDTO(this UpdateConfigurationTypeDataDTO updateDto, ConfigurationTypeData existingData)
         {
             existingData.ConfigurationType = updateDto.ConfigurationType;
             existingData.MinTrayHeight = updateDto.MinTrayHeight;
@@ -54,13 +58,13 @@ namespace api.Mappers
             existingData.ConfigHeight = updateDto.ConfigHeight;
             existingData.AmountDots = updateDto.AmountDots;
             existingData.DotsDelta = updateDto.DotsDelta;
+            existingData.DoubleDotPositions = updateDto.DoubleDotPositions ?? new List<int>();
+            existingData.ElevatorDotIndicators = updateDto.ElevatorDotIndicators ?? new List<int>();
             existingData.LowExtractorHeight = updateDto.LowExtractorHeight;
             existingData.LowExtractorDepth = updateDto.LowExtractorDepth;
             existingData.HighExtractorHeight = updateDto.HighExtractorHeight;
             existingData.HighExtractorDepth = updateDto.HighExtractorDepth;
             existingData.PalletDelta = updateDto.PalletDelta;
-
-            return existingData;
         }
     }
 }

@@ -68,11 +68,21 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     });
 
     // Calculate scaled machine dimensions
-    const machineHeight = scaledValue(ConfigurationConstants.MACHINE_HEIGHT);
+    const machineHeight = selectedConfiguration?.configurationTypeData?.configHeight 
+        ? scaledValue(selectedConfiguration.configurationTypeData.configHeight)
+        : scaledValue(ConfigurationConstants.MACHINE_HEIGHT);
     
+    // Local dot position function using dynamic dotsDelta
+    const getLocalDotYPosition = (dotNumber: number): number => {
+        const dotsDelta = selectedConfiguration?.configurationTypeData?.dotsDelta 
+            ? selectedConfiguration.configurationTypeData.dotsDelta / 10 // Assuming it's stored in 0.1mm units
+            : ConfigurationConstants.DOT_DELTA;
+        return (dotNumber - 1) * dotsDelta;
+    };
+
     // Scaled dot position function
     const getScaledDotYPosition = (dotNumber: number): number => {
-        return scaledValue(getDotYPosition(dotNumber));
+        return scaledValue(getLocalDotYPosition(dotNumber));
     };
 
     // Use a callback ref to attach the drop target
@@ -85,9 +95,12 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
 
     // Helper function to check if a dot is occupied by a tray
     const isDotOccupied = (dotNumber: number): boolean => {
+        const dotsDelta = selectedConfiguration?.configurationTypeData?.dotsDelta 
+            ? selectedConfiguration.configurationTypeData.dotsDelta / 10 
+            : ConfigurationConstants.DOT_DELTA;
         return trays.some(tray => {
             const trayBottomDot = tray.dotPosition;
-            const trayTopDot = trayBottomDot + Math.ceil(tray.trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
+            const trayTopDot = trayBottomDot + Math.ceil(tray.trayHeight / dotsDelta) - 1;
             return dotNumber >= trayBottomDot && dotNumber <= trayTopDot;
         });
     };
@@ -99,43 +112,43 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
 
     // Helper function to get elevator indicators
     const getElevatorIndicators = (dotNumber: number): number => {
-        // Bottom indicators
-        if (dotNumber === 1) return 1;
-        if (dotNumber === 3) return 2;
-        if (dotNumber === 6) return 3;
-        if (dotNumber === 7) return 4;
-        // Top indicators
-        if (dotNumber === 72) return 1;
-        if (dotNumber === 68) return 2;
-        if (dotNumber === 65) return 3;
-        if (dotNumber === 61) return 4;
+        const elevatorDots = selectedConfiguration?.configurationTypeData?.elevatorDotIndicators || [];
+        const n = elevatorDots.length;
+        const index = elevatorDots.indexOf(dotNumber);
+        if (index >= 0) {
+            return Math.min(index + 1, n - index);
+        }
         return 0;
     };
 
     // Helper function to check if dot should be double (every 10 starting from 3)
     const isDoubleDot = (dotNumber: number): boolean => {
-        return dotNumber >= 3 && (dotNumber - 3) % 10 === 0;
+        return selectedConfiguration?.configurationTypeData?.doubleDotPositions?.includes(dotNumber) || false;
     };
 
     // Calculate gaps between trays for red numbers
     const getGapNumbers = (): { dotNumber: number; gap: number }[] => {
+        const dotsDelta = selectedConfiguration?.configurationTypeData?.dotsDelta 
+            ? selectedConfiguration.configurationTypeData.dotsDelta / 10 
+            : ConfigurationConstants.DOT_DELTA;
+        const amountDots = selectedConfiguration?.configurationTypeData?.amountDots || ConfigurationConstants.DOTS;
         const sortedTrays = [...trays].sort((a, b) => a.dotPosition - b.dotPosition);
         const gaps: { dotNumber: number; gap: number }[] = [];
         
-        // Gap from top (72) to first tray
+        // Gap from top (amountDots) to first tray
         if (sortedTrays.length > 0) {
-            const firstTrayTop = sortedTrays[0].dotPosition + Math.ceil(sortedTrays[0].trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
-            const gapFromTop = ConfigurationConstants.DOTS - firstTrayTop;
+            const firstTrayTop = sortedTrays[trays.length - 1].dotPosition;
+            const gapFromTop = amountDots - firstTrayTop;
             if (gapFromTop > 0) {
-                gaps.push({ dotNumber: ConfigurationConstants.DOTS, gap: gapFromTop });
+                gaps.push({ dotNumber: amountDots, gap: gapFromTop });
             }
         }
         
         // Gaps between trays
         for (let i = 0; i < sortedTrays.length - 1; i++) {
-            const currentTrayTop = sortedTrays[i].dotPosition + Math.ceil(sortedTrays[i].trayHeight / ConfigurationConstants.DOT_DELTA) - 1;
+            const currentTrayTop = sortedTrays[i].dotPosition;
             const nextTrayBottom = sortedTrays[i + 1].dotPosition;
-            const gap = nextTrayBottom - currentTrayTop - 1;
+            const gap = nextTrayBottom - currentTrayTop - 2;
             if (gap > 0) {
                 gaps.push({ dotNumber: currentTrayTop + Math.floor(gap / 2), gap });
             }
@@ -151,7 +164,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 className="flex-shrink-0 relative bg-gray-100 border-r-2 border-black"
                 style={{ width: `${scaledValue(60)}px`, height: `${machineHeight}px` }}
             >
-                {Array.from({ length: ConfigurationConstants.DOTS }, (_, i) => {
+                {selectedConfiguration?.configurationTypeData?.amountDots ? Array.from({ length: Number(selectedConfiguration.configurationTypeData.amountDots) }, (_, i) => {
                     const dotNumber = i + 1;
                     const yPosition = getScaledDotYPosition(dotNumber);
                     const isOccupied = isDotOccupied(dotNumber);
@@ -180,7 +193,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                             />
                             
                             {/* Double dot indicator */}
-                            {isDouble && (
+                            {isDouble  && (
                                 <div 
                                     className={`${dotSize} rounded-full border ${dotColor} absolute ${dotOffset}`}
                                     style={{ left: `${scaledValue(10)}px`, top: '0px' }}
@@ -201,7 +214,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                             )}
                         </div>
                     );
-                })}
+                }) : null}
                 
                 {/* Gap numbers (red) */}
                 {getGapNumbers().map(({ dotNumber, gap }, index) => (
@@ -228,7 +241,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                     ${className}
                 `}
                 style={{
-                    width: `${scaledValue(700)}px`, // Scaled machine area width
+                    width: `${scaledValue(Number(selectedConfiguration?.configurationTypeData.trayWidth) + scaledValue(100))}px`, // Scaled machine area width
                     height: `${machineHeight}px`,
                     paddingLeft: `${scaledValue(60)}px`, // Increased padding for centering
                     paddingRight: `${scaledValue(60)}px` // Increased padding for centering

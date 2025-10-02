@@ -15,6 +15,8 @@ namespace api.DTOs.ConfigurationTypeData
         public float ConfigHeight { get; set; }
         public int AmountDots { get; set; }
         public float DotsDelta { get; set; }
+        public List<int> DoubleDotPositions { get; set; } = new List<int>();
+        public List<int> ElevatorDotIndicators { get; set; } = new List<int>();
 
         //ExtractorSpecs
         public float LowExtractorHeight { get; set; }

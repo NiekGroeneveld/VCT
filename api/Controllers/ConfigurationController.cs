@@ -113,6 +113,8 @@ namespace api.Controllers
             }
            
             var configuration = configurationDto.ToConfigurationFromCreateDTO(configurationTypeData, company);
+
+
             await _configurationRepository.CreateAsync(configuration);
             return CreatedAtAction(nameof(GetById), new { companyId = companyId, id = configuration.Id }, configuration.ToDTO());
         }

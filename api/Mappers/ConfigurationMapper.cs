@@ -20,6 +20,7 @@ namespace api.Mappers
                 Trays = configuration.Trays.Select(t => t.ToDTO()).ToList(),
                 ConfigurationTypeId = configuration.ConfigurationTypeData.Id,
                 ConfigurationType = configuration.ConfigurationTypeData.ConfigurationType,
+                ConfigurationTypeData = configuration.ConfigurationTypeData.ToDTO(),
                 CompanyId = configuration.CompanyId
             };
         }

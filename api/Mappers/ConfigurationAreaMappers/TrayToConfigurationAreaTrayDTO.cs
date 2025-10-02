@@ -10,8 +10,9 @@ namespace api.Mappers.ConfigurationAreaMappers
 {
     public static class TrayToConfigurationAreaTrayDTO
     {
-        public static ConfigurationAreaTrayDTO ToConfigurationAreaTrayDTO(this Tray tray, ConfigurationTypeData configTypeData)
+        public static ConfigurationAreaTrayDTO ToConfigurationAreaTrayDTO(this Tray tray, ConfigurationTypeData? configTypeData)
         {
+            if (configTypeData == null) throw new InvalidOperationException("ConfigurationTypeData is required for tray mapping");
             List<PlacedProductDTO> placedProducts = tray.TrayProducts
                 .Select(tp => tp.ToPlacedProductDTO(configTypeData))
                 .ToList();

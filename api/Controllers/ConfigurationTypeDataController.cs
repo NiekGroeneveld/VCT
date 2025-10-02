@@ -59,13 +59,18 @@ namespace api.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateConfigurationTypeDataDTO configurationTypeDataDTO)
         {
+            if (configurationTypeDataDTO == null)
+            {
+                return BadRequest("Invalid request body");
+            }
+
             var configTypeData = await _ConfigurationTypeDataRepository.GetByIdAsync(id);
             if (configTypeData == null)
             {
                 return NotFound();
             }
 
-            configTypeData = configurationTypeDataDTO.ToConfigurationTypeDataFromUpdateDTO(configTypeData);
+            configurationTypeDataDTO.ToConfigurationTypeDataFromUpdateDTO(configTypeData);
             await _ConfigurationTypeDataRepository.UpdateAsync(configTypeData);
             return NoContent();
         }

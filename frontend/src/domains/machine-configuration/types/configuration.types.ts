@@ -13,9 +13,9 @@ export interface Configuration {
     trays: Tray[];      // Array of trays in the configuration
     CompanyId: number; // ID of the client this configuration belongs to
     ConfigurationType: string; // Type of configuration, e.g., "VisionV8"
-    ConfigurationTypeData: ConfigurationTypeData; // Metadata about the configuration type
+    configurationTypeData: ConfigurationTypeData; // Metadata about the configuration type
     elevatorSetting: 1 | 2 | 3 | 4 | null; // Elevator setting (1 to 4) or null if not set
-    elevatorAssecories: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat' | null; // Elevator accessories or null if not set
+    elevatorAddition: 'Leeg' | 'Rollenbaantje' | 'Schuimbodem en schuimrand' | 'Glijplaat' | null; // Elevator accessories or null if not set
     // Add other common properties for configurations here
     createdAt: string; // Timestamp when the configuration was created
     updatedAt: string; // Timestamp when the configuration was last updated
@@ -29,6 +29,8 @@ export interface ConfigurationTypeData{
     configHeight: number
     amountDots: number
     dotsDelta: number
+    doubleDotPositions: number[] 
+    elevatorDotIndicators: number[]
     lowExtractorHeight: number
     lowExtractorDepth: number
     highExtractorHeight: number

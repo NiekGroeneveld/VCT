@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.DTOs.Tray;
+using api.DTOs.ConfigurationTypeData;
 
 namespace api.DTOs.Configuration
 {
@@ -16,6 +17,7 @@ namespace api.DTOs.Configuration
         //One-To-Many
         public int ConfigurationTypeId { get; set; }
         public string ConfigurationType { get; set; } = string.Empty;
+        public ConfigurationTypeDataDTO ConfigurationTypeData { get; set; } = new ConfigurationTypeDataDTO();
 
 
         //Many-To-One

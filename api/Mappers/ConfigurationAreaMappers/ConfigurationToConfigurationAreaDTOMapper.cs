@@ -22,7 +22,7 @@ namespace api.Mappers.ConfigurationAreaMappers
                 CreatedAt = configArea.CreatedAt,
                 UpdatedAt = configArea.UpdatedAt,
                 ConfigurationType = configArea.ConfigurationType,
-                ConfigurationTypeData = configArea.ConfigurationTypeData.ToDTO(),
+                ConfigurationTypeData = configArea.ConfigurationTypeData?.ToDTO() ?? throw new InvalidOperationException("ConfigurationTypeData is required"),
                 ElevatorSetting = configArea.ElevatorSetting,
                 ElevatorAddition = configArea.ElevatorAddition
             };
