@@ -61,22 +61,17 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const containerBottomY = containerRect.height - relativeY;
                 // Convert back to unscaled coordinates for data storage
                 const unscaledY = containerBottomY / scale;
-                const trayId = item.trayId ?? item.tray?.id;
-                if (trayId != null) {
-                    onTrayPositionChange(
-                        Number(selectedCompany?.id),
-                        Number(selectedConfiguration?.id),
-                        trayId,
-                        unscaledY
-                    );
-                }
+                
                 const newDot = getYPositionDot(unscaledY);
                 const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
+                
+                // Only update position when dot changes to avoid redundant updates
                 if (lastReportedDotRef.current !== clampedDot) {
                     lastReportedDotRef.current = clampedDot;
                     const trayId = item.trayId ?? item.tray?.id;
                     if (trayId != null) {
                         const bottomY = getDotYPosition(clampedDot);
+                        console.log(`[MachineConfigurationZone] Hover update: tray ${trayId} to dot ${clampedDot} (Y=${bottomY})`);
                         onTrayPositionChange(
                             Number(selectedCompany?.id),
                             Number(selectedConfiguration?.id),

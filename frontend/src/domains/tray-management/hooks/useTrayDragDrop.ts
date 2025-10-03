@@ -47,7 +47,7 @@ export const useTrayDragDrop = (
         // Since dot 1 is at Y=0, dot 2 at Y=135, etc., we can directly convert
         const newDot = getYPositionDot(newYposition);
         const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
-        //console.log(`Dragging tray ${trayId} to Y=${newYposition} (dot ${newDot}, clamped to ${clampedDot})`);
+        console.log(`[useTrayDragDrop] updateTrayPosition: trayId=${trayId}, Y=${newYposition}, newDot=${newDot}, clampedDot=${clampedDot}`);
 
 
     setTrays(prev => prev.map(tray => {
@@ -56,10 +56,6 @@ export const useTrayDragDrop = (
       // Check if this position is valid (for visual feedback)
       const otherTrays = prev.filter(t => t.id !== trayId);
       const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
-
-      if (tray.dotPosition === clampedDot && tray.isValidPosition === validation.canPlace) {
-        return tray;
-      }
 
       return {
         ...tray,

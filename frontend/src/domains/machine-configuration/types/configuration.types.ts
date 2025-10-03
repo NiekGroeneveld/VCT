@@ -6,6 +6,7 @@ supports dragging both products and trays
 
 import { Product } from "../../product-management/types/product.types";
 import { Tray } from "../../tray-management/types/tray.types";
+import { useConfig } from "../../../Context/useConfig";
 
 export interface Configuration {
     id: number;
