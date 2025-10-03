@@ -24,7 +24,7 @@ namespace api.Controllers
         private readonly ICompanyRepository _companyRepository;
         private readonly ITrayRepository _trayRepository;
         private readonly UserManager<AppUser> _userManager;
-    
+
 
         public ConfigurationController(IProductRepository productRepository, IConfigurationRepository configurationRepository, ICompanyRepository companyRepository, ITrayRepository trayRepository, IConfigurationTypeDataRepository configurationTypeDataRepository, UserManager<AppUser> userManager)
         {
@@ -111,7 +111,7 @@ namespace api.Controllers
             {
                 return BadRequest($"ConfigurationTypeData with type '{configurationDto.ConfigurationType}' not found. Available types can be retrieved from /api/ConfigurationTypeData");
             }
-           
+
             var configuration = configurationDto.ToConfigurationFromCreateDTO(configurationTypeData, company);
 
 
@@ -163,6 +163,37 @@ namespace api.Controllers
             var configurationAreaDTO = configuration.ToConfigurationAreaDTO();
 
             return Ok(configurationAreaDTO);
+        }
+
+        [HttpPut("UpdateElevatorSettings/{id}")]
+        public async Task<IActionResult> UpdateElevatorSettings([FromRoute] int companyId, [FromBody] UpdateElevatorSettingsDTO updateDto, [FromRoute] int id)
+        {
+            // Check if user belongs to the company
+            if (!await UserBelongsToCompany(companyId))
+            {
+                return Forbid("You don't have access to update configurations for this company");
+            }
+
+            var configuration = await _configurationRepository.GetByIdAsync(id);
+            if (configuration == null) return NotFound("Configuration Not Found");
+
+            // Verify the configuration belongs to the specified company
+            if (configuration.CompanyId != companyId)
+            {
+                return NotFound("Configuration not found for this company");
+            }
+
+            try
+            {
+                var updatedConfiguration = await _configurationRepository.UpdateElevatorSettingsAsync(id, updateDto.ElevatorSetting, updateDto.ElevatorAddition);
+                if (updatedConfiguration == null) return NotFound("Failed to update elevator settings");
+
+                return Ok(updatedConfiguration.ToDTO());
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -234,14 +234,6 @@ export const ConfigurationArea: React.FC = () => {
           <h3 className="font-semibold text-gray-800">Configuratie</h3>
           <div className="flex gap-2">
             <button
-              onClick={applySpacingToAllTrays}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md flex items-center gap-2 transition-colors text-sm"
-              title="Apply spacing to all products in all trays"
-            >
-              <AlignJustify size={16} />
-              <span>Spacing</span>
-            </button>
-            <button
               onClick={handleAddTray}
               className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md flex items-center gap-2 transition-colors text-sm"
             >

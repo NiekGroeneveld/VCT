@@ -58,7 +58,7 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
       const dropResult = monitor.getDropResult();
       if (item.product && dropResult ) {
         console.log(
-          `Dropped product ${item.product.name} into tray ${dropResult.trayId}`
+          `Dropped product ${item.product.name || 'Unknown'} into tray ${dropResult.trayId}`
         );
         if (companyId && configurationId) {
           // Backend expects 1-based OnTrayIndex
@@ -71,7 +71,7 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
 
       } else if (item.product) {
         console.log(
-          `Product ${item.product.name} was dragged but not dropped into a tray`
+          `Product ${item.product.name || 'Unknown'} was dragged but not dropped into a tray`
         );
       }
       else {
@@ -84,15 +84,16 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   const height = product.height * scale;
 
   // Determine label content
+  const productName = product?.name || 'Unknown';
   const labelContent = showLabel ? (
     width > 30 && height > 20 ? (
       <span className="text-xs text-center leading-tight px-1">
-        {product.name.length > product.width
-          ? product.name.substring(0, 6) + ".."
-          : product.name}
+        {productName.length > product.width
+          ? productName.substring(0, 6) + ".."
+          : productName}
       </span>
     ) : (
-      <span className="text-xs font-bold">{product.name.charAt(0)}</span>
+      <span className="text-xs font-bold">{productName.charAt(0)}</span>
     )
   ) : null;
 

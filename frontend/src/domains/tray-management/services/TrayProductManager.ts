@@ -177,15 +177,29 @@ export class TrayProductManager {
     return updatedTray;
   }
 
+  
   /**
    * Validates if a product can be placed in a tray
    */
+  /** 
   static canPlaceProduct(tray: Tray, product: Product, requestedX?: number): boolean {
     // Since we use advanced spacing, we can always fit products unless the tray is too narrow
     const totalWidth = tray.products.reduce((sum: number, p: PlacedProduct) => sum + p.width, 0) + product.width;
     return totalWidth <= tray.trayWidth;
   }
-
+  */
+  
+  static canPlaceProduct(tray: Tray, product: Product, requestedX?: number): boolean {
+    // Check if product fit on the tray.
+    // We have to round on 5 mm, and between each there is a bar of 2mm. Minimal canal width is 52 mm.
+    let canalWidth = this.getCanalWidth(product);
+    let currentUsedWidth = tray.products.reduce((sum: number, p: PlacedProduct) => sum + this.getCanalWidth(p), 0);
+    return (currentUsedWidth + canalWidth) <= tray.trayWidth;
+  }
+  
+  static getCanalWidth(product: Product): number {
+    return product.width > 52 ? Math.ceil(product.width / 5) * 5 + 2 : 52;
+  }
   /**
    * Gets tray utilization statistics
    */

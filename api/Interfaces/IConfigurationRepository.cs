@@ -16,5 +16,6 @@ namespace api.Interfaces
         Task<Configuration?> DeleteAsync(int id);
 
         Task<List<Configuration>> GetConfigurationsNamesIdsForCompanyAsync(int companyId);
+        Task<Configuration?> UpdateElevatorSettingsAsync(int id, int elevatorSetting, string elevatorAddition);
     }
 }

@@ -70,7 +70,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     // Calculate scaled machine dimensions
     const machineHeight = selectedConfiguration?.configurationTypeData?.configHeight 
         ? scaledValue(selectedConfiguration.configurationTypeData.configHeight)
-        : scaledValue(ConfigurationConstants.MACHINE_HEIGHT);
+        : selectedConfiguration ? scaledValue(ConfigurationConstants.MACHINE_HEIGHT) : scaledValue(400); // Default height when no config
     
     // Local dot position function using dynamic dotsDelta
     const getLocalDotYPosition = (dotNumber: number): number => {
@@ -161,8 +161,11 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         <div className="flex" id="machine-configuration-zone">
             {/* Left side: Dot indicators */}
             <div 
-                className="flex-shrink-0 relative bg-gray-100 border-r-2 border-black"
-                style={{ width: `${scaledValue(60)}px`, height: `${machineHeight}px` }}
+                className={`relative bg-gray-100 ${selectedConfiguration?.configurationTypeData ? 'flex-shrink-0 border-r-2 border-black' : 'flex-shrink-0'}`}
+                style={{ 
+                    width: selectedConfiguration?.configurationTypeData ? `${scaledValue(60)}px` : `${scaledValue(740)}px`, 
+                    height: `${machineHeight}px` 
+                }}
             >
                 {selectedConfiguration?.configurationTypeData?.amountDots ? Array.from({ length: Number(selectedConfiguration.configurationTypeData.amountDots) }, (_, i) => {
                     const dotNumber = i + 1;
@@ -214,10 +217,14 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                             )}
                         </div>
                     );
-                }) : null}
+                }) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-gray-500 text-lg font-medium text-center">Geen Configuratie Geselecteerd</span>
+                    </div>
+                )}
                 
                 {/* Gap numbers (red) */}
-                {getGapNumbers().map(({ dotNumber, gap }, index) => (
+                {selectedConfiguration && getGapNumbers().map(({ dotNumber, gap }, index) => (
                     <div 
                         key={index}
                         className="absolute text-red-600 font-bold text-xs"
@@ -232,62 +239,64 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 ))}
             </div>
 
-            {/* Right side: Machine area with black border */}
-            <div 
-                ref={divRef}
-                className={`
-                    relative border-2 border-black bg-gray-50
-                    ${isOver ? (canDrop ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50') : ''}
-                    ${className}
-                `}
-                style={{
-                    width: `${scaledValue(Number(selectedConfiguration?.configurationTypeData.trayWidth) + scaledValue(100))}px`, // Scaled machine area width
-                    height: `${machineHeight}px`,
-                    paddingLeft: `${scaledValue(60)}px`, // Increased padding for centering
-                    paddingRight: `${scaledValue(60)}px` // Increased padding for centering
-                }}
-            >
-                {/* Working area */}
-                <div
-                    className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-50"
-                    style={{ height: `${machineHeight}px` }}
+            {/* Right side: Machine area with black border - only show when configuration is loaded */}
+            {selectedConfiguration?.configurationTypeData ? (
+                <div 
+                    ref={divRef}
+                    className={`
+                        relative border-2 border-black bg-gray-50
+                        ${isOver ? (canDrop ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50') : ''}
+                        ${className}
+                    `}
+                    style={{
+                        width: `${scaledValue(Number(selectedConfiguration.configurationTypeData.trayWidth + 60))}px`, // Scaled machine area width
+                        height: `${machineHeight}px`,
+                        paddingLeft: `${0}px`, // Increased padding for centering
+                        paddingRight: `${0}px` // Increased padding for centering
+                    }}
                 >
-                    {children}
-                </div>
-
-                {/* Drag feedback */}
-                {isOver && draggedItem && (
-                    <div className="absolute top-4 right-4 bg-white p-3 rounded-lg shadow-lg border-2 border-blue-200">
-                        <div className={`text-sm font-medium ${canDrop ? 'text-green-600' : 'text-red-600'}`}>
-                            {canDrop ? '✓ Valid Position' : '✗ Invalid Position'}
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1">
-                            {(() => {
-                                const name = (draggedItem as DragItem)?.tray?.name;
-                                const id = (draggedItem as DragItem)?.trayId ?? (draggedItem as DragItem)?.tray?.id;
-                                return `Moving ${name ?? `Tray ${id}`}`;
-                            })()}
-                        </div>
-                        {!canDrop && (
-                            <div className="text-xs text-red-500 mt-1">
-                                Position blocked or out of bounds
-                            </div>
-                        )}
+                    {/* Working area */}
+                    <div
+                        className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-50"
+                        style={{ height: `${machineHeight}px` }}
+                    >
+                        {children}
                     </div>
-                )}
 
-                {/* Drop zone highlight when dragging */}
-                {isOver && (
-                    <div className={`
-                        absolute inset-0 pointer-events-none
-                        ${canDrop 
-                            ? 'bg-green-100 bg-opacity-20 border-2 border-green-400 border-dashed' 
-                            : 'bg-red-100 bg-opacity-20 border-2 border-red-400 border-dashed'
-                        }
-                        rounded-lg
-                    `} />
-                )}
-            </div>
+                    {/* Drag feedback */}
+                    {isOver && draggedItem && (
+                        <div className="absolute top-4 right-4 bg-white p-3 rounded-lg shadow-lg border-2 border-blue-200">
+                            <div className={`text-sm font-medium ${canDrop ? 'text-green-600' : 'text-red-600'}`}>
+                                {canDrop ? '✓ Valid Position' : '✗ Invalid Position'}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                                {(() => {
+                                    const name = (draggedItem as DragItem)?.tray?.name;
+                                    const id = (draggedItem as DragItem)?.trayId ?? (draggedItem as DragItem)?.tray?.id;
+                                    return `Moving ${name ?? `Tray ${id}`}`;
+                                })()}
+                            </div>
+                            {!canDrop && (
+                                <div className="text-xs text-red-500 mt-1">
+                                    Position blocked or out of bounds
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Drop zone highlight when dragging */}
+                    {isOver && (
+                        <div className={`
+                            absolute inset-0 pointer-events-none
+                            ${canDrop 
+                                ? 'bg-green-100 bg-opacity-20 border-2 border-green-400 border-dashed' 
+                                : 'bg-red-100 bg-opacity-20 border-2 border-red-400 border-dashed'
+                            }
+                            rounded-lg
+                        `} />
+                    )}
+                </div>
+            ) : null}
         </div>
     );
 };

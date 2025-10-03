@@ -79,7 +79,7 @@ export const LoadConfigurationAPI = async(companyId: number, configurationId: nu
         // Ensure all products have correct y coordinates based on stable property
         config.trays = TrayProductManager.ensureCorrectYCoordinatesForAllTrays(config.trays);
 
-        return response.data;
+        return config;
     }  catch (error) {
         handleError(error);
         return null;
@@ -226,7 +226,30 @@ export const SameTrayReorderAPI = async(companyId: number, configurationId: numb
     }
 };
 
-
+export const UpdateElevatorSettingsAPI = async(companyId: number, configurationId: number, elevatorSetting: number, elevatorAddition: string): Promise<any | null> => {
+    try{
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error("No company selected");
+        if (!configurationId) throw new Error("No configuration selected");
+        const response = await axios.put(
+            API_BASE_URL + `companies/${companyId}/configurations/UpdateElevatorSettings/${configurationId}`,
+            {
+                elevatorSetting,
+                elevatorAddition
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};
 
 // Export a singleton instance
 export const configurationService = {
@@ -240,5 +263,6 @@ export const configurationService = {
     PlaceProductOnTrayAPI,
     RemoveProductFromTrayAPI,
     MoveProductBetweenTraysAPI,
-    SameTrayReorderAPI
+    SameTrayReorderAPI,
+    UpdateElevatorSettingsAPI
 }

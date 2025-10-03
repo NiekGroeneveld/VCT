@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.Data;
 using api.Interfaces;
 using api.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
@@ -74,6 +75,24 @@ namespace api.Repository
 
             await _context.SaveChangesAsync();
             return existingConfiguration;
+        }
+
+        public async Task<Configuration?> UpdateElevatorSettingsAsync(int id, int elevatorSetting, string elevatorAddition)
+        {
+            var configuration = await GetByIdAsync(id);
+            if (configuration == null) return null;
+
+            if (configuration.ConfigurationType != "VisionV8")
+            {
+                throw new InvalidOperationException("Elevator settings can only be updated for VisionV8 configurations.");
+                
+            }
+
+            configuration.ElevatorSetting = elevatorSetting;
+            configuration.ElevatorAddition = elevatorAddition;
+
+            await _context.SaveChangesAsync();
+            return configuration;
         }
     }
 }
