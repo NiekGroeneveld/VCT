@@ -2,7 +2,7 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { Tray } from '../../tray-management/types/tray.types';
-import { ConfigurationConstants, getDotYPosition, DragItem } from '../types/configuration.types';
+import { ConfigurationConstants, getDotYPosition, getYPositionDot, DragItem } from '../types/configuration.types';
 import { useScaling } from '../../../hooks/useScaling';
 import { useCompany } from '../../../Context/useCompany';
 import { useConfig } from '../../../Context/useConfig';
@@ -24,6 +24,9 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     const { selectedConfiguration, setSelectedConfiguration } = useConfig();
     const { selectedCompany } = useCompany();
     
+    const [dropTargetDot, setDropTargetDot] = React.useState<number | null>(null);
+    const lastReportedDotRef = React.useRef<number | null>(null);
+    
     const [{ isOver, canDrop, draggedItem }, drop] = useDrop({
         accept: 'TRAY_POSITION',
         drop: (item: DragItem, monitor) => {
@@ -37,19 +40,18 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const unscaledY = containerBottomY / scale;
                 const trayId = item.trayId ?? item.tray?.id;
                 if (trayId != null) {
-                    console.log(`[DND] Drop for tray ${trayId} at unscaledY=${unscaledY}`);
-                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, unscaledY);
+                    const newDot = Math.max(1, Math.min(getYPositionDot(unscaledY), ConfigurationConstants.DOTS));
+                    const bottomY = getDotYPosition(newDot);
+                    console.log(`[DND] Drop for tray ${trayId} at dot=${newDot} (unscaledY=${unscaledY})`);
+                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, bottomY);
                 } else {
                     console.warn('[DND] Drop item missing trayId');
                 }
             }
+            lastReportedDotRef.current = null;
+            setDropTargetDot(null);
             return { dropped: true };
         },
-        collect: (monitor) => ({
-            isOver: monitor.isOver(),
-            canDrop: monitor.canDrop(),
-            draggedItem: monitor.getItem()
-        }),
         hover: (item: DragItem, monitor) => {
             const clientOffset = monitor.getClientOffset();
             const containerRect = divRef.current?.getBoundingClientRect();
@@ -61,10 +63,36 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 const unscaledY = containerBottomY / scale;
                 const trayId = item.trayId ?? item.tray?.id;
                 if (trayId != null) {
-                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, unscaledY);
+                    onTrayPositionChange(
+                        Number(selectedCompany?.id),
+                        Number(selectedConfiguration?.id),
+                        trayId,
+                        unscaledY
+                    );
                 }
+                const newDot = getYPositionDot(unscaledY);
+                const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
+                if (lastReportedDotRef.current !== clampedDot) {
+                    lastReportedDotRef.current = clampedDot;
+                    const trayId = item.trayId ?? item.tray?.id;
+                    if (trayId != null) {
+                        const bottomY = getDotYPosition(clampedDot);
+                        onTrayPositionChange(
+                            Number(selectedCompany?.id),
+                            Number(selectedConfiguration?.id),
+                            trayId,
+                            bottomY
+                        );
+                    }
+                }
+                setDropTargetDot(clampedDot);
             }
-        }
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop(),
+            draggedItem: monitor.getItem()
+        })
     });
 
     // Calculate scaled machine dimensions
@@ -92,6 +120,14 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             drop(divRef.current);
         }
     }, [drop]);
+
+    // Clear drop target when not hovering
+    React.useEffect(() => {
+        if (!isOver) {
+            lastReportedDotRef.current = null;
+            setDropTargetDot(null);
+        }
+    }, [isOver]);
 
     // Helper function to check if a dot is occupied by a tray
     const isDotOccupied = (dotNumber: number): boolean => {
@@ -281,6 +317,23 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                                     Position blocked or out of bounds
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Drop target indicator */}
+                    {dropTargetDot && (
+                        <div 
+                            className="absolute border-2 border-blue-500 bg-blue-200 bg-opacity-50 rounded pointer-events-none z-10"
+                            style={{
+                                bottom: `${getScaledDotYPosition(dropTargetDot)}px`,
+                                left: '10px',
+                                right: '10px',
+                                height: '20px'
+                            }}
+                        >
+                            <div className="absolute -top-6 left-0 text-blue-700 text-xs font-medium">
+                                Drop at Dot {dropTargetDot}
+                            </div>
                         </div>
                     )}
 

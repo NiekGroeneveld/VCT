@@ -50,20 +50,24 @@ export const useTrayDragDrop = (
         //console.log(`Dragging tray ${trayId} to Y=${newYposition} (dot ${newDot}, clamped to ${clampedDot})`);
 
 
-        setTrays(prev => prev.map(tray => {
-            if (tray.id !== trayId) return tray;
-            
-            // Check if this position is valid (for visual feedback)
-            const otherTrays = prev.filter(t => t.id !== trayId);
-            const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
-            
-            return {
-                ...tray, 
-                dotPosition: clampedDot,
-                // Add a flag to indicate if current position is valid (for visual feedback)
-                isValidPosition: validation.canPlace
-            };
-        }));
+    setTrays(prev => prev.map(tray => {
+      if (tray.id !== trayId) return tray;
+
+      // Check if this position is valid (for visual feedback)
+      const otherTrays = prev.filter(t => t.id !== trayId);
+      const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
+
+      if (tray.dotPosition === clampedDot && tray.isValidPosition === validation.canPlace) {
+        return tray;
+      }
+
+      return {
+        ...tray,
+        dotPosition: clampedDot,
+        // Add a flag to indicate if current position is valid (for visual feedback)
+        isValidPosition: validation.canPlace
+      };
+    }));
     }, [setTrays]);
   /**
    * Ends dragging a tray and validates the new position

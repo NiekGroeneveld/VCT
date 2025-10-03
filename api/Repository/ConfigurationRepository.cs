@@ -72,7 +72,7 @@ namespace api.Repository
             if (existingConfiguration == null) return null;
 
             existingConfiguration = configuration;
-
+            existingConfiguration.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return existingConfiguration;
         }
@@ -90,6 +90,7 @@ namespace api.Repository
 
             configuration.ElevatorSetting = elevatorSetting;
             configuration.ElevatorAddition = elevatorAddition;
+            configuration.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return configuration;
