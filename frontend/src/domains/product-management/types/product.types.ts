@@ -9,6 +9,7 @@ export interface Product {
     stable: boolean;    // Indicates if the product is stable
     color: string;      // Visual representation color of the product
     ColorHex?: string;  // Optional: backend color property for fallback
+    isActive: boolean; // Indicates if the product is active or archived
 }
 
 export interface PlacedProductBase extends Product {

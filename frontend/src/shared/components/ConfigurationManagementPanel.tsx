@@ -30,7 +30,8 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
       configurationTypeDataName:
         (selectedConfiguration as any)?.configurationType ||
         (selectedConfiguration as any)?.configurationTypeDataName,
-      orientation: "portrait",
+      orientation: "landscape",
+      configuration: selectedConfiguration ?? undefined,
     });
   }, [selectedCompany?.name, selectedConfiguration?.name, selectedConfiguration]);
 

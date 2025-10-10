@@ -7,6 +7,7 @@ import { productService } from "../services/productService";
 import { ProductVisual } from "./ProductVisual";
 import useGridDimensions from "../hooks/useGridDimensions";
 import MakeProductModal from "./MakeProductModal";
+import ProductInfoModal from "./ProductInfoModal";
 import { useScaling } from "../../../hooks/useScaling";
 
 interface ProductListProps {
@@ -20,6 +21,8 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [addProductModalOpen, setAddProductModalOpen] =
     useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productInfoModalOpen, setProductInfoModalOpen] = useState<boolean>(false);
   const { scale } = useScaling();
   const { selectedCompany } = useCompany();
 
@@ -167,6 +170,11 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
               draggable={true}
               showLabel={true}
               showStabilityIndicator={true}
+              showInfoButton={true}
+              onInfoClick={() => {
+                setSelectedProduct(product);
+                setProductInfoModalOpen(true);
+              }}
             />
           ))}
         </div>
@@ -184,6 +192,17 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         open={addProductModalOpen}
         onClose={() => setAddProductModalOpen(false)}
         onProductCreated={loadProducts}
+      />
+
+      {/* Product Info Modal */}
+      <ProductInfoModal
+        product={selectedProduct}
+        open={productInfoModalOpen}
+        onClose={() => {
+          setProductInfoModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onProductUpdated={loadProducts}
       />
     </div>
   );

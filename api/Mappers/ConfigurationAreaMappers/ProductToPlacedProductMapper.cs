@@ -27,6 +27,7 @@ namespace api.Mappers.ConfigurationAreaMappers
                         Stable = TrayProduct.Product.Stable,
                         Color = TrayProduct.Product.ColorHex,
                         OnTrayIndex = TrayProduct.OnTrayIndex,
+                        IsActive = TrayProduct.Product.IsActive,
                         ExtractorType = "Low",
                         ExtractorHeight = configurationTypeData.LowExtractorHeight     
                     };
@@ -41,6 +42,7 @@ namespace api.Mappers.ConfigurationAreaMappers
                         Stable = TrayProduct.Product.Stable,
                         Color = TrayProduct.Product.ColorHex,
                         OnTrayIndex = TrayProduct.OnTrayIndex,
+                        IsActive = TrayProduct.Product.IsActive,
                         ExtractorType = "High",
                         ExtractorHeight = configurationTypeData.HighExtractorHeight,
                         ClipDistance = 0 //GetClipDistance()

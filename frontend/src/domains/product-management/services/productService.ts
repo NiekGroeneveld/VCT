@@ -10,7 +10,7 @@ export const GetCompanyProductsAPI = async (companyId: number, includePublics: b
         const token  = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
         if (!companyId) throw new Error ("No company selected");
-        const response = await axios.get(API_BASE_URL + `companies/${companyId}/products/getCompanyProducts/${includePublics}`, {
+        const response = await axios.get(API_BASE_URL + `companies/${companyId}/products/getCompanyProductsActive/${includePublics}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -42,8 +42,62 @@ export const CreateProductAPI = async (companyId: number, productData: any): Pro
     }
 }
 
+export const DeActivateProductAPI = async (companyId: number, productId: number): Promise<boolean> => {
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.post(API_BASE_URL + `companies/${companyId}/products/${productId}/deactivate`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.status === 204;
+    } catch (error) {
+        console.error('Failed to deactivate product:', error);
+        return false;
+    }
+}
+
+export const ActivateProductAPI = async (companyId: number, productId: number): Promise<boolean> => {
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.post(API_BASE_URL + `companies/${companyId}/products/${productId}/activate`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.status === 204;
+    } catch (error) {
+        console.error('Failed to activate product:', error);
+        return false;
+    }
+}
+
+export const ProductSoftDeleteAPI = async (companyId: number, productId: number): Promise<{message: string, action: string, productId: number} | null> => {
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.delete(API_BASE_URL + `companies/${companyId}/products/${productId}/SoftDelete`, {
+            headers: {  
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data; // Expecting { message: string, action: string, productId: number }
+    } catch (error) {
+        console.error('Failed to soft delete product:', error);
+        return null;
+    }
+}
+
 // Export a singleton instance
 export const productService = {
     GetCompanyProductsAPI,
-    CreateProductAPI
+    CreateProductAPI,
+    DeActivateProductAPI,
+    ActivateProductAPI,
+    ProductSoftDeleteAPI
 }

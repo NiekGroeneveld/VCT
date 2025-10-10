@@ -13,5 +13,6 @@ namespace api.DTOs.Product
         public float Depth { get; set; }
         public bool Stable { get; set; }
         public string ColorHex { get; set; } = "#FFFFFF";
+        public bool IsActive { get; set; } = true;
     }
 }

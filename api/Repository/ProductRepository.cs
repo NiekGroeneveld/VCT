@@ -6,6 +6,7 @@ using api.Data;
 using api.DTOs.Product;
 using api.Interfaces;
 using api.Mappers;
+using api.Migrations;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +71,26 @@ namespace api.Repository
                 .ToListAsync();
         }
 
+        public Task<bool> SetProductToInActiveAsync(int productId)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null) return Task.FromResult(false);
+
+            product.IsActive = false;
+            _context.SaveChanges();
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SetProductToActiveAsync(int productId)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null) return Task.FromResult(false);
+
+            product.IsActive = true;
+            _context.SaveChanges();
+            return Task.FromResult(true);
+        }
+
         public async Task<Product?> UpdateAsync(Product product)
         {
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
@@ -80,8 +101,29 @@ namespace api.Repository
             return existingProduct;
         }
 
+        public Task<bool> IsProductInUseAsync(int productId)
+        {
+            var product = _context.Products
+                .Include(p => p.TrayProducts)
+                .FirstOrDefault(p => p.Id == productId);
+            if (product == null) return Task.FromResult(false);
+            
+            return Task.FromResult(product.TrayProducts.Count > 0);
+        }
 
-    
+        public Task<List<Product>> GetActiveProductsByCompanyIdAsync(int companyId, bool includePublics = false)
+        {
+            var products = _context.Products
+                .Include(p => p.Company)
+                .Where(p => p.CompanyId == companyId && p.IsActive);
+
+            if (includePublics)
+            {
+                products = products.Union(_context.Products.Where(p => p.isPublic && p.IsActive));
+            }
+
+            return products.ToListAsync();
+        }
     }
 
 }

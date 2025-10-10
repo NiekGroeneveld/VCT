@@ -6,6 +6,7 @@ import { Product, PlacedProduct } from "../types/product.types";
 import { useCompany } from "../../../Context/useCompany";
 import { useConfig } from "../../../Context/useConfig";
 import { configurationService } from "../../../domains/machine-configuration/services/ConfigurationService";
+import { MoreVertical } from "lucide-react";
 
 interface ProductVisualProps {
   product: Product | PlacedProduct;
@@ -16,6 +17,8 @@ interface ProductVisualProps {
   showLabel?: boolean;
   showStabilityIndicator?: boolean;
   draggable?: boolean;
+  showInfoButton?: boolean; // New prop to control info button visibility
+  onInfoClick?: () => void; // Callback when info button is clicked
 }
 export const ProductVisual: React.FC<ProductVisualProps> = ({
   product,
@@ -26,6 +29,8 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   showLabel = true,
   showStabilityIndicator = true,
   draggable = false,
+  showInfoButton = false,
+  onInfoClick,
 }) => {
   const { selectedCompany } = useCompany();
   const { selectedConfiguration } = useConfig();
@@ -83,17 +88,58 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   const width = product.width * scale;
   const height = product.height * scale;
 
+  // Calculate text color based on background brightness
+  const getTextColor = (hexColor: string): string => {
+    // Remove # if present
+    const hex = hexColor.replace('#', '');
+    
+    // Convert to RGB
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    // Calculate luminance (perceived brightness)
+    // Using the relative luminance formula
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Return white for dark backgrounds, black for light backgrounds
+    return luminance < 0.5 ? '#FFFFFF' : '#000000';
+  };
+
+  const backgroundColor = product.color || product.ColorHex || "#dbeafe";
+  const textColor = getTextColor(backgroundColor);
+
   // Determine label content
   const productName = product?.name || 'Unknown';
+  const isActive = product?.isActive ?? true; // Default to true if not specified
+
   const labelContent = showLabel ? (
     width > 30 && height > 20 ? (
-      <span className="text-xs text-center leading-tight px-1">
-        {productName.length > product.width
-          ? productName.substring(0, 6) + ".."
-          : productName}
-      </span>
+      <div className="text-center leading-tight px-1" style={{ color: textColor }}>
+        {/* Inactive Label */}
+        {!isActive && (
+          <div className="text-[0.6rem] font-bold text-red-600 mb-0.5">
+            Verwijderd
+          </div>
+        )}
+        <div className="text-xs font-bold">
+          {productName.length > product.width / scale
+            ? productName.substring(0, 6) + ".."
+            : productName}
+        </div>
+        <div className="text-[0.6rem] mt-0.5 flex flex-col items-center justify-center gap-0.5">
+          <span className="flex items-center gap-0.5">
+            <span className="font-bold">|</span>
+            <span>{product.height}</span>
+          </span>
+          <span className="flex items-center gap-0.5">
+            <span className="font-bold">—</span>
+            <span>{product.width}</span>
+          </span>
+        </div>
+      </div>
     ) : (
-      <span className="text-xs font-bold">{productName.charAt(0)}</span>
+      <span className="text-xs font-bold" style={{ color: textColor }}>{productName.charAt(0)}</span>
     )
   ) : null;
 
@@ -112,14 +158,31 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
   const combinedStyles = {
     width: `${width}px`,
     height: `${height}px`,
-    backgroundColor: product.color || product.ColorHex || "#dbeafe",
+    backgroundColor: backgroundColor,
+    opacity: !isActive ? 0.4 : 1, // Make inactive products semi-transparent
     ...style,
     ...dragStyles,
   };
 
   const productElement = (
-    <div className={baseClasses} style={combinedStyles} onClick={onClick}>
+    <div className={`${baseClasses} group`} style={combinedStyles} onClick={onClick}>
       {labelContent}
+
+      {/* Info Button - Only shown when showInfoButton is true */}
+      {showInfoButton && onInfoClick && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onInfoClick();
+          }}
+          className="absolute top-1 right-1 p-1 bg-white rounded-full shadow-md 
+                     opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                     hover:bg-gray-100 z-10"
+          title="Product Information"
+        >
+          <MoreVertical className="w-3 h-3 text-gray-700" />
+        </button>
+      )}
 
       {/* Stability indicator */}
       {showStabilityIndicator && !product.stable && (

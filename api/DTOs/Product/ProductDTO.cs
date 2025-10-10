@@ -14,6 +14,7 @@ namespace api.DTOs.Product
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
+        public bool IsActive { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string ColorHex { get; set; } = "#FFFFFF";
 

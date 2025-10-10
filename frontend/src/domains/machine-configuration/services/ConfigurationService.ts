@@ -77,6 +77,17 @@ export const LoadConfigurationAPI = async(companyId: number, configurationId: nu
         let config = response.data as Configuration;
         console.log('[LoadConfigurationAPI] Configuration loaded from API, processing trays...');
         
+        // Map backend PascalCase properties to frontend camelCase
+        if (config.trays) {
+            config.trays = config.trays.map(tray => ({
+                ...tray,
+                products: tray.products?.map((product: any) => ({
+                    ...product,
+                    isActive: product.IsActive ?? product.isActive ?? true, // Map IsActive to isActive
+                })) || []
+            }));
+        }
+        
         config.trays = ProductSpacingService.spaceOutAllTrays(config.trays || []);
         
         // Ensure all products have correct y coordinates based on stable property

@@ -85,10 +85,18 @@ namespace api.Controllers
             // Persist the change so subsequent GETs reflect the removal
             await _trayRepo.UpdateAsync(tray);
 
-            if(!TrayProductsIndicesAreValid(tray))
+            var ProductInUse = await _productRepo.IsProductInUseAsync(trayProduct.ProductId);
+            if (!ProductInUse)
             {
-                return BadRequest("TrayProduct indices are not valid after removal.");
+                // Product is not in use anywhere else; permanently delete it
+                await _productRepo.DeleteAsync(trayProduct.ProductId);
+                // Optionally, log this action or notify relevant parties
             }
+
+            if (!TrayProductsIndicesAreValid(tray))
+                {
+                    return BadRequest("TrayProduct indices are not valid after removal.");
+                }
 
             return Ok(tray.ToConfigurationAreaTrayDTO(configuration.ConfigurationTypeData));
         }

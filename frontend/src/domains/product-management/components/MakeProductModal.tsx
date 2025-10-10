@@ -139,6 +139,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     depth: formData.depth || 50,
     stable: formData.stable,
     color: formData.color || "#3B82F6",
+    isActive: true, // New products are active by default
   };
 
   return (
