@@ -6,7 +6,6 @@ supports dragging both products and trays
 
 import { Product } from "../../product-management/types/product.types";
 import { Tray } from "../../tray-management/types/tray.types";
-import { useConfig } from "../../../Context/useConfig";
 
 export interface Configuration {
     id: number;
@@ -117,4 +116,29 @@ export const getDotYPosition = (dotNumber: number): number => {
 
 export const getYPositionDot = (yPosition: number): number => {
     return Math.round(yPosition / ConfigurationConstants.DOT_DELTA) + 1;
+}
+
+export const getAmountDots = (configuration: Configuration): number => {
+    return configuration.configurationTypeData?.amountDots ?? ConfigurationConstants.DOTS;
+}
+
+export const getDotsDelta = (configuration: Configuration): number => {
+    return configuration.configurationTypeData?.dotsDelta ?? ConfigurationConstants.DOT_DELTA;
+}
+
+export const getMachineHeight = (configuration: Configuration): number => {
+    return configuration.configurationTypeData?.configHeight ?? (console.error("[getMachineHeight] Configuration or configurationTypeData is undefined"), 0);
+}
+
+export const getTopSpace = (configuration: Configuration): number => {
+    const amountDots = getAmountDots(configuration);
+    const dotsDelta = getDotsDelta(configuration);
+    return configuration.configurationTypeData?.configHeight - (amountDots * dotsDelta);
+}
+
+export const ConfigurationConstantsService = {
+    getAmountDots: getAmountDots,
+    getDotsDelta: getDotsDelta,
+    getMachineHeight: getMachineHeight,
+    getTopSpace: getTopSpace,
 }

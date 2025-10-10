@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { Tray } from "../types/tray.types";
 import { TrayPositionService } from "../../machine-configuration/services/TrayPositionService";
 import {
@@ -17,9 +17,24 @@ export const useTrayDragDrop = (
 ) => {
   const [draggedTray, setDraggedTray] = useState<Tray | null>(null);
   const company = useCompany().selectedCompany;
-  const companyId = company ? Number(company.id) : null;
   const { selectedConfiguration, setSelectedConfiguration } = useConfig();
-  const configurationId = selectedConfiguration ? Number(selectedConfiguration.id) : null;
+  
+  // Use refs to avoid stale closures
+  const companyIdRef = useRef(company ? Number(company.id) : null);
+  const configurationIdRef = useRef(selectedConfiguration ? Number(selectedConfiguration.id) : null);
+  const traysRef = useRef(trays);
+  
+  // Update refs when values change, but don't reset drag state unnecessarily
+  useEffect(() => {
+    companyIdRef.current = company ? Number(company.id) : null;
+    configurationIdRef.current = selectedConfiguration ? Number(selectedConfiguration.id) : null;
+    traysRef.current = trays;
+  }, [company, selectedConfiguration, trays]);
+  
+  // Only reset dragged tray when company or configuration changes (not when trays update)
+  useEffect(() => {
+    setDraggedTray(null);
+  }, [company?.id, selectedConfiguration?.id]);
 
   /**
    * starts dragging a tray
@@ -81,8 +96,9 @@ export const useTrayDragDrop = (
         setDraggedTray(null);
         return false;
       }
-      // Use the tray's current dotPosition from state (kept updated by hover)
-      const tray = trays.find((t) => t.id === trayId);
+      // Use the current trays from ref to avoid stale closure
+      const currentTrays = traysRef.current;
+      const tray = currentTrays.find((t) => t.id === trayId);
 
       if (!tray) {
         console.warn(`Tray with ID ${trayId} not found`);
@@ -91,7 +107,7 @@ export const useTrayDragDrop = (
 
       const clampedDot = Math.max(1, Math.min(tray.dotPosition, ConfigurationConstants.DOTS));
       const originalDot = tray.dragStartDot || tray.dotPosition;
-      const otherTrays = trays.filter((t) => t.id !== trayId);
+      const otherTrays = currentTrays.filter((t) => t.id !== trayId);
       const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
 
       console.log(
@@ -108,16 +124,18 @@ export const useTrayDragDrop = (
           )
         );
         setDraggedTray(null);
-        if (companyId && configurationId) {
+        const currentCompanyId = companyIdRef.current;
+        const currentConfigId = configurationIdRef.current;
+        if (currentCompanyId && currentConfigId) {
           configurationService
             .UpdateTrayPositionInConfigurationAPI(
-              companyId,
-              configurationId,
+              currentCompanyId,
+              currentConfigId,
               trayId,
               clampedDot
             )
             .then(async () => {
-              const config = await configurationService.LoadConfigurationAPI(companyId, configurationId);
+              const config = await configurationService.LoadConfigurationAPI(currentCompanyId, currentConfigId);
               if (config) {
                 setSelectedConfiguration(config);
                 setTrays(config.trays || []);
@@ -148,7 +166,7 @@ export const useTrayDragDrop = (
         return true;
       }
     },
-    [setTrays, trays, companyId, configurationId, setSelectedConfiguration]
+    [setTrays, setSelectedConfiguration]
   );
 
   return {

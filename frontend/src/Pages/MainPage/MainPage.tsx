@@ -6,6 +6,8 @@ import TopBar from "../../app/layout/NavBar";
 import { ProductList } from "../../domains/product-management/components/ProductList";
 import { ConfigurationArea } from "../../domains/machine-configuration/components/ConfigurationArea";
 import ConfigurationManagementPanel from "../../shared/components/ConfigurationManagementPanel";
+import { useCompany } from "../../Context/useCompany";
+import { useConfig } from "../../Context/useConfig";
 
 const MainContent = () => {
   const { scaledValue } = useScaling();
@@ -37,6 +39,9 @@ const MainContent = () => {
 };
 
 const MainPage = () => {
+  // Don't remount DndProvider - let it stay stable
+  // The refs in MachineConfigurationZone will handle company/config changes
+  
   return (
     <DndProvider backend={HTML5Backend}>
       <ScalingProvider>

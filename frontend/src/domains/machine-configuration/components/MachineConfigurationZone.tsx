@@ -2,10 +2,11 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { Tray } from '../../tray-management/types/tray.types';
-import { ConfigurationConstants, getDotYPosition, getYPositionDot, DragItem } from '../types/configuration.types';
+import { ConfigurationConstants, getDotYPosition, getYPositionDot, DragItem, ConfigurationConstantsService } from '../types/configuration.types';
 import { useScaling } from '../../../hooks/useScaling';
 import { useCompany } from '../../../Context/useCompany';
 import { useConfig } from '../../../Context/useConfig';
+import { configurationService } from '../services/ConfigurationService';
 
 interface MachineConfigurationZoneProps {
     trays: Tray[];
@@ -27,23 +28,57 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
     const [dropTargetDot, setDropTargetDot] = React.useState<number | null>(null);
     const lastReportedDotRef = React.useRef<number | null>(null);
     
-    const [{ isOver, canDrop, draggedItem }, drop] = useDrop({
+    // Use refs to avoid stale closures in useDrop callbacks
+    const selectedCompanyRef = React.useRef(selectedCompany);
+    const selectedConfigurationRef = React.useRef(selectedConfiguration);
+    const scaleRef = React.useRef(scale);
+    const onTrayPositionChangeRef = React.useRef(onTrayPositionChange);
+    
+    // Reset state when company or configuration changes
+    React.useEffect(() => {
+        selectedCompanyRef.current = selectedCompany;
+        selectedConfigurationRef.current = selectedConfiguration;
+        scaleRef.current = scale;
+        onTrayPositionChangeRef.current = onTrayPositionChange;
+        
+        // Clear any ongoing drag state when company/config changes
+        lastReportedDotRef.current = null;
+        setDropTargetDot(null);
+    }, [selectedCompany, selectedConfiguration, scale, onTrayPositionChange]);
+    
+    // Memoize the drop spec to prevent recreation
+    const dropSpec = React.useMemo(() => ({
         accept: 'TRAY_POSITION',
-        drop: (item: DragItem, monitor) => {
+        canDrop: () => {
+            console.log('[MachineConfigurationZone] canDrop check - returning true');
+            return true;
+        },
+        drop: (item: DragItem, monitor: any) => {
+            console.log('[MachineConfigurationZone] Drop handler called!');
             const clientOffset = monitor.getClientOffset();
             const containerRect = divRef.current?.getBoundingClientRect();
             if (clientOffset && containerRect) {
+                const currentConfig = selectedConfigurationRef.current;
+                const currentCompany = selectedCompanyRef.current;
+                const currentScale = scaleRef.current;
+                
+                if(!currentConfig || !currentCompany){
+                    console.error("[MachineConfigurationZone] No configuration or company selected during drop");
+                    return { dropped: false };
+                }
+                
+                
                 // Convert from top-based client coordinates to bottom-based container coordinates
                 const relativeY = clientOffset.y - containerRect.top;
                 const containerBottomY = containerRect.height - relativeY;
                 // Convert back to unscaled coordinates for data storage
-                const unscaledY = containerBottomY / scale;
+                const unscaledY = containerBottomY / currentScale;
                 const trayId = item.trayId ?? item.tray?.id;
                 if (trayId != null) {
-                    const newDot = Math.max(1, Math.min(getYPositionDot(unscaledY), ConfigurationConstants.DOTS));
+                    const newDot = Math.max(1, Math.min(getYPositionDot(unscaledY), ConfigurationConstantsService.getAmountDots(currentConfig)));
                     const bottomY = getDotYPosition(newDot);
                     console.log(`[DND] Drop for tray ${trayId} at dot=${newDot} (unscaledY=${unscaledY})`);
-                    onTrayPositionChange(Number(selectedCompany?.id), Number(selectedConfiguration?.id), trayId, bottomY);
+                    onTrayPositionChangeRef.current(Number(currentCompany?.id), Number(currentConfig?.id), trayId, bottomY);
                 } else {
                     console.warn('[DND] Drop item missing trayId');
                 }
@@ -52,19 +87,29 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             setDropTargetDot(null);
             return { dropped: true };
         },
-        hover: (item: DragItem, monitor) => {
+        hover: (item: DragItem, monitor: any) => {
+            if (!monitor.isOver({ shallow: true })) return; // Only handle when directly over this drop zone
+            
             const clientOffset = monitor.getClientOffset();
             const containerRect = divRef.current?.getBoundingClientRect();
             if (clientOffset && containerRect) {
+                const currentConfig = selectedConfigurationRef.current;
+                const currentCompany = selectedCompanyRef.current;
+                const currentScale = scaleRef.current;
+                
                 // Convert from top-based client coordinates to bottom-based container coordinates
                 const relativeY = clientOffset.y - containerRect.top;
                 const containerBottomY = containerRect.height - relativeY;
                 // Convert back to unscaled coordinates for data storage
-                const unscaledY = containerBottomY / scale;
+                const unscaledY = containerBottomY / currentScale;
                 
                 const newDot = getYPositionDot(unscaledY);
-                const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
-                
+                if(!currentConfig){
+                    console.error("[MachineConfigurationZone] No configuration selected during hover");
+                    return;
+                }
+                const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstantsService.getAmountDots(currentConfig)));
+
                 // Only update position when dot changes to avoid redundant updates
                 if (lastReportedDotRef.current !== clampedDot) {
                     lastReportedDotRef.current = clampedDot;
@@ -72,9 +117,9 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                     if (trayId != null) {
                         const bottomY = getDotYPosition(clampedDot);
                         console.log(`[MachineConfigurationZone] Hover update: tray ${trayId} to dot ${clampedDot} (Y=${bottomY})`);
-                        onTrayPositionChange(
-                            Number(selectedCompany?.id),
-                            Number(selectedConfiguration?.id),
+                        onTrayPositionChangeRef.current(
+                            Number(currentCompany?.id),
+                            Number(currentConfig?.id),
                             trayId,
                             bottomY
                         );
@@ -83,17 +128,19 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                 setDropTargetDot(clampedDot);
             }
         },
-        collect: (monitor) => ({
+        collect: (monitor: any) => ({
             isOver: monitor.isOver(),
             canDrop: monitor.canDrop(),
             draggedItem: monitor.getItem()
         })
-    });
+    }), []); // Empty deps - all values from refs
+    
+    const [{ isOver, canDrop, draggedItem }, drop] = useDrop(dropSpec);
 
     // Calculate scaled machine dimensions
     const machineHeight = selectedConfiguration?.configurationTypeData?.configHeight 
         ? scaledValue(selectedConfiguration.configurationTypeData.configHeight)
-        : selectedConfiguration ? scaledValue(ConfigurationConstants.MACHINE_HEIGHT) : scaledValue(400); // Default height when no config
+        : selectedConfiguration ? scaledValue(ConfigurationConstantsService.getMachineHeight(selectedConfiguration)) : scaledValue(400); // Default height when no config
     
     // Local dot position function using dynamic dotsDelta
     const getLocalDotYPosition = (dotNumber: number): number => {
@@ -108,11 +155,16 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         return scaledValue(getLocalDotYPosition(dotNumber));
     };
 
-    // Use a callback ref to attach the drop target
+    // Keep a ref for getting bounding rect
     const divRef = React.useRef<HTMLDivElement>(null);
-    React.useEffect(() => {
-        if (divRef.current) {
-            drop(divRef.current);
+    
+    // Use a callback ref to attach the drop target - this ensures it's always connected
+    const dropRef = React.useCallback((node: HTMLDivElement | null) => {
+        console.log('[MachineConfigurationZone] dropRef callback called, node:', node ? 'exists' : 'null');
+        divRef.current = node;
+        if (node) {
+            drop(node);
+            console.log('[MachineConfigurationZone] drop() connector called on node');
         }
     }, [drop]);
 
@@ -274,7 +326,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
             {/* Right side: Machine area with black border - only show when configuration is loaded */}
             {selectedConfiguration?.configurationTypeData ? (
                 <div 
-                    ref={divRef}
+                    ref={dropRef}
                     className={`
                         relative border-2 border-black bg-gray-50
                         ${isOver ? (canDrop ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50') : ''}
