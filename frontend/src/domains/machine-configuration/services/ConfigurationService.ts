@@ -3,6 +3,7 @@ import { Configuration } from "../types/configuration.types";
 import { handleError } from "../../../shared/utils/ErrorHandler";
 import { ProductSpacingService } from "../../../domains/tray-management/services/ProductSpacingService";
 import { TrayProductManager } from "../../../domains/tray-management/services/TrayProductManager";
+import { TrayPositionService } from "./TrayPositionService";
 import { API_BASE_URL } from "../../../shared/constants";
 
 export const AddTrayToConfigurationAPI = async(companyId: number, configurationId: number, trayPosition: number): Promise<Configuration | null> => {
@@ -74,10 +75,22 @@ export const LoadConfigurationAPI = async(companyId: number, configurationId: nu
         });
 
         let config = response.data as Configuration;
+        console.log('[LoadConfigurationAPI] Configuration loaded from API, processing trays...');
+        
         config.trays = ProductSpacingService.spaceOutAllTrays(config.trays || []);
         
         // Ensure all products have correct y coordinates based on stable property
         config.trays = TrayProductManager.ensureCorrectYCoordinatesForAllTrays(config.trays);
+
+        // Ensure collision detection is calculated immediately after loading
+        console.log('[LoadConfigurationAPI] Running collision detection on loaded trays...');
+        config.trays = TrayPositionService.updateCollisionStatus(config.trays, config);
+        console.log('[LoadConfigurationAPI] Trays after collision detection:', config.trays.map(t => ({
+            id: t.id,
+            position: t.dotPosition,
+            height: t.trayHeight,
+            hasCollision: t.hasCollision
+        })));
 
         return config;
     }  catch (error) {

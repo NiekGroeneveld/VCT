@@ -164,7 +164,7 @@ export const useTrayDragDrop = (
 
         return true;
       } else {
-        // Invalid position - allow placement but collision detection will mark it as colliding
+        // Invalid position - allow placement AND save to API, collision detection will mark it as colliding
         console.log(
           `Allowing placement of tray ${trayId} at dot ${clampedDot} - collision will be detected`
         );
@@ -177,6 +177,31 @@ export const useTrayDragDrop = (
           )
         );
         setDraggedTray(null);
+        
+        // Save invalid position to API as well
+        const currentCompanyId = companyIdRef.current;
+        const currentConfigId = configurationIdRef.current;
+        if (currentCompanyId && currentConfigId) {
+          configurationService
+            .UpdateTrayPositionInConfigurationAPI(
+              currentCompanyId,
+              currentConfigId,
+              trayId,
+              clampedDot
+            )
+            .then(async () => {
+              const config = await configurationService.LoadConfigurationAPI(currentCompanyId, currentConfigId);
+              if (config) {
+                setSelectedConfiguration(config);
+                setTrays(config.trays || []);
+                localStorage.setItem('selectedConfiguration', JSON.stringify(config));
+              }
+            })
+            .catch(err => console.error('[DND] API error updating tray position (invalid placement)', err));
+        } else {
+          console.warn('Missing companyId/configurationId; skipping API update for invalid placement.');
+        }
+        
         return true;
       }
     },

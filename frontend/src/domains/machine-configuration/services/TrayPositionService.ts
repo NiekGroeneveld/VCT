@@ -135,9 +135,33 @@ export class TrayPositionService {
 
     /**
      * Detects all collisions between trays and returns IDs of colliding trays
+     * Also detects boundary violations (trays exceeding machine height)
      */
     static detectCollisions(trays: Tray[], configuration: Configuration): Set<number> {
         const collidingTrayIds = new Set<number>();
+        const dotsDelta = ConfigurationConstantsService.getDotsDelta(configuration);
+        const machineHeight = ConfigurationConstantsService.getMachineHeight(configuration);
+        const amountDots = ConfigurationConstantsService.getAmountDots(configuration);
+        
+        // Calculate the maximum usable height (top of the highest dot grid)
+        // This is where trays can actually be placed
+        const maxUsableHeight = amountDots * dotsDelta;
+        
+        console.log('[TrayPositionService.detectCollisions] Machine height:', machineHeight, 'mm, Max usable height:', maxUsableHeight, 'mm, dotsDelta:', dotsDelta, 'mm, amountDots:', amountDots);
+        
+        // Check each tray for boundary violations
+        for (const tray of trays) {
+            const trayBottomY = (tray.dotPosition - 1) * dotsDelta;
+            const trayTopPosition = trayBottomY + tray.trayHeight;
+            
+            console.log(`[TrayPositionService.detectCollisions] Tray ${tray.id}: bottomY=${trayBottomY}mm, height=${tray.trayHeight}mm, topPosition=${trayTopPosition}mm, exceedsMachineHeight=${trayTopPosition > machineHeight}, exceedsUsableHeight=${trayTopPosition > maxUsableHeight}`);
+            
+            // Check if tray exceeds the usable area (which should match canPlaceTrayAtDot logic)
+            if (trayTopPosition > machineHeight) {
+                console.log(`[TrayPositionService.detectCollisions] ⚠️ Tray ${tray.id} EXCEEDS machine height boundary!`);
+                collidingTrayIds.add(tray.id);
+            }
+        }
         
         // Check every tray against every other tray
         for (let i = 0; i < trays.length; i++) {
