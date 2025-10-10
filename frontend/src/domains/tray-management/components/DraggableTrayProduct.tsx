@@ -100,7 +100,6 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
     const opacity = isDragging ? 0.5 : 1;
     const transform = isDragging ? "scale(0.95)" : "none";
 
-
     return (
     <>
       {/* Extractor Visual */}

@@ -1,5 +1,3 @@
-// src/components/configuration/Tray/TrayComponent.tsx
-
 import React from "react";
 import { useDrop } from "react-dnd";
 import { Tray } from "../types/tray.types";
@@ -11,6 +9,8 @@ import { TrayProductReorderService } from "../services/TrayProductReorderService
 import { DraggableTrayProduct } from "./DraggableTrayProduct";
 import { useScaling } from "../../../hooks/useScaling";
 import { configurationService } from "../../machine-configuration/services/ConfigurationService";
+import { useConfig } from "../../../Context/useConfig";
+import { getPalletConfigurationString } from "../../product-management/services/palletService";
 
 interface TrayComponentProps {
   tray: Tray;
@@ -256,18 +256,71 @@ const TrayProductsDisplay: React.FC<{
  */
 const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => {
   const { scaledValue } = useScaling();
+  const { selectedConfiguration } = useConfig();
+  const palletDelta = selectedConfiguration?.configurationTypeData?.palletDelta;
+  
+  // Debug logging
+  console.log('[TrayBase] palletDelta:', palletDelta);
+  console.log('[TrayBase] tray.products:', tray.products.length);
+  console.log('[TrayBase] tray.products details:', tray.products.map(p => ({ 
+    name: p.name, 
+    extractorType: p.extractorType,
+    hasExtractorType: 'extractorType' in p 
+  })));
+  
+  // Get pallet configuration strings for high extractor products
+  // Note: extractorType comes from backend as "High" or "Low" (capitalized)
+  const highExtractorProducts = tray.products.filter(p => 
+    (p.extractorType as string)?.toLowerCase() === 'high'
+  );
+  console.log('[TrayBase] highExtractorProducts:', highExtractorProducts.length);
+  
+  const palletStrings = palletDelta 
+    ? highExtractorProducts.map(p => {
+        const palletString = getPalletConfigurationString(p, palletDelta);
+        console.log('[TrayBase] Generated pallet string for product:', p.name, '=', palletString);
+        return {
+          product: p,
+          palletString,
+          x: p.x
+        };
+      })
+    : [];
+  
+  console.log('[TrayBase] palletStrings count:', palletStrings.length);
   
   return (
-    <div
-      className="absolute bg-gray-200 border border-gray-400"
-      style={{
-        left: `${scaledValue(0)}px`, // Small margin from edges
-        bottom: `${scaledValue(0)}px`,
-        width: `${scaledValue(tray.trayWidth - 3)}px`, // Slightly narrower (4px margin on each side)
-        height: `${scaledValue(28)}px`,
-        zIndex: 1,
-      }}
-    />
+    <>
+      <div
+        className="absolute bg-gray-200 border border-gray-400"
+        style={{
+          left: `${scaledValue(0)}px`,
+          bottom: `${scaledValue(0)}px`,
+          width: `${scaledValue(tray.trayWidth - 3)}px`,
+          height: `${scaledValue(28)}px`,
+          zIndex: 1,
+        }}
+      >
+        {/* Render pallet configuration strings for high extractor products */}
+        {palletStrings.map((item, index) => (
+          <div
+            key={`pallet-${item.product.id}-${index}`}
+            className="absolute text-xs font-mono font-bold"
+            style={{
+              left: `${scaledValue(item.x)}px`,
+              top: '4px',
+              width: `${scaledValue(item.product.width)}px`,
+              textAlign: 'center',
+              lineHeight: '1',
+              color: '#000',
+            }}
+            title={`Pallet Configuration: ${item.palletString}`}
+          >
+            {item.palletString}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
