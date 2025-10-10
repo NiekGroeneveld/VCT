@@ -129,11 +129,12 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         const dotsDelta = selectedConfiguration?.configurationTypeData?.dotsDelta 
             ? selectedConfiguration.configurationTypeData.dotsDelta / 10 
             : ConfigurationConstants.DOT_DELTA;
-        return trays.some(tray => {
+        const isOccupied = trays.some(tray => {
             const trayBottomDot = tray.dotPosition;
             const trayTopDot = trayBottomDot + Math.ceil(tray.trayHeight / dotsDelta) - 1;
             return dotNumber >= trayBottomDot && dotNumber <= trayTopDot;
         });
+        return isOccupied;
     };
 
     // Helper function to check if a dot is the attachment point (bottom) of a tray
