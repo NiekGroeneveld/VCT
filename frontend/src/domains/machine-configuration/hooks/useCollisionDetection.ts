@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { Tray } from '../../tray-management/types/tray.types';
 import { TrayPositionService } from '../services/TrayPositionService';
+import { Configuration } from '../types/configuration.types';
 
 /**
  * Hook that manages persistent collision detection for all trays
@@ -8,14 +9,20 @@ import { TrayPositionService } from '../services/TrayPositionService';
  */
 export const useCollisionDetection = (
     trays: Tray[],
-    setTrays: (trays: Tray[] | ((prev: Tray[]) => Tray[])) => void
+    setTrays: (trays: Tray[] | ((prev: Tray[]) => Tray[])) => void,
+    configuration: Configuration | null
 ) => {
     /**
      * Updates collision status for all trays
      */
     const updateCollisionStatus = useCallback(() => {
+        if (!configuration) {
+            console.warn('[useCollisionDetection] No configuration provided, skipping collision detection');
+            return;
+        }
+        
         setTrays(prev => {
-            const updatedTrays = TrayPositionService.updateCollisionStatus(prev);
+            const updatedTrays = TrayPositionService.updateCollisionStatus(prev, configuration);
             
             // Only update if there are actual changes to avoid infinite loops
             const hasChanges = updatedTrays.some((tray: Tray, index: number) => 
@@ -33,7 +40,7 @@ export const useCollisionDetection = (
             
             return hasChanges ? updatedTrays : prev;
         });
-    }, [setTrays]);
+    }, [setTrays, configuration]);
 
     /**
      * Force recalculation of collision status

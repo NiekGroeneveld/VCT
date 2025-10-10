@@ -58,7 +58,7 @@ export const ConfigurationArea: React.FC = () => {
   }, [selectedConfiguration, applySpacingToAllTrays]);
 
   //Hook for collision detection
-  const checkCollision = useCollisionDetection(trays, setTrays);
+  const checkCollision = useCollisionDetection(trays, setTrays, selectedConfiguration);
 
   // Add THIS:: Hook for cross-tray product movement
   const { handleProductMoveBetweenTrays, moveProductBetweenTrays } =
@@ -189,7 +189,8 @@ export const ConfigurationArea: React.FC = () => {
       const validation = TrayPositionService.canPlaceTrayAtDot(
         trayModel,
         dot,
-        trays
+        trays,
+        selectedConfiguration!
       );
       if (validation.canPlace) {
         validDot = dot;

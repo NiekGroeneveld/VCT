@@ -9,7 +9,6 @@ import { configurationService } from "../../machine-configuration/services/Confi
 import { useCompany } from "../../../Context/useCompany";
 import { useConfig } from "../../../Context/useConfig";
 import { TrayProductManager } from "../services/TrayProductManager";
-import { config } from "process";
 
 export const useTrayDragDrop = (
   trays: Tray[],
@@ -58,6 +57,12 @@ export const useTrayDragDrop = (
      * Now includes collision detection for visual feedback
      */
     const updateTrayPosition = useCallback((trayId: number, newYposition: number) => {
+        // If no configuration is loaded, skip validation
+        if (!selectedConfiguration) {
+            console.warn('[useTrayDragDrop] No configuration available, skipping position validation');
+            return;
+        }
+
         // Convert screen Y to dot position using the same logic as getDotYPosition
         // Since dot 1 is at Y=0, dot 2 at Y=135, etc., we can directly convert
         const newDot = getYPositionDot(newYposition);
@@ -70,7 +75,7 @@ export const useTrayDragDrop = (
 
       // Check if this position is valid (for visual feedback)
       const otherTrays = prev.filter(t => t.id !== trayId);
-      const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
+      const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays, selectedConfiguration);
 
       return {
         ...tray,
@@ -79,7 +84,7 @@ export const useTrayDragDrop = (
         isValidPosition: validation.canPlace
       };
     }));
-    }, [setTrays]);
+    }, [setTrays, selectedConfiguration]);
   /**
    * Ends dragging a tray and validates the new position
    */
@@ -90,6 +95,15 @@ export const useTrayDragDrop = (
       } else {
         console.log(`[DND] Approve drop for tray ${trayId}`);
       }
+      
+      // Check if configuration is available
+      if (!selectedConfiguration) {
+        console.warn('[useTrayDragDrop] No configuration available in endTrayDrag');
+        setTrays(prev => prev.map(t => t.id === trayId ? { ...t, isDragging: false, dragStartDot: undefined } : t));
+        setDraggedTray(null);
+        return false;
+      }
+      
       // If drag ended without a valid drop target, just reset flags and skip API
       if (Number.isNaN(_finalYPosition)) {
         setTrays(prev => prev.map(t => t.id === trayId ? { ...t, isDragging: false, dragStartDot: undefined } : t));
@@ -108,7 +122,7 @@ export const useTrayDragDrop = (
       const clampedDot = Math.max(1, Math.min(tray.dotPosition, ConfigurationConstants.DOTS));
       const originalDot = tray.dragStartDot || tray.dotPosition;
       const otherTrays = currentTrays.filter((t) => t.id !== trayId);
-      const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays);
+      const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays, selectedConfiguration);
 
       console.log(
         `Attempting to place tray ${trayId} at dot ${clampedDot}, validation:`,
@@ -166,7 +180,7 @@ export const useTrayDragDrop = (
         return true;
       }
     },
-    [setTrays, setSelectedConfiguration]
+    [setTrays, setSelectedConfiguration, selectedConfiguration]
   );
 
   return {

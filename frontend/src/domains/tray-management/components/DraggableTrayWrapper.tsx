@@ -4,6 +4,7 @@ import { GripVertical } from 'lucide-react';
 import { Tray } from '../types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
 import { TrayComponent } from '../../../domains/tray-management/components/TrayComponent';
+import { useScaling } from '../../../hooks/useScaling';
 
 interface DraggableTrayWrapperProps {
     tray: Tray;
@@ -35,6 +36,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
 }) => {
     const dragRef = useRef<HTMLDivElement>(null);
     const handleRef = useRef<HTMLDivElement>(null);
+    const { scaledValue } = useScaling();
 
     const [{ isDragging }, drag, preview] = useDrag({
         type: 'TRAY_POSITION',
@@ -61,10 +63,15 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
     // Connect the preview to the entire tray
     preview(dragRef);
 
+    // Calculate the full width including drag handle and tray
+    const dragHandleWidth = 24; // w-6 = 24px
+    const trayScaledWidth = scaledValue(tray.trayWidth);
+    const totalWidth = dragHandleWidth + trayScaledWidth;
+
     return (
         <div
             ref={dragRef}
-            className={`relative group ${className}`}
+            className={`relative group flex ${className}`}
             style={{
                 opacity: isDragging ? 0.8 : 1,
                 transition: isDragging ? 'none' : 'all 0.2s ease',
@@ -80,7 +87,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                          top: '-4px', 
                          bottom: '-4px', 
                          left: '-4px', 
-                         right: '-28px' 
+                         width: `${totalWidth + 8}px`  // Total width + border offset
                      }}>
                     <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
                         Collision
@@ -95,7 +102,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                          top: '-4px', 
                          bottom: '-4px', 
                          left: '-4px', 
-                         right: '-28px' 
+                         width: `${totalWidth + 8}px`  // Total width + border offset
                      }}>
                     <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
                         Invalid Position
@@ -107,7 +114,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
             <div
                 ref={handleRef}
                 className={`
-                    absolute left-0 top-0 bottom-0 w-6 
+                    flex-shrink-0 w-6 
                     bg-gray-200 hover:bg-gray-300 
                     border-r border-gray-300
                     cursor-grab active:cursor-grabbing
@@ -133,16 +140,16 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                 />
             </div>
 
-            {/* Tray Component with left padding for handle */}
-            <div className="pl-6">
+            {/* Tray Component */}
+            <div className="flex-shrink-0">
                 <TrayComponent
                     tray={tray}
                     onUpdate={onUpdate}
                     onRemove={onRemove}
-                    onProductMoveBetweenTrays={onProductMoveBetweenTrays} // ADD THIS LINE
+                    onProductMoveBetweenTrays={onProductMoveBetweenTrays}
                     companyId={companyId}
                     configurationId={configurationId}
-                    variant="managed" // ADD THIS LINE
+                    variant="managed"
                 />
             </div>
 

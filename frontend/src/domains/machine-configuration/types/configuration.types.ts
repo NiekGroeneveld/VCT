@@ -123,7 +123,9 @@ export const getAmountDots = (configuration: Configuration): number => {
 }
 
 export const getDotsDelta = (configuration: Configuration): number => {
-    return configuration.configurationTypeData?.dotsDelta ?? ConfigurationConstants.DOT_DELTA;
+    // dotsDelta is stored in 0.1mm units in the database, so divide by 10 to get mm
+    const dotsDeltaInTenths = configuration.configurationTypeData?.dotsDelta;
+    return dotsDeltaInTenths ? dotsDeltaInTenths / 10 : ConfigurationConstants.DOT_DELTA;
 }
 
 export const getMachineHeight = (configuration: Configuration): number => {
