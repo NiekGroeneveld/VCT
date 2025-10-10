@@ -237,6 +237,7 @@ const TrayProductsDisplay: React.FC<{
 }> = ({ tray, onRemoveProduct, onReorderProducts, onMoveBetweenTrays }) => (
   <div className="relative" style={{ padding: 0, margin: 0, height: "100%", bottom: "0px" }}>
     <TrayBase tray={tray} />
+    <PalletStringsOverlay tray={tray} />
     {tray.products.map((product, index) => (
       <DraggableTrayProduct
         key={`${product.id}-${index}-${product.placedAt}`} // Unique key that includes placement time
@@ -252,74 +253,71 @@ const TrayProductsDisplay: React.FC<{
 );
 
 /**
- * Visual representation of the tray base
+ * Visual representation of the tray base (gray bar at bottom)
  */
 const TrayBase: React.FC<{ tray: Tray }> = ({ tray }) => {
+  const { scaledValue } = useScaling();
+  
+  return (
+    <div
+      className="absolute bg-gray-200 border border-gray-400"
+      style={{
+        left: `${scaledValue(0)}px`,
+        bottom: `${scaledValue(0)}px`,
+        width: `${scaledValue(tray.trayWidth - 3)}px`,
+        height: `${scaledValue(28)}px`,
+        zIndex: 1,
+      }}
+    />
+  );
+};
+
+/**
+ * Overlay component to render pallet configuration strings on top of tray base
+ * Separated from TrayBase to avoid nested absolute positioning issues in PDF export
+ */
+const PalletStringsOverlay: React.FC<{ tray: Tray }> = ({ tray }) => {
   const { scaledValue } = useScaling();
   const { selectedConfiguration } = useConfig();
   const palletDelta = selectedConfiguration?.configurationTypeData?.palletDelta;
   
-  // Debug logging
-  console.log('[TrayBase] palletDelta:', palletDelta);
-  console.log('[TrayBase] tray.products:', tray.products.length);
-  console.log('[TrayBase] tray.products details:', tray.products.map(p => ({ 
-    name: p.name, 
-    extractorType: p.extractorType,
-    hasExtractorType: 'extractorType' in p 
-  })));
+  if (!palletDelta) return null;
   
-  // Get pallet configuration strings for high extractor products
-  // Note: extractorType comes from backend as "High" or "Low" (capitalized)
+  // Get high extractor products (extractorType comes from backend as "High" or "Low")
   const highExtractorProducts = tray.products.filter(p => 
     (p.extractorType as string)?.toLowerCase() === 'high'
   );
-  console.log('[TrayBase] highExtractorProducts:', highExtractorProducts.length);
-  
-  const palletStrings = palletDelta 
-    ? highExtractorProducts.map(p => {
-        const palletString = getPalletConfigurationString(p, palletDelta);
-        console.log('[TrayBase] Generated pallet string for product:', p.name, '=', palletString);
-        return {
-          product: p,
-          palletString,
-          x: p.x
-        };
-      })
-    : [];
-  
-  console.log('[TrayBase] palletStrings count:', palletStrings.length);
   
   return (
     <>
-      <div
-        className="absolute bg-gray-200 border border-gray-400"
-        style={{
-          left: `${scaledValue(0)}px`,
-          bottom: `${scaledValue(0)}px`,
-          width: `${scaledValue(tray.trayWidth - 3)}px`,
-          height: `${scaledValue(28)}px`,
-          zIndex: 1,
-        }}
-      >
-        {/* Render pallet configuration strings for high extractor products */}
-        {palletStrings.map((item, index) => (
+      {highExtractorProducts.map((product, index) => {
+        const palletString = getPalletConfigurationString(product, palletDelta);
+        
+        return (
           <div
-            key={`pallet-${item.product.id}-${index}`}
-            className="absolute text-xs font-mono font-bold"
+            key={`pallet-overlay-${product.id}-${index}`}
             style={{
-              left: `${scaledValue(item.x)}px`,
-              top: '4px',
-              width: `${scaledValue(item.product.width)}px`,
-              textAlign: 'center',
-              lineHeight: '1',
+              position: 'absolute',
+              left: `${scaledValue(product.x)}px`,
+              bottom: `${scaledValue(4)}px`,
+              width: `${scaledValue(product.width)}px`,
+              height: `${scaledValue(20)}px`,
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: `${scaledValue(16)}px`,
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
               color: '#000',
+              pointerEvents: 'none',
             }}
-            title={`Pallet Configuration: ${item.palletString}`}
+            title={`Pallet Configuration: ${palletString}`}
           >
-            {item.palletString}
+            {palletString}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </>
   );
 };

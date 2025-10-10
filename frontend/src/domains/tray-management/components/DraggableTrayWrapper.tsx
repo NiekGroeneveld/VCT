@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { GripVertical } from 'lucide-react';
 import { Tray } from '../types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
@@ -60,8 +61,11 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
 
     // Connect the drag handle to the drag source
     drag(handleRef);
-    // Connect the preview to the entire tray
-    preview(dragRef);
+    
+    // Hide the default drag preview
+    useEffect(() => {
+        preview(getEmptyImage(), { captureDraggingState: true });
+    }, [preview]);
 
     // Calculate the full width including drag handle and tray
     const dragHandleWidth = 24; // w-6 = 24px
@@ -73,7 +77,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
             ref={dragRef}
             className={`relative group flex ${className}`}
             style={{
-                opacity: isDragging ? 0.8 : 1,
+                opacity: 1,
                 transition: isDragging ? 'none' : 'all 0.2s ease',
                 boxShadow: isDragging ? '0 10px 25px rgba(0,0,0,0.3)' : 'none',
                 zIndex: isDragging ? 40 : 'auto',
