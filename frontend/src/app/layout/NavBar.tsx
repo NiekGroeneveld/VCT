@@ -163,19 +163,19 @@ const NavBar: React.FC<Props> = (props: Props) => {
                   <button
                     className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                     onClick={logoutUser}
-                  >Logout</button>
+                  >Uitloggen</button>
                   <button
                     className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                     onClick={() => { setShowCreateCompany(true); setMenuOpen(false); }}
-                  >Create Company</button>
+                  >Bedrijf Aanmaken</button>
                   <button
                     className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                     onClick={() => {setShowCreateConfiguration(true); setMenuOpen(false); }}
-                  >Create Configuration</button>
-                  <button 
+                  >Configuratie Aanmaken</button>
+                  <button
                     className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                     onClick={() => { setSelectedCompany(null); setSelectedConfiguration(null); setMenuOpen(false); }}
-                  >Clear Selection</button>
+                  >Selectie Wissen</button>
                 </div>
               )}
             </div>

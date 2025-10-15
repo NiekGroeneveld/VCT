@@ -6,7 +6,7 @@ import { VisionV8ElevatorSettings } from "./VisionV8ElevatorSettings";
 import { NuukElevatorSettings } from "./NuukElevatorSettings";
 import DuplicateConfigurationModal from "../modals/duplicateConfigurationModal";
 import { configurationService } from "../../domains/machine-configuration/services/ConfigurationService";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, Printer } from "lucide-react";
 
 type Props = {
   className?: string;
@@ -168,9 +168,9 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
       <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700" />
       {/* ButtonSpace */}
       <div className="p-4 bg-white rounded-b-lg border-t border-gray-300 flex-shrink-0">
-        {/* Duplicate and Delete buttons */}
+        {/* Action buttons - only show when configuration is loaded */}
         {selectedConfiguration && (
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-3 gap-3">
             <button
               onClick={() => setShowDuplicateModal(true)}
               className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow transition-colors"
@@ -188,16 +188,16 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
               <Trash2 size={18} />
               {isDeleting ? "Verwijderen..." : "Verwijder"}
             </button>
+            <button
+              onClick={handlePrintToPdf}
+              className="flex items-center justify-center gap-2 bg-vendolutionWarm hover:bg-orange-700 text-white font-semibold px-4 py-2 rounded shadow transition-colors"
+              title="Export Configuration to PDF"
+            >
+              <Printer size={18} />
+              Print PDF
+            </button>
           </div>
         )}
-        
-        <button
-          onClick={handlePrintToPdf}
-          className="w-full bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow"
-          title="Export Configuration to PDF"
-        >
-          Print to PDF
-        </button>
       </div>
 
       {/* Duplicate Configuration Modal */}
