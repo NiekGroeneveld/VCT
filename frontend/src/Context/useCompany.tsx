@@ -7,7 +7,7 @@ type Company = {
 
 type CompanyContextType = {
     selectedCompany: Company | null;
-    setSelectedCompany: (company: Company) => void;
+    setSelectedCompany: (company: Company | null) => void;
 };
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
@@ -37,7 +37,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [selectedCompany]);
 
   // Setter that updates state and localStorage
-  const setSelectedCompany = (company: Company) => {
+  const setSelectedCompany = (company: Company | null) => {
     setSelectedCompanyState(company);
   };
 

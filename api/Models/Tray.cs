@@ -16,6 +16,9 @@ namespace api.Models
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        
+        // Foreign key
+        public int ConfigurationId { get; set; }
         public Configuration Configuration { get; set; } = new Configuration();
 
         [NotMapped]

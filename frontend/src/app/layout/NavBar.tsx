@@ -37,10 +37,12 @@ const NavBar: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     // Reset selected configuration when company changes
     setSelectedConfiguration(null);
+    
     if (!selectedCompany) {
       setConfigurations([]);
       return;
     }
+    
     configurationService.GetMyConfigurationsAPI(Number(selectedCompany.id))
       .then((data: any) => {
         if (data && Array.isArray(data)) {
@@ -50,6 +52,28 @@ const NavBar: React.FC<Props> = (props: Props) => {
         }
       })
       .catch(() => setConfigurations([]));
+  }, [selectedCompany]); // Only depend on selectedCompany
+
+  // Listen for custom event to refresh configurations
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (!selectedCompany) {
+        setConfigurations([]);
+        return;
+      }
+      configurationService.GetMyConfigurationsAPI(Number(selectedCompany.id))
+        .then((data: any) => {
+          if (data && Array.isArray(data)) {
+            setConfigurations(data);
+          } else {
+            setConfigurations([]);
+          }
+        })
+        .catch(() => setConfigurations([]));
+    };
+    
+    window.addEventListener('refreshConfigurations', handleRefresh);
+    return () => window.removeEventListener('refreshConfigurations', handleRefresh);
   }, [selectedCompany]);
 
   React.useEffect(() => {
@@ -74,6 +98,7 @@ const NavBar: React.FC<Props> = (props: Props) => {
           className = ""
           options={companies.map(c => c.name)}
           placeholder="Kies Bedrijf" 
+          value={selectedCompany ? selectedCompany.name : ""}
           buttonColor = "bg-vendolutionGreen"
           backgroundColor = "bg-white"
           textColor = "text-black"
@@ -147,6 +172,10 @@ const NavBar: React.FC<Props> = (props: Props) => {
                     className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                     onClick={() => {setShowCreateConfiguration(true); setMenuOpen(false); }}
                   >Create Configuration</button>
+                  <button 
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => { setSelectedCompany(null); setSelectedConfiguration(null); setMenuOpen(false); }}
+                  >Clear Selection</button>
                 </div>
               )}
             </div>
@@ -183,11 +212,7 @@ const NavBar: React.FC<Props> = (props: Props) => {
         onClose={() => setShowCreateConfiguration(false)}
         onCreate={() => {
           // Refresh configurations after creating a new one
-          if (selectedCompany || token) {
-            configurationService.GetMyConfigurationsAPI(Number(selectedCompany?.id)).then(res => {
-              if (res && Array.isArray(res)) setConfigurations(res);
-            });
-          }
+          window.dispatchEvent(new Event('refreshConfigurations'));
         }}
       />
             

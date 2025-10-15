@@ -195,5 +195,32 @@ namespace api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("CloneConfiguration/{id}")]
+        public async Task<IActionResult> CloneConfiguration([FromRoute] int companyId, [FromRoute] int id, [FromBody] CloneConfigurationDTO cloneDto)
+        {
+            // Check if user belongs to the company
+            if (!await UserBelongsToCompany(companyId))
+            {
+                return Forbid("You don't have access to clone configurations for this company");
+            }
+
+            var configuration = await _configurationRepository.GetByIdAsync(id);
+            if (configuration == null) return NotFound("Configuration Not Found");
+
+            // Verify the configuration belongs to the specified company
+            if (configuration.CompanyId != companyId)
+            {
+                return NotFound("Configuration not found for this company");
+            }
+
+            var clonedConfiguration = await _configurationRepository.CloneConfigurationAsync(id, cloneDto.NewName);
+            if (clonedConfiguration == null) return BadRequest("Failed to clone configuration");
+
+            return CreatedAtAction(nameof(GetById), new { companyId = companyId, id = clonedConfiguration.Id }, clonedConfiguration.ToConfigurationAreaDTO());
+        }
+
+
+        
     }
 }

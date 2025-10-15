@@ -17,5 +17,6 @@ namespace api.Interfaces
 
         Task<List<Configuration>> GetConfigurationsNamesIdsForCompanyAsync(int companyId);
         Task<Configuration?> UpdateElevatorSettingsAsync(int id, int elevatorSetting, string elevatorAddition);
+        Task<Configuration?> CloneConfigurationAsync(int id, string newName);
     }
 }

@@ -32,6 +32,8 @@ namespace api.Controllers
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
+            configuration.UpdatedAt = DateTime.UtcNow;
+        
 
             var tray = new Models.Tray
             {
@@ -55,6 +57,8 @@ namespace api.Controllers
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
+            configuration.UpdatedAt = DateTime.UtcNow;
+            await _configurationRepo.UpdateAsync(configuration);
 
             var tray = await _trayRepo.GetByIdAsync(trayId);
             if (tray == null) return NotFound("Tray not found");
@@ -77,6 +81,8 @@ namespace api.Controllers
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
+            configuration.UpdatedAt = DateTime.UtcNow;
+            await _configurationRepo.UpdateAsync(configuration);
 
             var tray = await _trayRepo.GetByIdAsync(trayId);
             if (tray == null) return NotFound("Tray not found");

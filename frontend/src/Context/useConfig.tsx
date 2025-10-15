@@ -10,13 +10,17 @@ const ConfigurationContext = createContext<ConfigurationContextType | undefined>
 
 export const ConfigurationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedConfiguration, setSelectedConfigurationState] = useState<Configuration | null>(null);
+  
     // Load from localStorage on mount
-    const stored = localStorage.getItem('selectedConfiguration');
     useEffect(() => {
+        const stored = localStorage.getItem('selectedConfiguration');
         if (stored) {
             try {
                 setSelectedConfigurationState(JSON.parse(stored));
-            } catch {}
+            } catch (error) {
+                console.error('Error parsing stored configuration:', error);
+                localStorage.removeItem('selectedConfiguration');
+            }
         }
     }, []);
 
@@ -28,10 +32,12 @@ export const ConfigurationProvider: React.FC<{ children: React.ReactNode }> = ({
             localStorage.removeItem('selectedConfiguration');
         }
     }, [selectedConfiguration]);
+    
     // Setter that updates state and localStorage
     const setSelectedConfiguration = (configuration: Configuration | null) => {
-        setSelectedConfigurationState(configuration );
+        setSelectedConfigurationState(configuration);
     };
+    
     return (
     <ConfigurationContext.Provider value={{ selectedConfiguration, setSelectedConfiguration }}>
         {children}

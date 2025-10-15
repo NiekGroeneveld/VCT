@@ -1,9 +1,12 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useCompany } from "../../Context/useCompany";
 import { useConfig } from "../../Context/useConfig";
 import { openA4PrintWindowForMachineConfiguration } from "../services/PdfExportService";
 import { VisionV8ElevatorSettings } from "./VisionV8ElevatorSettings";
 import { NuukElevatorSettings } from "./NuukElevatorSettings";
+import DuplicateConfigurationModal from "../modals/duplicateConfigurationModal";
+import { configurationService } from "../../domains/machine-configuration/services/ConfigurationService";
+import { Copy, Trash2 } from "lucide-react";
 
 type Props = {
   className?: string;
@@ -15,7 +18,9 @@ type Props = {
  */
 export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }) => {
   const { selectedCompany } = useCompany();
-  const { selectedConfiguration } = useConfig();
+  const { selectedConfiguration, setSelectedConfiguration } = useConfig();
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handlePrintToPdf = useCallback(async () => {
     const el = document.getElementById("machine-configuration-zone");
@@ -34,6 +39,77 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
       configuration: selectedConfiguration ?? undefined,
     });
   }, [selectedCompany?.name, selectedConfiguration?.name, selectedConfiguration]);
+
+  const handleDuplicate = useCallback(async (newName: string) => {
+    if (!selectedCompany?.id || !selectedConfiguration?.id) {
+      console.error("No company or configuration selected");
+      return;
+    }
+
+    try {
+      console.log('Duplicating configuration:', {
+        companyId: selectedCompany.id,
+        configurationId: selectedConfiguration.id,
+        newName
+      });
+
+      const copiedConfig = await configurationService.CloneConfigurationAPI(
+        Number(selectedCompany.id),
+        selectedConfiguration.id,
+        newName
+      );
+
+      console.log('Copied configuration response:', copiedConfig);
+
+      if (copiedConfig) {
+        // The API now returns a fully processed ConfigurationAreaDTO
+        setSelectedConfiguration(copiedConfig);
+        // Refresh the configurations list in NavBar
+        window.dispatchEvent(new Event('refreshConfigurations'));
+        alert(`Configuratie succesvol gedupliceerd als "${newName}"`);
+      } else {
+        alert("Fout bij dupliceren van configuratie");
+      }
+    } catch (error) {
+      console.error("Error duplicating configuration:", error);
+      alert("Fout bij dupliceren van configuratie: " + (error as Error).message);
+    }
+  }, [selectedCompany?.id, selectedConfiguration?.id, setSelectedConfiguration]);
+
+  const handleDelete = useCallback(async () => {
+    if (!selectedCompany?.id || !selectedConfiguration?.id) {
+      console.error("No company or configuration selected");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Weet je zeker dat je de configuratie "${selectedConfiguration.name}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const success = await configurationService.DeleteConfigurationAPI(
+        Number(selectedCompany.id),
+        selectedConfiguration.id
+      );
+
+      if (success) {
+        setSelectedConfiguration(null);
+        // Refresh the configurations list in NavBar
+        window.dispatchEvent(new Event('refreshConfigurations'));
+        alert("Configuratie succesvol verwijderd");
+      } else {
+        alert("Fout bij verwijderen van configuratie");
+      }
+    } catch (error) {
+      console.error("Error deleting configuration:", error);
+      alert("Fout bij verwijderen van configuratie");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [selectedCompany?.id, selectedConfiguration?.id, selectedConfiguration?.name, setSelectedConfiguration]);
 
   return (
     <div className={`flex flex-col bg-gray-100 h-full border-gray-600 rounded-lg border ${className}`}>
@@ -92,6 +168,29 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
       <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700" />
       {/* ButtonSpace */}
       <div className="p-4 bg-white rounded-b-lg border-t border-gray-300 flex-shrink-0">
+        {/* Duplicate and Delete buttons */}
+        {selectedConfiguration && (
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <button
+              onClick={() => setShowDuplicateModal(true)}
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow transition-colors"
+              title="Dupliceer Configuratie"
+            >
+              <Copy size={18} />
+              Dupliceer
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Verwijder Configuratie"
+            >
+              <Trash2 size={18} />
+              {isDeleting ? "Verwijderen..." : "Verwijder"}
+            </button>
+          </div>
+        )}
+        
         <button
           onClick={handlePrintToPdf}
           className="w-full bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow"
@@ -100,6 +199,16 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
           Print to PDF
         </button>
       </div>
+
+      {/* Duplicate Configuration Modal */}
+      {selectedConfiguration && (
+        <DuplicateConfigurationModal
+          isOpen={showDuplicateModal}
+          onClose={() => setShowDuplicateModal(false)}
+          onDuplicate={handleDuplicate}
+          originalName={selectedConfiguration.name}
+        />
+      )}
     </div>
   );
 };

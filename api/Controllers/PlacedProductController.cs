@@ -35,6 +35,9 @@ namespace api.Controllers
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
 
+            configuration.UpdatedAt = DateTime.UtcNow;
+            await _configurationRepo.UpdateAsync(configuration);
+
             var tray = await _trayRepo.GetByIdAsync(trayId);
             if (tray == null) return NotFound("Tray not found");
             if (tray.Configuration.Id != configurationId) return BadRequest("Tray does not belong to the specified configuration");
@@ -70,6 +73,8 @@ namespace api.Controllers
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
+            configuration.UpdatedAt = DateTime.UtcNow;
+            await _configurationRepo.UpdateAsync(configuration);
 
             var tray = await _trayRepo.GetByIdAsync(trayId);
             if (tray == null) return NotFound("Tray not found");
@@ -85,6 +90,8 @@ namespace api.Controllers
             // Persist the change so subsequent GETs reflect the removal
             await _trayRepo.UpdateAsync(tray);
 
+
+            ///Clean the DataBase if it is not needed anymore.
             var ProductInUse = await _productRepo.IsProductInUseAsync(trayProduct.ProductId);
             if (!ProductInUse)
             {
@@ -110,6 +117,8 @@ namespace api.Controllers
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);
             if (configuration == null) return NotFound("Configuration not found");
+            configuration.UpdatedAt = DateTime.UtcNow;
+            await _configurationRepo.UpdateAsync(configuration);
 
             var fromTray = await _trayRepo.GetByIdAsync(fromTrayId);
             if (fromTray == null) return NotFound("Source Tray not found");

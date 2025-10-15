@@ -1,9 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../Context/useAuth';
-import LoginPage from '../pages/LoginPage';
-import MainPage from '../pages/MainPage';
-import RegisterPage from '../pages/RegisterPage';
+import LoginPage from '../Pages/LoginPage';
+import MainPage from '../Pages/MainPage';
+import RegisterPage from '../Pages/RegisterPage';
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -53,7 +53,7 @@ const AppRoutes = () => {
       {/* Default redirect */}
       <Route 
         path="/" 
-        element={<Navigate to="/main" replace />} 
+        element={<Navigate to="/login" replace />} 
       />
       
       {/* Catch all other routes */}

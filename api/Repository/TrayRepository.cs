@@ -102,6 +102,8 @@ namespace api.Repository
             return ordered;
         }
 
+    
+
         public async Task<bool> ReorderWithinTrayAsync(int trayId, int oldIndex, int newIndex)
         {
             if (oldIndex == newIndex) return true;
@@ -163,5 +165,42 @@ namespace api.Repository
                 throw;
             }
         }
+
+        public async Task<Tray?> CopyTrayAsync(int id, int newConfigurationId)
+        {
+            var trayToCopy = await GetByIdAsync(id);
+            if (trayToCopy == null) return null;
+
+            var newTray = new Tray
+            {
+                TrayConfig = trayToCopy.TrayConfig,
+                TrayPosition = trayToCopy.TrayPosition,
+                ConfigurationId = newConfigurationId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                TrayProducts = new List<TrayProduct>()
+            };
+
+            await CreateAsync(newTray);
+            int newTrayId = newTray.Id;
+
+            // Copy TrayProducts
+            foreach (var tp in trayToCopy.TrayProducts)
+            {
+                var newTp = new TrayProduct
+                {
+                    TrayId = newTrayId,
+                    ProductId = tp.ProductId,
+                    OnTrayIndex = tp.OnTrayIndex
+                };
+                _context.TrayProducts.Add(newTp);
+            }
+
+            await _context.SaveChangesAsync();
+            return await GetByIdAsync(newTrayId);
+        }    
+
+    
+        
     }
 }

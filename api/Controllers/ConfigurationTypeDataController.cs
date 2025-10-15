@@ -87,7 +87,7 @@ namespace api.Controllers
             await _ConfigurationTypeDataRepository.DeleteAsync(id);
             return NoContent();
         }
-        
+
         [HttpGet("types")]
         public async Task<IActionResult> GetTypes()
         {
