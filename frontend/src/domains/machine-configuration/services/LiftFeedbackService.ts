@@ -3,7 +3,9 @@ import { Configuration } from "../types/configuration.types";
 export const RecommendedV8LiftHeight = (config: Configuration): number => {
     const highestTrayDot = Math.max(...config.trays.map(tray => tray.dotPosition));
 
-    if(config.ConfigurationType !== "VisionV8"){
+    const configurationType = config.configurationTypeData?.configurationType || config.ConfigurationType;
+    
+    if(configurationType !== "VisionV8"){
         console.warn("RecommendedV8LiftHeight called on non-VisionV8 configuration");
         return 1; // Default to setting 1 if not VisionV8
     }
@@ -12,29 +14,33 @@ export const RecommendedV8LiftHeight = (config: Configuration): number => {
         console.warn("Elevator dot indicators not defined in configuration type data");
         return 1; // Default to setting 1 if data is missing
     }
-    if (highestTrayDot >= config.configurationTypeData?.elevatorDotIndicators.at(-1)!) {
-        return 1;
+
+    console.log("Highest tray dot:", highestTrayDot);
+    console.log("Elevator dot indicators:", config.configurationTypeData.elevatorDotIndicators);
+    if (highestTrayDot > config.configurationTypeData?.elevatorDotIndicators.at(-2)!) {
+        return 1; 
     }
-    if (highestTrayDot >= config.configurationTypeData?.elevatorDotIndicators.at(-2)!) {
+    if (highestTrayDot > config.configurationTypeData?.elevatorDotIndicators.at(-3)!) {
+
         return 2;
+        
     }
-    if (highestTrayDot <= config.configurationTypeData?.elevatorDotIndicators.at(-3)!) { 
-        return 3;
-    }
-    if (highestTrayDot <= config.configurationTypeData?.elevatorDotIndicators.at(-2)!) { 
-        return 4;
+    if (highestTrayDot > config.configurationTypeData?.elevatorDotIndicators.at(-4)!) { 
+       return 3;
     }
     else{
-        console.warn("Trays span multiple elevator levels, defaulting to setting 1");
-        return 1; // Default to setting 1 if trays span multiple levels
+        return 4; // Default to setting 1 if trays span multiple levels
     }
+    
 }
-
-export const ConfigurationSupportsLift = (config: Configuration): boolean => {
+/* feature does not work properly */
+export const ConfigurationSupportsLiftSetting = (config: Configuration): boolean => {
     const lowestTrayDot = Math.min(...config.trays.map(tray => tray.dotPosition));
     const highestTrayDot = Math.max(...config.trays.map(tray => tray.dotPosition));
 
-    if(config.ConfigurationType !== "VisionV8"){
+    const configurationType = config.configurationTypeData?.configurationType || config.ConfigurationType;
+    
+    if(configurationType !== "VisionV8"){
         console.warn("ConfigurationSupportsLift called on non-VisionV8 configuration");
         return false; // Only VisionV8 supports lift
     }
@@ -46,12 +52,17 @@ export const ConfigurationSupportsLift = (config: Configuration): boolean => {
     }
     
     let recommendedLiftHeight = RecommendedV8LiftHeight(config);
+    console.log(elevatorDots);
+    console.log("Lowest tray dot:", lowestTrayDot);
+    console.log("Highest tray dot:", highestTrayDot);
+    console.log("Recommended lift height:", recommendedLiftHeight);
     if (recommendedLiftHeight < 1 || recommendedLiftHeight > 4) {
         console.warn("Invalid recommended lift height:", recommendedLiftHeight);
         return false; // Invalid lift height
     }
 
-    if  ((lowestTrayDot < elevatorDots.at(recommendedLiftHeight - 1)! || highestTrayDot > elevatorDots.at(-recommendedLiftHeight)!)) {
+    if  ((lowestTrayDot > elevatorDots.at(recommendedLiftHeight - 1)! && highestTrayDot < elevatorDots.at(elevatorDots.length-(recommendedLiftHeight-1))!)) {
+        console.log("Configuration does not support the recommended lift setting");
         return false; // Setting 4 cannot cover all trays
     }
 
@@ -60,6 +71,5 @@ export const ConfigurationSupportsLift = (config: Configuration): boolean => {
 
 export const LiftFeedbackService = {
     RecommendedV8LiftHeight,
-    ConfigurationSupportsLift
 };
 

@@ -2,8 +2,9 @@ import React, { useCallback, useState, useEffect } from "react";
 import { useCompany } from "../../Context/useCompany";
 import { useConfig } from "../../Context/useConfig";
 import { configurationService } from "../../domains/machine-configuration/services/ConfigurationService";
+import { LiftFeedbackService } from "../../domains/machine-configuration/services/LiftFeedbackService";
 import * as Select from "@radix-ui/react-select";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 
 export const VisionV8ElevatorSettings: React.FC = () => {
   const { selectedCompany } = useCompany();
@@ -11,6 +12,19 @@ export const VisionV8ElevatorSettings: React.FC = () => {
 
   const [liftStand, setLiftStand] = useState("1");
   const [liftAccessoires, setLiftAccessoires] = useState("rollenbaantje");
+  const [feedbackData, setFeedbackData] = useState<{
+    recommendedLiftHeight: number;
+  } | null>(null);
+
+  const handleGetFeedback = useCallback(() => {
+    if (!selectedConfiguration) return;
+
+    const recommendedLiftHeight = LiftFeedbackService.RecommendedV8LiftHeight(selectedConfiguration);
+
+    setFeedbackData({
+      recommendedLiftHeight,
+    });
+  }, [selectedConfiguration]);
 
   // Sync state with configuration when it loads
   useEffect(() => {
@@ -20,7 +34,12 @@ export const VisionV8ElevatorSettings: React.FC = () => {
     if (selectedConfiguration?.elevatorAddition) {
       setLiftAccessoires(selectedConfiguration.elevatorAddition);
     }
-  }, [selectedConfiguration]);
+    
+    // Load feedback data when configuration changes
+    if (selectedConfiguration) {
+      handleGetFeedback();
+    }
+  }, [selectedConfiguration, handleGetFeedback]);
 
   const handleLiftStandChange = useCallback(async (value: string) => {
     if (!selectedConfiguration || !selectedCompany) return;
@@ -135,6 +154,45 @@ export const VisionV8ElevatorSettings: React.FC = () => {
           </Select.Root>
         </div>
       </div>
+
+      {/* Lift Feedback Section */}
+      {feedbackData && (
+        <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h5 className="text-sm font-semibold text-gray-700">Lift Feedback</h5>
+            <button
+              onClick={handleGetFeedback}
+              className="text-gray-600 hover:text-vendolutionBlue transition-colors"
+              title="Refresh feedback"
+            >
+              <RefreshCw size={18} />
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Warning Message */}
+            <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-xs text-yellow-800 leading-relaxed">
+                <strong>Let op!!</strong> Voor juiste liftfeedback plaats je de hoogste lade zo ver als mogelijk boven in de configuratie.
+              </p>
+            </div>
+
+            {/* Recommended Lift Height */}
+            <div className="flex items-start gap-2">
+              <div className="flex-shrink-0 mt-0.5">
+                <CheckCircle2 size={16} className="text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-700">Aanbevolen Lifthoogte</p>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  Stand {feedbackData.recommendedLiftHeight} {renderCircles(feedbackData.recommendedLiftHeight)}
+                </p>
+              </div>
+            </div>
+          
+          </div>
+        </div>
+      )}
     </>
   );
 };
