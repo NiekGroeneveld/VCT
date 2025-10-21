@@ -19,6 +19,7 @@ export interface Tray{
     dragStartDot?: number;  // Starting position of the tray when dragging begins
     isValidPosition?: boolean; // Flag to indicate if current position is valid during drag
     hasCollision?: boolean; // Flag to indicate if the tray has a persistent collision with other trays
+    isProhibitedPosition?: boolean; // Flag to indicate if the tray is on a prohibited dot (based on elevator setting)
 }
 
 

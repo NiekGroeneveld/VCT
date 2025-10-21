@@ -26,13 +26,15 @@ export const useCollisionDetection = (
             
             // Only update if there are actual changes to avoid infinite loops
             const hasChanges = updatedTrays.some((tray: Tray, index: number) => 
-                tray.hasCollision !== prev[index]?.hasCollision
+                tray.hasCollision !== prev[index]?.hasCollision ||
+                tray.isProhibitedPosition !== prev[index]?.isProhibitedPosition
             );
             
             if (hasChanges) {
-                console.log('Collision status updated:', updatedTrays.map((t: Tray) => ({ 
+                console.log('Collision and prohibited position status updated:', updatedTrays.map((t: Tray) => ({ 
                     id: t.id, 
                     hasCollision: t.hasCollision,
+                    isProhibitedPosition: t.isProhibitedPosition,
                     position: t.dotPosition,
                     height: t.trayHeight
                 })));
@@ -51,10 +53,12 @@ export const useCollisionDetection = (
 
     // Join tray info into a single string to keep dependency array stable
     const traySignature = trays.map(t => `${t.id}-${t.dotPosition}-${t.trayHeight}`).join('|');
+    const elevatorSetting = configuration?.elevatorSetting ?? 0;
+    
     useEffect(() => {
         updateCollisionStatus();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [traySignature]);
+    }, [traySignature, elevatorSetting]);
 
     return {
         recalculateCollisions

@@ -210,6 +210,25 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
         return selectedConfiguration?.configurationTypeData?.doubleDotPositions?.includes(dotNumber) || false;
     };
 
+    // Helper function to check if a dot is prohibited based on elevator setting
+    const isDotProhibited = (dotNumber: number): boolean => {
+        if (!selectedConfiguration?.elevatorSetting) return false; // Lift setting 1 or null - all dots allowed
+        
+        const elevatorSetting = selectedConfiguration.elevatorSetting;
+        const elevatorDots = selectedConfiguration?.configurationTypeData?.elevatorDotIndicators || [];
+        
+        if (elevatorSetting === 1 || elevatorDots.length === 0) {
+            return false; // All dots allowed for setting 1
+        }
+        
+        // For settings 2, 3, 4: dots must be within the range defined by elevator indicators
+        const lowerBound = elevatorDots[elevatorSetting - 1]; // e.g., elevatorDots[1] for setting 2
+        const upperBound = elevatorDots[elevatorDots.length - elevatorSetting]; // e.g., elevatorDots[length-2] for setting 2
+        
+        // Dot is prohibited if it's outside the allowed range
+        return dotNumber < lowerBound || dotNumber > upperBound;
+    };
+
     // Calculate gaps between trays for red numbers
     const getGapNumbers = (): { dotNumber: number; gap: number }[] => {
         const dotsDelta = selectedConfiguration?.configurationTypeData?.dotsDelta 
@@ -258,12 +277,18 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                     const isAttachmentPoint = isDotAttachmentPoint(dotNumber);
                     const elevatorCount = getElevatorIndicators(dotNumber);
                     const isDouble = isDoubleDot(dotNumber);
+                    const isProhibited = isDotProhibited(dotNumber);
                     
                     // Determine dot color and size based on status
                     let dotColor = 'bg-black'; // Default
                     let dotSize = 'w-2 h-2'; // Default size (8px)
                     let dotOffset = ''; // Default positioning
-                    if (isAttachmentPoint) {
+                    let dotOpacity = ''; // Default opacity
+                    
+                    if (isProhibited) {
+                        dotColor = 'bg-gray-500'; // Light gray for prohibited dots
+                        dotOpacity = 'opacity-50'; // Semi-transparent
+                    } else if (isAttachmentPoint) {
                         dotColor = 'bg-red-500'; // Red for attachment point (more prominent)
                         dotSize = 'w-2.5 h-2.5'; // 1.1x size (10px vs 8px)
                         dotOffset = '-translate-x-0.5'; // Center the larger dot horizontally only
@@ -275,14 +300,14 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                         <div key={dotNumber} className="absolute" style={{ bottom: `${yPosition}px`, left: `${scaledValue(10)}px` }}>
                             {/* Main dot */}
                             <div 
-                                className={`${dotSize} rounded-full border ${dotColor} ${dotOffset}`}
-                                title={`Dot ${dotNumber}${isAttachmentPoint ? ' (attachment point)' : isOccupied ? ' (occupied)' : ''}`}
+                                className={`${dotSize} rounded-full border ${dotColor} ${dotOffset} ${dotOpacity}`}
+                                title={`Dot ${dotNumber}${isProhibited ? ' (prohibited by lift setting)' : isAttachmentPoint ? ' (attachment point)' : isOccupied ? ' (occupied)' : ''}`}
                             />
                             
                             {/* Double dot indicator */}
                             {isDouble  && (
                                 <div 
-                                    className={`${dotSize} rounded-full border ${dotColor} absolute ${dotOffset}`}
+                                    className={`${dotSize} rounded-full border ${dotColor} absolute ${dotOffset} ${dotOpacity}`}
                                     style={{ left: `${scaledValue(10)}px`, top: '0px' }}
                                 />
                             )}

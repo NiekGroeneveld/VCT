@@ -100,6 +100,21 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                 </div>
             )}
             
+            {/* Prohibited position indicator */}
+            {!isDragging && !tray.hasCollision && tray.isProhibitedPosition && (
+                <div className="absolute border-2 border-red-500 rounded-lg pointer-events-none z-10" 
+                     style={{ 
+                         top: '-4px', 
+                         bottom: '-4px', 
+                         left: '-4px', 
+                         width: `${totalWidth + 8}px`  // Total width + border offset
+                     }}>
+                    <div className="absolute top-1 right-1 text-red-600 text-xs font-bold bg-red-100 px-1 rounded">
+                        Invalid Position
+                    </div>
+                </div>
+            )}
+            
             {/* Invalid position indicator during drag */}
             {isDragging && tray.isValidPosition === false && (
                 <div className="absolute border-2 border-red-500 border-dashed rounded-lg bg-red-100 bg-opacity-20 pointer-events-none z-10"
@@ -129,6 +144,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     ${tray.isDragging ? 'bg-blue-200 border-blue-300' : ''}
                     ${isDragging && tray.isValidPosition === false ? 'bg-red-200 border-red-300' : ''}
                     ${!isDragging && tray.hasCollision ? 'bg-red-200 border-red-300' : ''}
+                    ${!isDragging && !tray.hasCollision && tray.isProhibitedPosition ? 'bg-red-200 border-red-300' : ''}
                     rounded-l-lg
                 `}
                 title={`Drag ${tray.name || `Tray ${tray.id}`} to reposition`}
@@ -141,6 +157,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                         ${tray.isDragging ? 'text-blue-600' : ''}
                         ${isDragging && tray.isValidPosition === false ? 'text-red-600' : ''}
                         ${!isDragging && tray.hasCollision ? 'text-red-600' : ''}
+                        ${!isDragging && !tray.hasCollision && tray.isProhibitedPosition ? 'text-red-600' : ''}
                     `} 
                 />
             </div>
@@ -170,6 +187,7 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     ${tray.isDragging ? 'bg-blue-200 border-blue-300' : ''}
                     ${isDragging && tray.isValidPosition === false ? 'bg-red-200 border-red-300' : ''}
                     ${!isDragging && tray.hasCollision ? 'bg-red-200 border-red-300' : ''}
+                    ${!isDragging && !tray.hasCollision && tray.isProhibitedPosition ? 'bg-red-200 border-red-300' : ''}
                     rounded-r-lg
                 `}
             >

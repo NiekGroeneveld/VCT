@@ -167,45 +167,21 @@ export const useTrayDragDrop = (
 
         return true;
       } else {
-        // Invalid position - allow placement AND save to API, collision detection will mark it as colliding
+        // Invalid position - revert to original position
         console.log(
-          `Allowing placement of tray ${trayId} at dot ${clampedDot} - collision will be detected`
+          `Cannot place tray ${trayId} at dot ${clampedDot}: ${validation.error}. Reverting to dot ${originalDot}`
         );
 
         setTrays((prev) =>
           prev.map((t) =>
             t.id === trayId
-              ? { ...t, dotPosition: clampedDot, isDragging: false, dragStartDot: undefined, isValidPosition: true }
+              ? { ...t, dotPosition: originalDot, isDragging: false, dragStartDot: undefined, isValidPosition: true }
               : t
           )
         );
         setDraggedTray(null);
         
-        // Save invalid position to API as well
-        const currentCompanyId = companyIdRef.current;
-        const currentConfigId = configurationIdRef.current;
-        if (currentCompanyId && currentConfigId) {
-          configurationService
-            .UpdateTrayPositionInConfigurationAPI(
-              currentCompanyId,
-              currentConfigId,
-              trayId,
-              clampedDot
-            )
-            .then(async () => {
-              const config = await configurationService.LoadConfigurationAPI(currentCompanyId, currentConfigId);
-              if (config) {
-                setSelectedConfiguration(config);
-                setTrays(config.trays || []);
-                localStorage.setItem('selectedConfiguration', JSON.stringify(config));
-              }
-            })
-            .catch(err => console.error('[DND] API error updating tray position (invalid placement)', err));
-        } else {
-          console.warn('Missing companyId/configurationId; skipping API update for invalid placement.');
-        }
-        
-        return true;
+        return false;
       }
     },
     [setTrays, setSelectedConfiguration, selectedConfiguration]

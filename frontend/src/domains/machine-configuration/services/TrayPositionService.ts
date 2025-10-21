@@ -3,6 +3,29 @@ import { Configuration, ConfigurationConstants, getDotYPosition, ConfigurationCo
 
 export class TrayPositionService {
     /**
+     * Checks if a dot is prohibited based on elevator setting
+     * @param dotNumber - The dot number to check
+     * @param configuration - The current configuration with elevator settings
+     */
+    static isDotProhibited(dotNumber: number, configuration: Configuration): boolean {
+        if (!configuration.elevatorSetting) return false; // Lift setting 1 or null - all dots allowed
+        
+        const elevatorSetting = configuration.elevatorSetting;
+        const elevatorDots = configuration.configurationTypeData?.elevatorDotIndicators || [];
+        
+        if (elevatorSetting === 1 || elevatorDots.length === 0) {
+            return false; // All dots allowed for setting 1
+        }
+        
+        // For settings 2, 3, 4: dots must be within the range defined by elevator indicators
+        const lowerBound = elevatorDots[elevatorSetting - 1];
+        const upperBound = elevatorDots[elevatorDots.length - elevatorSetting];
+        
+        // Dot is prohibited if it's outside the allowed range
+        return dotNumber < lowerBound || dotNumber > upperBound;
+    }
+
+    /**
      * Validates if a tray can be placed at a specific dot position
      * @param tray - The tray to validate
      * @param targetDot - The target dot position
@@ -29,6 +52,14 @@ export class TrayPositionService {
             }
         }
 
+        // Check if the target dot is prohibited by elevator setting
+        if (this.isDotProhibited(targetDot, configuration)) {
+            return {
+                canPlace: false,
+                error: `Dot position ${targetDot} is prohibited by elevator setting ${configuration.elevatorSetting}`
+            }
+        }
+
         //Check top space constraints
         const trayBottomY = (targetDot - 1) * dotsDelta;
         const trayTopPosition = trayBottomY + tray.trayHeight;
@@ -43,6 +74,7 @@ export class TrayPositionService {
         //Check collision with other trays
         const trayBottomDot = targetDot;
         const trayTopDot = this.calculateTopDotForTray(tray, targetDot, configuration);
+
 
         for(const existingTray of existingTrays){
             if (existingTray.id === tray.id) continue; // Skip self-collision
@@ -136,6 +168,40 @@ export class TrayPositionService {
     }
 
     /**
+     * Checks if a tray is placed on a prohibited dot position
+     * @param tray - The tray to check
+     * @param configuration - The current configuration with elevator settings
+     */
+    static isTrayOnProhibitedPosition(tray: Tray, configuration: Configuration): boolean {
+        return this.isDotProhibited(tray.dotPosition, configuration);
+    }
+
+    /**
+     * Detects all trays that are on prohibited positions
+     * @param trays - Array of trays to check
+     * @param configuration - The current configuration with elevator settings
+     */
+    static detectProhibitedPositions(trays: Tray[], configuration: Configuration): Set<number> {
+        const prohibitedTrayIds = new Set<number>();
+        
+        console.log(`[TrayPositionService.detectProhibitedPositions] Checking ${trays.length} trays with elevator setting: ${configuration.elevatorSetting}`);
+        
+        for (const tray of trays) {
+            const isProhibited = this.isTrayOnProhibitedPosition(tray, configuration);
+            if (isProhibited) {
+                console.log(`[TrayPositionService.detectProhibitedPositions] ⚠️ Tray ${tray.id} is on prohibited dot ${tray.dotPosition}`);
+                prohibitedTrayIds.add(tray.id);
+            } else {
+                console.log(`[TrayPositionService.detectProhibitedPositions] ✓ Tray ${tray.id} is valid at dot ${tray.dotPosition}`);
+            }
+        }
+        
+        console.log(`[TrayPositionService.detectProhibitedPositions] Found ${prohibitedTrayIds.size} prohibited trays:`, Array.from(prohibitedTrayIds));
+        
+        return prohibitedTrayIds;
+    }
+
+    /**
      * Detects all collisions between trays and returns IDs of colliding trays
      * Also detects boundary violations (trays exceeding machine height)
      */
@@ -188,15 +254,26 @@ export class TrayPositionService {
     }
 
     /**
-     * Updates collision status for all trays
+     * Updates collision status and prohibited position status for all trays
      */
     static updateCollisionStatus(trays: Tray[], configuration: Configuration): Tray[] {
         const collidingTrayIds = this.detectCollisions(trays, configuration);
+        const prohibitedTrayIds = this.detectProhibitedPositions(trays, configuration);
 
-        return trays.map(tray => ({
+        const updatedTrays = trays.map(tray => ({
             ...tray,
-            hasCollision: collidingTrayIds.has(tray.id)
+            hasCollision: collidingTrayIds.has(tray.id),
+            isProhibitedPosition: prohibitedTrayIds.has(tray.id)
         }));
+
+        console.log('[TrayPositionService.updateCollisionStatus] Updated trays:', updatedTrays.map(t => ({
+            id: t.id,
+            dotPosition: t.dotPosition,
+            hasCollision: t.hasCollision,
+            isProhibitedPosition: t.isProhibitedPosition
+        })));
+
+        return updatedTrays;
     }
 
 
