@@ -172,9 +172,8 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       // Notify parent component
       onProductCreated?.();
 
-      // Don't close modal - just clear the name so user can create another similar product
-      // User can manually close if done
-      // onClose();
+      // Close modal after successful creation
+      onClose();
     } catch (err) {
       console.error("Failed to create product:", err);
       setError("Er is een fout opgetreden bij het aanmaken van het product");

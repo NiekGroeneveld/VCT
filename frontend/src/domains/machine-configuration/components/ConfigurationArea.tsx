@@ -186,7 +186,7 @@ export const ConfigurationArea: React.FC = () => {
     };
 
     const amountDots = selectedConfiguration ? ConfigurationConstantsService.getAmountDots(selectedConfiguration) : ConfigurationConstants.DOTS;
-    for (let dot = 1; dot <= amountDots; dot++) {
+    for (let dot = amountDots; dot >= 1; dot--) {
       trayModel.dotPosition = dot;
       const validation = TrayPositionService.canPlaceTrayAtDot(
         trayModel,

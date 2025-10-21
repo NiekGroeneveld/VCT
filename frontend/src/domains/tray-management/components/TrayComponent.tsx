@@ -90,6 +90,9 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
       const updatedTray = TrayProductManager.removeProductByIndex(tray, productIndex);
       onUpdate(updatedTray);
 
+      // Dispatch event to refresh products in configuration list
+      window.dispatchEvent(new CustomEvent('refreshProductsInConfiguration'));
+
       console.log(`Successfully removed product ${productToRemove.name} from tray ${tray.id}`);
     } catch (error) {
       console.error('Failed to remove product:', error);
@@ -153,19 +156,7 @@ export const TrayComponent: React.FC<TrayComponentProps> = ({
   };
 
   return (
-    <div ref={drop as any} className={`${trayClasses} group`} style={trayStyle}>
-      {/* Remove Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity z-20"
-        title="Remove tray"
-      >
-        ×
-      </button>
-      
+    <div ref={drop as any} className={`${trayClasses}`} style={trayStyle}>
       {tray.products.length === 0 ? (
         <TrayEmptyState tray={tray} />
       ) : (

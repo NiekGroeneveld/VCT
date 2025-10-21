@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2, Copy } from 'lucide-react';
 import { Tray } from '../types/tray.types';
 import { PlacedProduct } from '../../product-management/types/product.types';
 import { TrayComponent } from '../../../domains/tray-management/components/TrayComponent';
@@ -67,10 +67,11 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
         preview(getEmptyImage(), { captureDraggingState: true });
     }, [preview]);
 
-    // Calculate the full width including drag handle and tray
+    // Calculate the full width including drag handle, tray, and action bar
     const dragHandleWidth = 24; // w-6 = 24px
+    const actionBarWidth = 24; // w-6 = 24px
     const trayScaledWidth = scaledValue(tray.trayWidth);
-    const totalWidth = dragHandleWidth + trayScaledWidth;
+    const totalWidth = dragHandleWidth + trayScaledWidth + actionBarWidth;
 
     return (
         <div
@@ -155,6 +156,47 @@ export const DraggableTrayWrapper: React.FC<DraggableTrayWrapperProps> = ({
                     configurationId={configurationId}
                     variant="managed"
                 />
+            </div>
+
+            {/* Action Bar (Right Side) */}
+            <div
+                className={`
+                    flex-shrink-0 w-6 
+                    bg-gray-200 hover:bg-gray-300 
+                    border-l border-gray-300
+                    flex flex-col items-center justify-center gap-2 py-2
+                    transition-colors duration-200
+                    ${isDragging ? 'bg-blue-200 border-blue-300' : ''}
+                    ${tray.isDragging ? 'bg-blue-200 border-blue-300' : ''}
+                    ${isDragging && tray.isValidPosition === false ? 'bg-red-200 border-red-300' : ''}
+                    ${!isDragging && tray.hasCollision ? 'bg-red-200 border-red-300' : ''}
+                    rounded-r-lg
+                `}
+            >
+                {/* Copy Button (Future functionality) */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        // Future: implement copy functionality
+                    }}
+                    className="bg-blue-700 text-white rounded p-1 transition-all hover:bg-blue-800 cursor-not-allowed opacity-0 group-hover:opacity-50"
+                    title="Copy tray (coming soon)"
+                    disabled
+                >
+                    <Copy size={12} />
+                </button>
+
+                {/* Remove Button */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove();
+                    }}
+                    className="bg-red-500 text-white rounded p-1 transition-all hover:bg-red-600 hover:shadow-md active:scale-95 opacity-0 group-hover:opacity-100"
+                    title="Remove tray"
+                >
+                    <Trash2 size={12} />
+                </button>
             </div>
 
             {/* Dragging indicator */}

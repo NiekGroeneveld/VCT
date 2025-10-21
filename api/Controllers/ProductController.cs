@@ -251,8 +251,9 @@ namespace api.Controllers
                 {
                     return StatusCode(500, "Failed to deactivate the product");
                 }
-                
-                return Ok(new { 
+
+                return Ok(new
+                {
                     message = "Product is in use and has been deactivated instead of deleted",
                     action = "deactivated",
                     productId = id
@@ -262,8 +263,9 @@ namespace api.Controllers
             {
                 // Product is not used - hard delete
                 await _productRepo.DeleteAsync(id);
-                
-                return Ok(new { 
+
+                return Ok(new
+                {
                     message = "Product was not in use and has been permanently deleted",
                     action = "deleted",
                     productId = id
@@ -271,5 +273,39 @@ namespace api.Controllers
             }
 
         }
+
+        [HttpGet("productInUse/{id}")]
+        public async Task<IActionResult> IsProductInUse([FromRoute] int companyId, [FromRoute] int id)
+        {
+            // Check if user belongs to the company
+            if (!await UserBelongsToCompany(companyId))
+            {
+                return Forbid("You don't have access to check products for this company");
+            }
+
+            var product = await _productRepo.GetByIdAsync(id);
+            if (product == null || product.CompanyId != companyId)
+            {
+                return NotFound("Product not found for this company");
+            }
+
+            bool isInUse = await _productRepo.IsProductInUseAsync(id);
+            return Ok(new { productId = id, inUse = isInUse });
+        }
+
+        [HttpGet("productsInConfiguration/{configurationId}")]
+        public async Task<IActionResult> GetProductsInConfiguration([FromRoute] int companyId, [FromRoute] int configurationId)
+        {
+            // Check if user belongs to the company
+            if (!await UserBelongsToCompany(companyId))
+            {
+                return Forbid("You don't have access to check products for this company");
+            }
+
+            var products = await _productRepo.GetProductsInConfigurationAsync(configurationId);
+            return Ok(products.Select(p => p.ToDTO()));
+        }
+
+    
     }
 }

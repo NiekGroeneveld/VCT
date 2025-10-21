@@ -68,7 +68,14 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
         if (companyId && configurationId) {
           // Backend expects 1-based OnTrayIndex
           const positionOnTray = (dropResult.targetIndex ?? 0) + 1;
-          configurationService.PlaceProductOnTrayAPI(Number(companyId), Number(configurationId), dropResult.trayId, item.product.id, positionOnTray);
+          configurationService.PlaceProductOnTrayAPI(Number(companyId), Number(configurationId), dropResult.trayId, item.product.id, positionOnTray)
+            .then(() => {
+              // Dispatch event to refresh products in configuration list
+              window.dispatchEvent(new CustomEvent('refreshProductsInConfiguration'));
+            })
+            .catch((error) => {
+              console.error('Failed to place product on tray:', error);
+            });
         }
         else{
           console.error("Cannot place product on tray: Missing company or configuration ID");

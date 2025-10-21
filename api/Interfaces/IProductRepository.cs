@@ -19,9 +19,11 @@ namespace api.Interfaces
         Task<List<Product>> GetProductsByIdsAsync(List<int> productIds);
         Task<List<Product>> GetProductsByCompanyIdAsync(int companyId, bool includePublics = false);
         Task<List<Product>> GetActiveProductsByCompanyIdAsync(int companyId, bool includePublics = false);
+        Task<List<Product>> GetProductsInConfigurationAsync(int configurationId);
         Task<bool> SetProductToInActiveAsync(int productId);
         Task<bool> SetProductToActiveAsync(int productId);
         Task<bool> IsProductInUseAsync(int productId);
-
+        
+       
     }
 }

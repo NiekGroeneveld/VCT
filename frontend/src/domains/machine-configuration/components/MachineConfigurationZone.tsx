@@ -333,7 +333,7 @@ export const MachineConfigurationZone: React.FC<MachineConfigurationZoneProps> =
                         ${className}
                     `}
                     style={{
-                        width: `${scaledValue(Number(selectedConfiguration.configurationTypeData.trayWidth + 60))}px`, // Scaled machine area width
+                        width: `${scaledValue(Number(selectedConfiguration.configurationTypeData.trayWidth + 90))}px`, // Scaled machine area width
                         height: `${machineHeight}px`,
                         paddingLeft: `${0}px`, // Increased padding for centering
                         paddingRight: `${0}px` // Increased padding for centering

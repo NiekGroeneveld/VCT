@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { Trash2 } from "lucide-react";
 import { Tray } from "../types/tray.types";
 import { PlacedProduct } from "../../product-management/types/product.types";
 import { DragItem } from "../../machine-configuration/types/configuration.types";
@@ -119,9 +120,7 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
       {/* Product Visual with Drag & Drop */}
       <div
         ref={ref}
-        className={`absolute group cursor-move ${
-          isOver && canDrop ? "ring-2 ring-blue-400" : ""
-        }`}
+        className={`absolute group cursor-move`}
         style={{
           left: `${scaledValue(product.x)}px`,
           bottom: `${scaledValue(product.y)}px`, // Position from bottom of tray container
@@ -145,20 +144,15 @@ export const DraggableTrayProduct: React.FC<DraggableTrayProductProps> = ({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          className="absolute top-1 right-1 bg-red-500 text-white rounded p-0.5 transition-all hover:bg-red-600 hover:shadow-md active:scale-95 opacity-0 group-hover:opacity-100 z-10"
           title="Remove product"
         >
-          ×
+          <Trash2 size={10} />
         </button>
 
-        {/* Drag Handle */}
-        <div className="absolute -top-1 -left-1 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
-          ⋮⋮
-        </div>
-
         {/* Order Indicator */}
-        <div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white text-xs px-1 rounded-br opacity-0 group-hover:opacity-100 transition-opacity">
-          #{index + 1}
+        <div className="absolute top-0.5 left-0.5 bg-black bg-opacity-60 text-white text-[10px] px-1 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          {index + 1}
         </div>
       </div>
 

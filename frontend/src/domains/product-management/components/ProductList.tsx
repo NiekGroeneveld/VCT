@@ -1,6 +1,7 @@
 // src/components/ProductList.tsx - Clean version using ProductVisual
 import React, { useState, useEffect } from "react";
 import { useCompany } from "../../../Context/useCompany";
+import { useConfig } from "../../../Context/useConfig";
 import { Plus, Search } from "lucide-react";
 import { Product } from "../types/product.types";
 import { productService } from "../services/productService";
@@ -10,31 +11,63 @@ import MakeProductModal from "./MakeProductModal";
 import ProductInfoModal from "./ProductInfoModal";
 import { useScaling } from "../../../hooks/useScaling";
 
+type ProductFilter = 'all' | 'in_config' | 'not_in_config';
+
 interface ProductListProps {
   className?: string;
 }
 
 export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsInConfig, setProductsInConfig] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [productFilter, setProductFilter] = useState<ProductFilter>('all');
   const [addProductModalOpen, setAddProductModalOpen] =
     useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productInfoModalOpen, setProductInfoModalOpen] = useState<boolean>(false);
   const { scale } = useScaling();
   const { selectedCompany } = useCompany();
+  const { selectedConfiguration } = useConfig();
 
   useEffect(() => {
     if (selectedCompany) {
       loadProducts();
     } else {
       setProducts([]);
+      setProductsInConfig([]);
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompany]);
+
+  // Load products in configuration when configuration changes
+  useEffect(() => {
+    if (selectedConfiguration && selectedCompany) {
+      loadProductsInConfiguration();
+    } else {
+      setProductsInConfig([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConfiguration, selectedCompany]);
+
+  // Listen for refresh events when products are added/removed from trays
+  useEffect(() => {
+    const handleRefreshProductsInConfiguration = () => {
+      console.log('Refreshing products in configuration...');
+      if (selectedConfiguration && selectedCompany) {
+        loadProductsInConfiguration();
+      }
+    };
+
+    window.addEventListener('refreshProductsInConfiguration', handleRefreshProductsInConfiguration);
+    return () => {
+      window.removeEventListener('refreshProductsInConfiguration', handleRefreshProductsInConfiguration);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompany, selectedConfiguration]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -46,6 +79,11 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     const CompanyProducts = await productService.GetCompanyProductsAPI(Number(selectedCompany.id));
       setProducts(CompanyProducts);
       
+      // Also refresh products in configuration if a configuration is selected
+      if (selectedConfiguration) {
+        await loadProductsInConfiguration();
+      }
+      
       // Dispatch event to notify other components (like ConfigurationArea) that products were refreshed
       window.dispatchEvent(new CustomEvent('productRefresh', { 
         detail: { products: CompanyProducts, companyId: selectedCompany.id } 
@@ -56,36 +94,50 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       setLoading(false);
     }
   };
-// Removed stray if (!selectedCompany) {
-  // ✅ NEW: Filter products based on search term
+
+  const loadProductsInConfiguration = async () => {
+    try {
+      if (!selectedCompany || !selectedConfiguration) {
+        setProductsInConfig([]);
+        return;
+      }
+      const productsInConf = await productService.ProductsInConfigurationAPI(
+        Number(selectedCompany.id),
+        selectedConfiguration.id
+      );
+      setProductsInConfig(productsInConf);
+    } catch (error) {
+      console.error("Failed to load products in configuration:", error);
+      setProductsInConfig([]);
+    }
+  };
+  // ✅ Filter products based on search term and configuration filter
   const filteredProducts = React.useMemo(() => {
+    // Step 1: Apply configuration filter
+    let baseProducts = products;
+    
+    if (productFilter === 'in_config') {
+      // YES: Show only products IN configuration (intersection)
+      const inConfigIds = new Set(productsInConfig.map(p => p.id));
+      baseProducts = products.filter(p => inConfigIds.has(p.id));
+    } else if (productFilter === 'not_in_config') {
+      // NO: Show only products NOT IN configuration (difference)
+      const inConfigIds = new Set(productsInConfig.map(p => p.id));
+      baseProducts = products.filter(p => !inConfigIds.has(p.id));
+    }
+    // ALL: Use all products (no filtering)
+
+    // Step 2: Apply search term filter
     if (!searchTerm.trim()) {
-      console.log("No search term, showing all products");
-      return products;
+      return baseProducts;
     }
 
-    const filtered = products.filter((product) => {
-      const matches = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      console.log(
-        `Product: "${product.name}" | Search: "${searchTerm}" | Matches: ${matches}`
-      );
-      return matches;
-    });
-
-    console.log("=== FILTER RESULTS ===");
-    console.log("Search term:", `"${searchTerm}"`);
-    console.log("Total products:", products.length);
-    console.log("Filtered products:", filtered.length);
-    console.log(
-      "Filtered names:",
-      filtered.map((p) => p.name)
+    const filtered = baseProducts.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    console.log("=====================");
 
     return filtered;
-  }, [products, searchTerm]);
+  }, [products, productsInConfig, searchTerm, productFilter]);
 
   // ✅ FIXED: Use filtered products and scale for grid calculations
   const gridDimensions = useGridDimensions(containerRef, filteredProducts, scale);
@@ -149,6 +201,44 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             )}
           </div>
         </div>
+
+        {/* Configuration Filter */}
+        {selectedConfiguration && (
+          <div className="px-3 pb-3">
+            <div className="flex gap-1 bg-gray-200 rounded-md p-1">
+              <button
+                onClick={() => setProductFilter('all')}
+                className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  productFilter === 'all'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Alle
+              </button>
+              <button
+                onClick={() => setProductFilter('in_config')}
+                className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  productFilter === 'in_config'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                In Configuratie
+              </button>
+              <button
+                onClick={() => setProductFilter('not_in_config')}
+                className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  productFilter === 'not_in_config'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Niet in Configuratie
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Product Grid */}

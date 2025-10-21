@@ -173,6 +173,34 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
           </div>
         )}
 
+        {/* Configuration Tips */}
+        {selectedConfiguration && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+            <h4 className="text-md font-semibold text-left mb-3 text-blue-800">Configuratie Tips</h4>
+            <hr className="h-px bg-blue-200 border-0 mb-3" />
+            <div className="text-sm text-gray-700 space-y-2">
+              <p> 
+                • Maak eerst alle producten aan om een goed overzicht te krijgen van de producten die in de automaat moeten. 
+              </p>
+              <p className="leading-relaxed">
+                • Begin met het configurereen van de bovenste lade en werk naar beneden. De bovenste lade heeft namelijk de meeste ruimt in de hoogte, dit bepaalt ook de liftstand. 
+              </p>
+              <p className="leading-relaxed">
+                • Plaats eerst de hoge producten en sorteer de producten per lade op hoogte. 
+              </p>
+              <p className="leading-relaxed">
+                • Controleer de rode collision waarschuwingen voor overlappende producten
+              </p>
+              <p className = "leading-relaxed">
+                • Je kunt in de productlijst producten bewerken en als nieuw product opslaan om snel varianten toe te voegen.
+              </p>
+              <p>
+                • Gebruik de print knop om een PDF overzicht van de configuratie te genereren
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Lift Instelling - show appropriate component based on machine type */}
         {selectedConfiguration?.configurationTypeData?.configurationType === "VisionV8" && (
           <VisionV8ElevatorSettings />

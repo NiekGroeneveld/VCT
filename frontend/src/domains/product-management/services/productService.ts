@@ -93,11 +93,66 @@ export const ProductSoftDeleteAPI = async (companyId: number, productId: number)
     }
 }
 
+export const UpdateProductAPI = async (companyId: number, productId: number, updatedData: any): Promise<Product | null> => {    
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");  
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.put(API_BASE_URL + `companies/${companyId}/products/${productId}`, updatedData, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to update product:', error);
+        return null;
+    }
+}
+
+export const ProductInUseAPI = async (companyId: number, productId: number): Promise<boolean> => {
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");  
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.get(API_BASE_URL + `companies/${companyId}/products/productInUse/${productId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.inUse;
+    } catch (error) {
+        console.error('Failed to check if product is in use:', error);
+        return false;
+    }
+}
+
+export const ProductsInConfigurationAPI = async (companyId: number, configurationId: number): Promise<Product[]> => {
+    try {
+        const token  = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+        if (!companyId) throw new Error ("No company selected");
+        const response = await axios.get(API_BASE_URL + `companies/${companyId}/products/productsInConfiguration/${configurationId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch products in configuration:', error);
+        return [];
+    }
+}
+    
+
 // Export a singleton instance
 export const productService = {
     GetCompanyProductsAPI,
     CreateProductAPI,
     DeActivateProductAPI,
     ActivateProductAPI,
-    ProductSoftDeleteAPI
+    ProductSoftDeleteAPI,
+    UpdateProductAPI,
+    ProductInUseAPI,
+    ProductsInConfigurationAPI
 }

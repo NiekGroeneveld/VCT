@@ -8,6 +8,7 @@ using api.Interfaces;
 using api.Mappers;
 using api.Migrations;
 using api.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
@@ -123,6 +124,29 @@ namespace api.Repository
             }
 
             return products.ToListAsync();
+        }
+
+        public Task<List<Product>> GetProductsInConfigurationAsync(int configurationId )
+        {
+            var configuration = _context.Configurations
+                .Include(c => c.Trays)
+                .ThenInclude(t => t.TrayProducts)
+                .ThenInclude(tp => tp.Product)
+                .FirstOrDefault(c => c.Id == configurationId);
+
+            if (configuration == null)
+            {
+                return Task.FromResult(new List<Product>());
+            }
+            var products = configuration.Trays
+                .SelectMany(t => t.TrayProducts)
+                .Select(tp => tp.Product)
+                .Distinct()
+                .ToList();
+
+            products = products.Where(p => p.IsActive).ToList();
+
+            return Task.FromResult(products);
         }
     }
 
