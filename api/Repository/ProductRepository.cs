@@ -58,7 +58,7 @@ namespace api.Repository
 
             if (includePublics)
             {
-                products.Union(_context.Products.Where(p => p.isPublic));
+                products.Union(_context.Products.Where(p => p.IsPublic));
             }
             return products.ToListAsync();
         }
@@ -119,7 +119,7 @@ namespace api.Repository
 
             if (includePublics)
             {
-                products = products.Union(_context.Products.Where(p => p.isPublic && p.IsActive));
+                products = products.Union(_context.Products.Where(p => p.IsPublic && p.IsActive));
             }
 
             return products.ToListAsync();

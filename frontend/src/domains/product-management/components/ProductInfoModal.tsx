@@ -255,6 +255,14 @@ export const ProductInfoModal: React.FC<ProductInfoModalProps> = ({
                       {product.stable ? "Stable (Low Motor)" : "Unstable (High Motor)"}
                     </span>
                   </div>
+                  {!product.stable && product.palletConfig && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Pallet Configuration</span>
+                      <span className="font-mono text-sm font-semibold text-gray-800">
+                        {product.palletConfig}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
                     <span className="text-gray-600">Product ID</span>
                     <span className="font-mono text-sm font-semibold text-gray-800">

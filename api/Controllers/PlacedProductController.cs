@@ -93,7 +93,7 @@ namespace api.Controllers
 
             ///Clean the DataBase if it is not needed anymore.
             var ProductInUse = await _productRepo.IsProductInUseAsync(trayProduct.ProductId);
-            if (!ProductInUse)
+            if (!ProductInUse && trayProduct.Product.IsActive == false)
             {
                 // Product is not in use anywhere else; permanently delete it
                 await _productRepo.DeleteAsync(trayProduct.ProductId);

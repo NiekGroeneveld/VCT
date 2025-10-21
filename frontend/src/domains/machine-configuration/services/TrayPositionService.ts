@@ -103,8 +103,10 @@ export class TrayPositionService {
             return targetDot;
         }
 
+        const amountDots = ConfigurationConstantsService.getAmountDots(configuration);
+        
         //Search nearby positions
-        for (let offset = 1; offset < ConfigurationConstants.DOTS; offset++){
+        for (let offset = 1; offset < amountDots; offset++){
             //Try below
             const belowDot = targetDot - offset
             if (belowDot >= 1 && this.canPlaceTrayAtDot(tray, belowDot, existingTrays, configuration).canPlace){
@@ -113,7 +115,7 @@ export class TrayPositionService {
 
             //Try above
             const aboveDot = targetDot + offset;
-            if (aboveDot <= ConfigurationConstants.DOTS && this.canPlaceTrayAtDot(tray, aboveDot, existingTrays, configuration).canPlace){
+            if (aboveDot <= amountDots && this.canPlaceTrayAtDot(tray, aboveDot, existingTrays, configuration).canPlace){
                 return aboveDot;
             }
         }

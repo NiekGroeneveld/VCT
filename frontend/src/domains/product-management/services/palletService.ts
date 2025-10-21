@@ -1,6 +1,10 @@
 import {Product, PlacedProduct} from "../types/product.types";
 
 export const getPalletConfigurationString = (product: PlacedProduct, palletDelta?: number): string => {
+    if (product.palletConfig) {
+        return product.palletConfig;
+    }
+    
     if (!palletDelta || palletDelta <= 0) {
         console.warn("Cannot get pallet configuration: Invalid pallet delta");
         return "unknown";

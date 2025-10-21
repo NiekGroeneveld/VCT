@@ -63,6 +63,22 @@ namespace api.Data
                     HighExtractorHeight = 55,
                     HighExtractorDepth = 60,
                     PalletDelta = 135
+                },
+                new ConfigurationTypeData
+                {
+                    ConfigurationType = "Qendra",
+                    MinTrayHeight = 122,
+                    TrayWidth = 640,
+                    ConfigHeight = 1224,
+                    AmountDots = 75,
+                    DotsDelta = 135,
+                    DoubleDotPositions = new List<int> { 3, 13, 23, 33, 43, 53, 63 },
+                    ElevatorDotIndicators = new List<int> { 2, 4, 9, 10, 64, 67, 69, 72 },
+                    LowExtractorHeight = 40,
+                    LowExtractorDepth = 60,
+                    HighExtractorHeight = 55,
+                    HighExtractorDepth = 60,
+                    PalletDelta = 135
                 }
             };
 

@@ -10,11 +10,13 @@ export interface Product {
     color: string;      // Visual representation color of the product
     ColorHex?: string;  // Optional: backend color property for fallback
     isActive: boolean; // Indicates if the product is active or archived
+    palletConfig: string | null; // Configuration string for clip placement
 }
 
 export interface PlacedProductBase extends Product {
     x: number;        // X coordinate wihtin tray
     y: number;        // Y coordinate within tray
+    rotation: number; // Rotation angle in degrees
     onTrayIndex: number; // The place of the product in the tray
     placedAt: number; // Timestamp when the product was placed
     trayId: number; // ID of the tray where the product is placed

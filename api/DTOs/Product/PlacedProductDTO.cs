@@ -17,6 +17,7 @@ namespace api.DTOs.Product
         public bool Stable { get; set; }
         public string Color { get; set; }
         public bool IsActive { get; set; }
+        public string PalletConfig { get; set; }
 
         public int OnTrayIndex { get; set; }
         public string ExtractorType { get; set; } 

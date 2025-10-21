@@ -3,6 +3,7 @@ import { Tray, TrayConstants } from "../../tray-management/types/tray.types";
 import {
   getDotYPosition,
   ConfigurationConstants,
+  ConfigurationConstantsService,
 } from "../types/configuration.types";
 import { DraggableTrayWrapper } from "../../tray-management/components/DraggableTrayWrapper";
 import { useScaling } from "../../../hooks/useScaling";
@@ -184,7 +185,8 @@ export const ConfigurationArea: React.FC = () => {
       products: [],
     };
 
-    for (let dot = 1; dot <= ConfigurationConstants.DOTS; dot++) {
+    const amountDots = selectedConfiguration ? ConfigurationConstantsService.getAmountDots(selectedConfiguration) : ConfigurationConstants.DOTS;
+    for (let dot = 1; dot <= amountDots; dot++) {
       trayModel.dotPosition = dot;
       const validation = TrayPositionService.canPlaceTrayAtDot(
         trayModel,

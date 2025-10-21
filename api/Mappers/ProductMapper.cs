@@ -23,6 +23,7 @@ namespace api.Mappers
                 CompanyName = product.Company?.Name ?? "No Company", // Handle null company
                 ColorHex = product.ColorHex,
                 IsActive = product.IsActive,
+                PalletConfig = product.PalletConfig,
             };
         }
 
@@ -37,7 +38,7 @@ namespace api.Mappers
                 Depth = productDto.Depth,
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
-                Company = null //added later in controller
+                PalletConfig   = productDto.PalletConfig,
             };
         }
 
@@ -52,6 +53,7 @@ namespace api.Mappers
                 Stable = productDto.Stable,
                 ColorHex = productDto.ColorHex,
                 CreatedAt = DateTime.UtcNow,
+                PalletConfig = productDto.PalletConfig,
                 IsActive = true // New products are active by default
             };
         }

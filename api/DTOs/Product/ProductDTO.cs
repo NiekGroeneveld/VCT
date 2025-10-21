@@ -17,6 +17,7 @@ namespace api.DTOs.Product
         public bool IsActive { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string ColorHex { get; set; } = "#FFFFFF";
+        public string PalletConfig { get; set; } = string.Empty;
 
     }
 }

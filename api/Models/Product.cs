@@ -11,13 +11,13 @@ namespace api.Models
         public DateTime CreatedAt { get; set; }
 
         //Data
-        public string ProductConfig { get; set; } = string.Empty;
+        public string PalletConfig { get; set; } = string.Empty;
         public float Height { get; set; }
         public float Width { get; set; }
         public float Depth { get; set; }
         public bool Stable { get; set; }
         public bool IsActive { get; set; } = true;
-        public bool isPublic { get; set; } = false;
+        public bool IsPublic { get; set; } = false;
         
 
         // Store color as hex string (e.g., "#FFFFFF", "#FF0000")

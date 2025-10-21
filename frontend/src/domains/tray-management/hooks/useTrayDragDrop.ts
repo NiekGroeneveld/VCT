@@ -4,6 +4,7 @@ import { TrayPositionService } from "../../machine-configuration/services/TrayPo
 import {
   getYPositionDot,
   ConfigurationConstants,
+  ConfigurationConstantsService,
 } from "../../machine-configuration/types/configuration.types";
 import { configurationService } from "../../machine-configuration/services/ConfigurationService";
 import { useCompany } from "../../../Context/useCompany";
@@ -66,7 +67,8 @@ export const useTrayDragDrop = (
         // Convert screen Y to dot position using the same logic as getDotYPosition
         // Since dot 1 is at Y=0, dot 2 at Y=135, etc., we can directly convert
         const newDot = getYPositionDot(newYposition);
-        const clampedDot = Math.max(1, Math.min(newDot, ConfigurationConstants.DOTS));
+        const amountDots = ConfigurationConstantsService.getAmountDots(selectedConfiguration);
+        const clampedDot = Math.max(1, Math.min(newDot, amountDots));
         console.log(`[useTrayDragDrop] updateTrayPosition: trayId=${trayId}, Y=${newYposition}, newDot=${newDot}, clampedDot=${clampedDot}`);
 
 
@@ -119,7 +121,8 @@ export const useTrayDragDrop = (
         return false;
       }
 
-      const clampedDot = Math.max(1, Math.min(tray.dotPosition, ConfigurationConstants.DOTS));
+      const amountDots = ConfigurationConstantsService.getAmountDots(selectedConfiguration);
+      const clampedDot = Math.max(1, Math.min(tray.dotPosition, amountDots));
       const originalDot = tray.dragStartDot || tray.dotPosition;
       const otherTrays = currentTrays.filter((t) => t.id !== trayId);
       const validation = TrayPositionService.canPlaceTrayAtDot(tray, clampedDot, otherTrays, selectedConfiguration);

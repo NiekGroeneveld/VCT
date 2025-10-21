@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { Product } from "../types/product.types";
+import React, { useState, useEffect } from "react";
+import { Product, PlacedProduct } from "../types/product.types";
 import { productService } from "../services/productService";
 import { ColorPicker } from "../../../shared/components/ui/ColorPicker";
 import { ProductVisual } from "./ProductVisual";
 import { useCompany } from "../../../Context/useCompany";
+import { useConfig } from "../../../Context/useConfig";
+import { getPalletConfigurationString } from "../services/palletService";
+import { Lock, Unlock } from "lucide-react";
 
 
 type MakeProductModalProps = {
@@ -19,6 +22,7 @@ interface ProductFormData {
   depth: number;
   stable: boolean;
   color: string;
+  palletConfig: string;
 }
 
 const MakeProductModal: React.FC<MakeProductModalProps> = ({
@@ -33,10 +37,13 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     depth: 100,
     stable: true,
     color: "#003B7D", // Default color
+    palletConfig: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPalletConfigLocked, setIsPalletConfigLocked] = useState(true);
   const { selectedCompany } = useCompany();
+  const { selectedConfiguration } = useConfig();
   const companyId = selectedCompany ? Number(selectedCompany.id) : 0;
 
   const handleInputChange = (
@@ -49,6 +56,46 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     }));
     // Clear error when user starts typing
     if (error) setError(null);
+  };
+
+  // Auto-update palletConfig when dimensions or stability change (only if locked)
+  useEffect(() => {
+    if (isPalletConfigLocked && !formData.stable) {
+      const calculatedConfig = getClipConfigString();
+      if (calculatedConfig !== formData.palletConfig) {
+        setFormData((prev) => ({
+          ...prev,
+          palletConfig: calculatedConfig,
+        }));
+      }
+    }
+  }, [formData.width, formData.depth, formData.stable, isPalletConfigLocked]);
+
+  // Helper function to calculate clip config string
+  const getClipConfigString = (): string => {
+    if (formData.stable) return ""; // Only for high motors (unstable)
+    
+    let palletDelta = selectedConfiguration?.configurationTypeData?.palletDelta;
+    if (!palletDelta) {
+      console.warn("No pallet delta found, using hardcoded value of: 135 mm");
+      palletDelta = 135;
+    }
+    
+    // Create a mock PlacedProduct for the getPalletConfigurationString function
+    const mockPlacedProduct: PlacedProduct = {
+      ...previewProduct,
+      x: 0,
+      y: 0,
+      onTrayIndex: 0,
+      placedAt: Date.now(),
+      trayId: 0,
+      extractorType: 'high',
+      extractorHeight: 25,
+      clipDistance: 0,
+      rotation: 0,
+    };
+
+    return getPalletConfigurationString(mockPlacedProduct, palletDelta);
   };
 
   const validateForm = (): boolean => {
@@ -68,6 +115,17 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       setError("Diepte moet tussen 1 en 540 mm zijn");
       return false;
     }
+    
+    // Validate palletConfig for high motors (unstable products)
+    if (!formData.stable && formData.palletConfig) {
+      // Only allow numbers, forward slash (/), backslash (\), and dots (.)
+      const validPalletConfigRegex = /^[0-9\/\\.]*$/;
+      if (!validPalletConfigRegex.test(formData.palletConfig)) {
+        setError("Pallet configuratie bevat ongeldige karakters. Alleen nummers, /, \\ en . zijn toegestaan.");
+        return false;
+      }
+    }
+    
     return true;
   };
 
@@ -88,7 +146,11 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
         depth: formData.depth,
         stable: formData.stable,
         ColorHex: formData.color, // Use ColorHex to match backend
+        PalletConfig: formData.palletConfig || "", // Match backend PascalCase
       };
+
+      console.log("Creating product with data:", newProduct);
+      console.log("Form data palletConfig:", formData.palletConfig);
 
       // Call the product service to create the product
       await productService.CreateProductAPI(companyId, newProduct);
@@ -101,6 +163,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
         depth: 100,
         stable: true,
         color: "#003B7D",
+        palletConfig: "",
       });
 
       // Notify parent component
@@ -125,6 +188,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       depth: 10,
       stable: true,
       color: "#003B7D",
+      palletConfig: "",
     });
     setError(null);
     onClose();
@@ -140,7 +204,13 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
     stable: formData.stable,
     color: formData.color || "#3B82F6",
     isActive: true, // New products are active by default
+    palletConfig: null, // Will be calculated below
   };
+
+  // Calculate extractor height based on stability
+  const extractorHeight = formData.stable ? 10 : 25; // Low extractor: 37mm, High extractor: 90mm
+
+  const clipConfigString = formData.palletConfig || getClipConfigString();
 
   return (
     <div
@@ -154,25 +224,24 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       onClick={handleClose}
     >
       <div
-        className={`bg-gray-800 rounded-lg shadow-xl p-6 relative
+        className={`bg-white rounded-lg shadow-xl p-6 relative
             transition-all max-w-4xl w-full mx-4 ${
               open ? "scale-100 opacity-100" : "scale-95 opacity-0"
             }`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-2 right-2 py-1 px-2 
-                border border-white rounded-md text-white
-                bg-red-600 hover:bg-red-800 hover:text-white transition-colors z-10"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
           onClick={handleClose}
+          aria-label="Close"
         >
-          ×
+          <span className="text-gray-600 text-xl">×</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
           {/* Left Column - Form */}
           <div className="space-y-4 flex flex-col">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-gray-800">
               Nieuw Product Toevoegen
             </h2>
 
@@ -184,7 +253,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-3 flex flex-col flex-1">
             <div>
-              <label className="block text-sm font-medium text-white mb-1 border-black">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Product Naam *
               </label>
               <input
@@ -192,14 +261,14 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Voer product naam in..."
-                className="w-full px-3 py-2 border bg-gray-600 text-white border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-3 py-2 border bg-white text-gray-900 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-white mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Breedte (mm) *
                 </label>
                 <input
@@ -210,12 +279,12 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
                     handleInputChange("width", parseInt(e.target.value) || 0)
                   }
                   placeholder="50"
-                  className="w-full px-3 py-2 border  bg-gray-600 border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                  className="w-full px-3 py-2 border bg-white border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Hoogte (mm) *
                 </label>
                 <input
@@ -226,7 +295,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
                     handleInputChange("height", parseInt(e.target.value) || 0)
                   }
                   placeholder="120"
-                  className="w-full px-3 py-2 border bg-gray-600 border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                  className="w-full px-3 py-2 border bg-white border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -234,7 +303,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-white mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Diepte (mm) *
                 </label>
                 <input
@@ -245,40 +314,84 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
                     handleInputChange("depth", parseInt(e.target.value) || 0)
                   }
                   placeholder="50"
-                  className="w-full px-3 py-2 border  bg-gray-600 border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                  className="w-full px-3 py-2 border bg-white border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-gray-700">
                     Stabiel product
                   </span>
                 </label>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                     <button
                     type="button"
                     onClick={() => handleInputChange("stable", !formData.stable)}
-                    className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${
-                        formData.stable ? "bg-green-500" : "bg-gray-600"
+                    className={`relative inline-flex h-8 w-10 flex-col items-center rounded-md transition-colors ${
+                        formData.stable ? "bg-vendolutionBlue" : "bg-vendolutionBlue"
                     }`}
                     >
                     <span
-                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                        formData.stable ? "translate-x-9" : "translate-x-1"
+                        className={`inline-block h-3 w-8 transform rounded-sm bg-white transition-transform ${
+                        formData.stable ? "translate-y-4" : "translate-y-1"
                         }`}
                     />
                     </button>
-                    <span className="ml-2 text-sm font-medium text-white">
+                    <span className="text-sm font-medium text-gray-700">
                         {formData.stable ? "Lage Motor" : "Hoge Motor"}
                     </span>
                 </div>
               </div>
             </div>
 
+            {/* Pallet Configuratie Section - Only for high motors */}
+            {!formData.stable && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pallet Configuratie
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={formData.palletConfig}
+                    onChange={(e) => handleInputChange("palletConfig", e.target.value)}
+                    disabled={isPalletConfigLocked}
+                    className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      isPalletConfigLocked 
+                        ? "bg-gray-300 text-gray-900 border-gray-300 cursor-not-allowed" 
+                        : "bg-white text-gray-900 border-gray-300"
+                    }`}
+                    placeholder="/.../..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsPalletConfigLocked(!isPalletConfigLocked)}
+                    className={`px-3 py-2 border rounded-md transition-colors ${
+                      isPalletConfigLocked
+                        ? "bg-red-500 hover:bg-red-600 border-red-500"
+                        : "bg-green-200 hover:bg-green-300 border-green-200"
+                    }`}
+                    title={isPalletConfigLocked ? "Unlock to edit" : "Lock to auto-calculate"}
+                  >
+                    {isPalletConfigLocked ? (
+                      <Lock className="w-4 h-4 text-white" />
+                    ) : (
+                      <Unlock className="w-4 h-4 text-gray-700" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isPalletConfigLocked
+                    ? "Automatisch berekend. Klik op het slot om handmatig te bewerken."
+                    : "Handmatig invoeren. Klik op het slot om terug te schakelen naar automatische berekening."}
+                </p>
+              </div>
+            )}
+
             {/* Color Picker Section */}
             <div className="flex-1">
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Product Kleur *
               </label>
               <ColorPicker
@@ -293,7 +406,7 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
                   type="button"
                   onClick={handleClose}
                   disabled={loading}
-                  className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                  className="px-4 py-2 text-gray-800 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
                 >
                   Annuleren
                 </button>
@@ -317,34 +430,71 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
 
           {/* Right Column - Product Preview */}
           <div className="space-y-4 border-l border-gray-200 pl-6 flex flex-col">
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-gray-800">
               Product Preview
             </h3>
             
-            <div className="bg-gray-700 rounded-lg p-6 flex flex-col items-center justify-center flex-1">
-              <div className="mb-4">
-                <ProductVisual
-                  product={previewProduct}
-                  scale={1} // Real scale, same as ProductList
-                  draggable={false}
-                  showLabel={true}
-                  showStabilityIndicator={true}
-                  className="mx-auto"
-                />
+            <div className="bg-gray-50 rounded-lg p-6 flex flex-col items-center justify-center flex-1">
+              {/* Product with Extractor Preview */}
+              <div className="mb-4 relative" style={{ height: `${previewProduct.height + extractorHeight + 20}px` }}>
+                {/* Extractor */}
+                <div
+                  className="absolute bg-gray-500 border border-gray-800 flex items-center justify-center"
+                  style={{
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    bottom: '0px',
+                    width: `${previewProduct.width}px`,
+                    height: `${extractorHeight}px`,
+                  }}
+                  title={`${formData.stable ? 'Low' : 'High'} extractor (${extractorHeight}mm)`}
+                >
+                  {/* Clip configuration string for high motors */}
+                  {!formData.stable && clipConfigString && (
+                    <span
+                      className="font-mono font-bold text-gray-100"
+                      style={{
+                        fontSize: '16px',
+                      }}
+                    >
+                      {clipConfigString}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Product on top of extractor */}
+                <div
+                  className="absolute"
+                  style={{
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    bottom: `${extractorHeight}px`,
+                  }}
+                >
+                  <ProductVisual
+                    product={previewProduct}
+                    scale={1} // Real scale, same as ProductList
+                    draggable={false}
+                    showLabel={true}
+                    showStabilityIndicator={true}
+                    className="mx-auto"
+                  />
+                </div>
               </div>
               
               {/* Product Info */}
-              <div className="text-center space-y-2">
-                <div className="text-white font-medium">
+              <div className="text-center space-y-2 mt-4">
+                <div className="text-gray-800 font-medium">
                   {previewProduct.name}
                 </div>
-                <div className="text-gray-300 text-sm space-y-1">
-                  <div>Afmetingen: {previewProduct.width} × {previewProduct.height} × {previewProduct.depth} mm</div>
-                  <div>Stabiliteit: {previewProduct.stable ? "Stabiel" : "Instabiel"}</div>
+                <div className="text-gray-600 text-sm space-y-1">
+                  <div>Product: {previewProduct.width} × {previewProduct.height} × {previewProduct.depth} mm</div>
+                  <div>Extractor: {formData.stable ? "Lage Motor" : "Hoge Motor"} ({extractorHeight}mm)</div>
+                  <div>Hoogte: {previewProduct.height} mm</div>
                   <div className="flex items-center justify-center gap-2">
                     <span>Kleur:</span>
                     <div 
-                      className="w-4 h-4 rounded border border-gray-400"
+                      className="w-4 h-4 rounded border border-gray-300"
                       style={{ backgroundColor: previewProduct.color }}
                     />
                     <span className="font-mono text-xs">{previewProduct.color}</span>
