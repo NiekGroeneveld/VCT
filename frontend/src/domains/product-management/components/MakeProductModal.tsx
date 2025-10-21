@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Product, PlacedProduct } from "../types/product.types";
 import { productService } from "../services/productService";
 import { ColorPicker } from "../../../shared/components/ui/ColorPicker";
@@ -30,21 +30,29 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
   onClose,
   onProductCreated,
 }) => {
-  const [formData, setFormData] = useState<ProductFormData>({
+  // Use ref to persist form data across renders/remounts
+  const persistedFormData = useRef<ProductFormData>({
     name: "",
     width: 50,
     height: 120,
     depth: 100,
     stable: true,
-    color: "#003B7D", // Default color
+    color: "#003B7D",
     palletConfig: "",
   });
+
+  const [formData, setFormData] = useState<ProductFormData>(persistedFormData.current);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPalletConfigLocked, setIsPalletConfigLocked] = useState(true);
   const { selectedCompany } = useCompany();
   const { selectedConfiguration } = useConfig();
   const companyId = selectedCompany ? Number(selectedCompany.id) : 0;
+
+  // Sync formData changes to persisted ref
+  useEffect(() => {
+    persistedFormData.current = formData;
+  }, [formData]);
 
   const handleInputChange = (
     field: keyof ProductFormData,
@@ -155,22 +163,18 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
       // Call the product service to create the product
       await productService.CreateProductAPI(companyId, newProduct);
 
-      // Reset form
-      setFormData({
+      // Reset only the name field, keep other settings for next product
+      setFormData(prev => ({
+        ...prev,
         name: "",
-        width: 50,
-        height: 120,
-        depth: 100,
-        stable: true,
-        color: "#003B7D",
-        palletConfig: "",
-      });
+      }));
 
       // Notify parent component
       onProductCreated?.();
 
-      // Close modal
-      onClose();
+      // Don't close modal - just clear the name so user can create another similar product
+      // User can manually close if done
+      // onClose();
     } catch (err) {
       console.error("Failed to create product:", err);
       setError("Er is een fout opgetreden bij het aanmaken van het product");
@@ -180,16 +184,8 @@ const MakeProductModal: React.FC<MakeProductModalProps> = ({
   };
 
   const handleClose = () => {
-    // Reset form and error state when closing
-    setFormData({
-      name: "",
-      width: 50,
-      height: 120,
-      depth: 10,
-      stable: true,
-      color: "#003B7D",
-      palletConfig: "",
-    });
+    // Don't reset form data - keep settings for next time modal opens
+    // Only clear the error state
     setError(null);
     onClose();
   };

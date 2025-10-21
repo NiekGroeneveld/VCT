@@ -87,8 +87,8 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     return filtered;
   }, [products, searchTerm]);
 
-  // ✅ FIXED: Use filtered products for grid calculations
-  const gridDimensions = useGridDimensions(containerRef, filteredProducts);
+  // ✅ FIXED: Use filtered products and scale for grid calculations
+  const gridDimensions = useGridDimensions(containerRef, filteredProducts, scale);
 
   const handleProductClick = (product: Product) => {
     console.log("Product clicked:", product.name);
@@ -157,8 +157,9 @@ export const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           className="grid gap-3"
           style={{
             gridTemplateColumns: `repeat(${gridDimensions.cols}, max-content)`, 
-            justifyContent: "start", 
-            alignItems: "start",
+            justifyContent: "center", // Center the grid columns in the container
+            alignItems: "center", // Center items vertically in their rows
+            justifyItems: "center", // Center items horizontally within their columns
           }}
         >
           {filteredProducts.map((product) => (

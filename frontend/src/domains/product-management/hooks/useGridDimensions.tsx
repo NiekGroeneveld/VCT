@@ -5,6 +5,7 @@ import { Product } from '../types/product.types';
 export const useGridDimensions = (
     containerRef: HTMLDivElement | null,
     products: Product[],
+    scale: number = 1, // Add scale parameter
     minCols: number = 1,
     maxCols: number = 8
 ) => {
@@ -23,13 +24,14 @@ export const useGridDimensions = (
         // ✅ ACTUAL AVAILABLE WIDTH: Subtract padding from container width
         const availableWidth = containerWidth - containerPadding;
         
-        // ✅ REAL SIZE: Find widest product at 1:1 scale (1mm = 1px)  
-        const widestProductWidth = Math.max(...products.map(p => p.width));
+        // ✅ SCALED SIZE: Find widest product and apply scale (1mm = 1px * scale)
+        const widestProductWidth = Math.max(...products.map(p => p.width)) * scale;
         
         console.log('=== GRID CALCULATION ===');
         console.log('Container width:', containerWidth);
         console.log('Available width:', availableWidth);
-        console.log('Widest product:', widestProductWidth);
+        console.log('Scale factor:', scale);
+        console.log('Widest product (scaled):', widestProductWidth);
         
         // ✅ NO CROPPING: Calculate columns that fit without exceeding available width
         let cols = minCols;
@@ -65,7 +67,7 @@ export const useGridDimensions = (
         setGridDimensions({
             cols: cols
         });
-    }, [containerRef, products, minCols, maxCols]);
+    }, [containerRef, products, scale, minCols, maxCols]);
 
     React.useEffect(() => {
         calculateGridDimensions();

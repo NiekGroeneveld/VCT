@@ -27,7 +27,7 @@ namespace api.Controllers
         [Route("addTrayToConfiguration/{trayPosition}")]
         public async Task<IActionResult> AddTrayToConfiguration([FromRoute] int companyId, [FromRoute] int configurationId, [FromRoute] int trayPosition)
         {
-            var company = await _configurationRepo.GetByIdAsync(companyId);
+            var company = await _companyRepo.GetByIdAsync(companyId);
             if (company == null) return NotFound("Company not found");
 
             var configuration = await _configurationRepo.GetByIdAsync(configurationId);

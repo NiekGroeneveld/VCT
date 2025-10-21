@@ -19,6 +19,24 @@ type Props = {
 export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }) => {
   const { selectedCompany } = useCompany();
   const { selectedConfiguration, setSelectedConfiguration } = useConfig();
+
+  // Helper function to convert UTC date string to local time display
+  const formatUTCDateToLocal = (utcDateString: string | undefined): string => {
+    if (!utcDateString) return 'Onbekend';
+    
+    // Ensure the date string is treated as UTC by adding 'Z' if not present
+    const dateStr = utcDateString.endsWith('Z') ? utcDateString : `${utcDateString}Z`;
+    const date = new Date(dateStr);
+    
+    return date.toLocaleString('nl-NL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -142,13 +160,13 @@ export const ConfigurationManagementPanel: React.FC<Props> = ({ className = "" }
               <div>
                 <span className="font-medium text-gray-700">Aangemaakt:</span>
                 <div className="text-gray-900 mt-1">
-                  {selectedConfiguration.createdAt ? new Date(selectedConfiguration.createdAt).toLocaleString('nl-NL') : 'Onbekend'}
+                  {formatUTCDateToLocal(selectedConfiguration.createdAt)}
                 </div>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Laatst Bewerkt:</span>
                 <div className="text-gray-900 mt-1">
-                  {selectedConfiguration.updatedAt ? new Date(selectedConfiguration.updatedAt).toLocaleString('nl-NL') : 'Onbekend'}
+                  {formatUTCDateToLocal(selectedConfiguration.updatedAt)}
                 </div>
               </div>
             </div>
